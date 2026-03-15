@@ -79,6 +79,23 @@ function convertClassMembers(source, className) {
     }
   );
 
+  // Fix class fields without explicit access modifier (var a:Array -> public a: any[]).
+  // Limit scope to class-header section before first method to avoid rewriting local vars.
+  const firstFunctionIndex = out.search(/^\s*(?:(?:override|public|private|protected|internal|static|\w+)\s+)*function\b/m);
+  const classHead = firstFunctionIndex === -1 ? out : out.slice(0, firstFunctionIndex);
+  const classTail = firstFunctionIndex === -1 ? '' : out.slice(firstFunctionIndex);
+  const normalizedHead = classHead.replace(
+    /^(\s*)(static\s+)?(?:const|var)\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
+    (_, indent, isStatic, name, type, init) => {
+      const staticPart = isStatic ? 'static ' : '';
+      const mappedType = mapType(type);
+      let initializer = init ? init : '';
+      if (initializer.includes('null') && mappedType !== 'any') initializer = ' = null as any';
+      return `${indent}public ${staticPart}${name}: ${mappedType}${initializer};`;
+    }
+  );
+  out = normalizedHead + classTail;
+
   out = out.replace(
     /^(\s*)((?:(?:override|public|private|protected|internal|\w+)\s+)*(?:static\s+)?)function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
     (_, indent, modifiers, fnName, params, returnType) => {
@@ -167,6 +184,10 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bbi_internal\s+/g, 'public ');
   converted = converted.replace(/\.\*/g, '._star');
   converted = converted.replace(/\*\./g, '_star.');
+  converted = converted.replace(/^(\s*)(\d+|"[^"]+"|'[^']+'):\s*$/gm, '$1case $2:');
+  converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
+  converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
+  converted = converted.replace(/\b(this|_[a-zA-Z0-9_]+)\.\s*\(/g, '$1._missingMethod(');
   converted = converted.replace(/\.\s*\(/g, '._filter(');
   converted = converted.replace(/(\w+)\.\(([^)]*)\)/g, '$1["$2"]');
   converted = converted.replace(/\bcatch\s*\(\s*([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
@@ -214,6 +235,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\b([A-Z][a-zA-Z0-9_]*)\(([^)]+)\)/g, (match, asClassName, inner, offset, whole) => {
     if (classCastIgnoreList.has(asClassName)) return match;
     const before = whole.slice(0, offset);
+    if (before.endsWith('.')) return match;
     if (/\b(function|new)\s*$/.test(before)) return match;
     return `(${inner} as unknown as ${asClassName})`;
   });
