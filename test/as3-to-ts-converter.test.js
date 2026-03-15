@@ -145,6 +145,43 @@ test('convertAs3ToTs rewrites E4X wildcard and filter notations', () => {
   assert.match(output, /_star\.xml/);
   assert.match(output, /xml\._filter\(id == 1\)/);
 });
+
+test('convertAs3ToTs normalizes interface getter signatures with space before type colon', () => {
+  const input = `package fl.controls.listClasses
+{
+   public interface ICellRenderer
+   {
+      function get data() : Object;
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /export interface ICellRenderer/);
+  assert.match(output, /data: Record<string, any>;/);
+  assert.doesNotMatch(output, /function get data\(\)/);
+});
+
+test('convertAs3ToTs repairs accidental this.default switch labels', () => {
+  const input = `package
+{
+   public class class_14
+   {
+      public function f() : void
+      {
+         switch(x)
+         {
+            this.default:
+               return;
+         }
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /default:/);
+  assert.doesNotMatch(output, /this\.default:/);
+});
+
 test('fix-implicit-this extracts class properties and prefixes usages', () => {
   const input = `export class ArenaData extends MovieClip {\n  public x: number = 0;\n  private alpha: number = 1;\n\n  public move(): void {\n    x += 10;\n    alpha = 0.5;\n  }\n}`;
 
