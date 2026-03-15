@@ -219,9 +219,12 @@ function convertAs3ToTs(source) {
     'getChildIndex',
     'contains'
   ];
-  // Do not prefix declarations like `function getChildIndex(` or accessors `get/set foo(`.
-  const methodsRegex = new RegExp(`(?<!\\bfunction\\s+|\\bget\\s+|\\bset\\s+)(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
+  const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
   converted = converted.replace(methodsRegex, '$1this.$2(');
+
+  // Remove accidentally-prefixed declarations (e.g. `private function this.foo(...)`).
+  converted = converted.replace(/\b(function|get|set|public|private|protected|static|override)\s+this\./g, '$1 ');
+
 
   converted = converted.replace(
     /(\b[\w$.]+\.)?(addEventListener|removeEventListener)\s*\(([^,]+),\s*([a-zA-Z0-9_$.]+)(?:\s*,[^)]*)?\)/g,

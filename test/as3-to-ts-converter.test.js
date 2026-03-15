@@ -121,7 +121,7 @@ test('convertAs3ToTs rewrites typed for-each, bi_internal, catch typing, and inc
 
   const output = convertAs3ToTs(input);
   assert.match(output, /\/\/ include removed/);
-  assert.match(output, /let t: number = 0;/);
+  assert.match(output, /public t: number = 0;/);
   assert.match(output, /for \(let comp of list\)/);
   assert.match(output, /catch \(e: any\)/);
 });
