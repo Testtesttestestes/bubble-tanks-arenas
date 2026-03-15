@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { BTAGameWorldScene } from './game/scenes/BTAGameWorldScene';
+import { LegacyStartupScene } from './game/scenes/LegacyStartupScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -7,7 +8,7 @@ const config: Phaser.Types.Core.GameConfig = {
   height: 720,
   parent: 'game-root',
   backgroundColor: '#241c15',
-  scene: [BTAGameWorldScene],
+  scene: [LegacyStartupScene, BTAGameWorldScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
