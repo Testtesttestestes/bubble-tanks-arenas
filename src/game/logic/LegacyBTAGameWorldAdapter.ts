@@ -39,6 +39,9 @@ export class LegacyBTAGameWorldAdapter {
     this.tankView.aimAtWorldPoint(pointer.worldX, pointer.worldY);
     this.tankView.spinHull(deltaMs);
     this.playerTankLogic?.update();
+<<<<<<< HEAD
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
+=======
 >>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   }
 

@@ -56,6 +56,7 @@ export class class_113 {
   public var_349 = 0;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   private static readonly BASE_MOVE_SPEED = 0.26;
   private static readonly BASE_TURN_SPEED = 0.2;
 
@@ -70,6 +71,8 @@ export class class_113 {
 
   public constructor(public readonly view: TankView) {
 =======
+=======
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   public constructor(public readonly view: TankView, data?: Partial<TankDataLike>) {
     this.Setup({
       numLife: data?.numLife ?? 100,
@@ -78,6 +81,9 @@ export class class_113 {
       arrTankDetails: data?.arrTankDetails ?? [],
       numBubblesReturned: data?.numBubblesReturned ?? 0,
     });
+<<<<<<< HEAD
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
+=======
 >>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
     this.syncView();
   }
@@ -126,6 +132,7 @@ export class class_113 {
 
   public Move(): void {
 <<<<<<< HEAD
+<<<<<<< HEAD
     const speed = (this.objData?.numSpeed as number | undefined) ?? class_113.BASE_MOVE_SPEED;
 
     const horizontalAxis = Number(this.currentInput.right) - Number(this.currentInput.left);
@@ -155,6 +162,8 @@ export class class_113 {
   public setInput(inputData: TankInputState): void {
     this.currentInput = inputData;
 =======
+=======
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
     this.method_406();
   }
 
@@ -208,6 +217,9 @@ export class class_113 {
 
   private RandNum(min: number, max: number): number {
     return Math.round(Math.random() * (max - min + 0.8) + min - 0.4);
+<<<<<<< HEAD
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
+=======
 >>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   }
 
