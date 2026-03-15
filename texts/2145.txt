@@ -1,0 +1,5 @@
+You can add or substract 
+--- RECORDSEPARATOR ---
+enemies in a bubblefield using 
+--- RECORDSEPARATOR ---
+the "+" and "-" buttons.

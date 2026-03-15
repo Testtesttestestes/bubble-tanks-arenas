@@ -1,0 +1,3 @@
+Drag a tank part from 
+--- RECORDSEPARATOR ---
+this box onto the stage.

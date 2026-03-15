@@ -1,0 +1,9 @@
+Each bubblefield has a 
+--- RECORDSEPARATOR ---
+complexity cap.  Once the 
+--- RECORDSEPARATOR ---
+complexity meter is full, you 
+--- RECORDSEPARATOR ---
+cannot add further enemies to 
+--- RECORDSEPARATOR ---
+the current bubblefield.

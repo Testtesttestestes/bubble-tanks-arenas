@@ -1,0 +1,9 @@
+The arena you've attempted to 
+--- RECORDSEPARATOR ---
+load contains corrupt data and 
+--- RECORDSEPARATOR ---
+could not be loaded.  It has 
+--- RECORDSEPARATOR ---
+been flagged for review.
+--- RECORDSEPARATOR ---
+Thank you for your patience!

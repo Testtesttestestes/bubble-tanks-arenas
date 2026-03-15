@@ -1,0 +1,5 @@
+Click here to remove all of a 
+--- RECORDSEPARATOR ---
+specific enemy from a 
+--- RECORDSEPARATOR ---
+bubblefield.

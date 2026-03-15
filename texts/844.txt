@@ -1,0 +1,7 @@
+You can toggle 
+--- RECORDSEPARATOR ---
+symettric mode
+--- RECORDSEPARATOR ---
+ on and 
+--- RECORDSEPARATOR ---
+off for easy editting.

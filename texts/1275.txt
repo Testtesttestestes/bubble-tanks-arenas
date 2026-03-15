@@ -1,0 +1,3 @@
+Warning: If you delete a local tank all local 
+--- RECORDSEPARATOR ---
+arenas with the tank in it will be deleted

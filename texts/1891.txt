@@ -1,0 +1,5 @@
+Use asd keys to move
+--- RECORDSEPARATOR ---
+Use your mouse to aim,
+--- RECORDSEPARATOR ---
+hold to shoot.

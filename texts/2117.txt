@@ -1,0 +1,5 @@
+You can navigate between 
+--- RECORDSEPARATOR ---
+viewing BTA, server, and 
+--- RECORDSEPARATOR ---
+locally saved arenas here.

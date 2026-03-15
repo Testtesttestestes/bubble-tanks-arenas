@@ -1,0 +1,7 @@
+This is an enemy 
+--- RECORDSEPARATOR ---
+weapon. You can now 
+--- RECORDSEPARATOR ---
+use this weapon when 
+--- RECORDSEPARATOR ---
+creating new enemies!

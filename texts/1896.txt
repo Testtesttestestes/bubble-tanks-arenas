@@ -1,0 +1,5 @@
+You must destroy all
+--- RECORDSEPARATOR ---
+enemies in a bubblefield
+--- RECORDSEPARATOR ---
+to move forward.

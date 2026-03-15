@@ -1,0 +1,7 @@
+You are allotted 4 types of 
+--- RECORDSEPARATOR ---
+enemies per bubblefield, 10 
+--- RECORDSEPARATOR ---
+types of enemies per arena, 
+--- RECORDSEPARATOR ---
+and 10 bubblefields per arena. 

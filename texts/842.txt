@@ -1,0 +1,11 @@
+You can 
+--- RECORDSEPARATOR ---
+scale
+--- RECORDSEPARATOR ---
+ and 
+--- RECORDSEPARATOR ---
+rotate
+--- RECORDSEPARATOR ---
+ parts using these 
+--- RECORDSEPARATOR ---
+sliders.

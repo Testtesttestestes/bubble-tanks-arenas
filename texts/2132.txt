@@ -1,0 +1,5 @@
+This button will add 
+--- RECORDSEPARATOR ---
+an enemy to the 
+--- RECORDSEPARATOR ---
+current bubblefield.

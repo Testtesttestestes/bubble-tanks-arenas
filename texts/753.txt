@@ -1,0 +1,1 @@
+This is the summary text, it is now taking up 2 lines. &nbsp;Maybe it needs one more for good measure.

@@ -1,0 +1,7 @@
+A larger class size 
+--- RECORDSEPARATOR ---
+produces a slower tank, 
+--- RECORDSEPARATOR ---
+but will increase
+--- RECORDSEPARATOR ---
+its health.

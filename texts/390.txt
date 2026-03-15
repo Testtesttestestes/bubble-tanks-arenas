@@ -1,0 +1,11 @@
+There was a problem
+--- RECORDSEPARATOR ---
+connecting to the server.
+--- RECORDSEPARATOR ---
+Please confirm that your
+--- RECORDSEPARATOR ---
+computer is connected to
+--- RECORDSEPARATOR ---
+the internet and refresh
+--- RECORDSEPARATOR ---
+your web browser.

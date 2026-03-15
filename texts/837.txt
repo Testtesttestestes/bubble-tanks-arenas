@@ -1,0 +1,9 @@
+Once your tank 
+--- RECORDSEPARATOR ---
+reaches class size 4 or 
+--- RECORDSEPARATOR ---
+above your movement 
+--- RECORDSEPARATOR ---
+style will change to that 
+--- RECORDSEPARATOR ---
+of a heavy tank.

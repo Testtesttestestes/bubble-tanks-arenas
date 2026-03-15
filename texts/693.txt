@@ -1,0 +1,7 @@
+Bubbles Used:
+--- RECORDSEPARATOR ---
+Gun Points:
+--- RECORDSEPARATOR ---
+Class:
+--- RECORDSEPARATOR ---
+Armor:            Speed:

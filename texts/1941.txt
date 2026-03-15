@@ -1,0 +1,5 @@
+Your tank's class size 
+--- RECORDSEPARATOR ---
+changes its speed
+--- RECORDSEPARATOR ---
+and health.

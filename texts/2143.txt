@@ -1,0 +1,5 @@
+Enemy quick keys can be used 
+--- RECORDSEPARATOR ---
+to quickly add a used enemy to 
+--- RECORDSEPARATOR ---
+the current bubblefield.

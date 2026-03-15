@@ -1,0 +1,7 @@
+You have a secondary weapon 
+--- RECORDSEPARATOR ---
+on your current tank!
+--- RECORDSEPARATOR ---
+(Secondary weapons are used 
+--- RECORDSEPARATOR ---
+by pressing the spacebar.)
