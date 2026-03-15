@@ -10,5 +10,11 @@
     "tsc:stats": "bash tools/as3-to-ts/collect-tsc-stats.sh",
     "tsc:tmp-run": "bash tools/as3-to-ts/run-migrated-tsc.sh",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

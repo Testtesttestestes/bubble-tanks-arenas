@@ -24,7 +24,8 @@ export class MassiveBulletEffect extends Phaser.GameObjects.Sprite {
     this.play(animKey);
   }
 
-  public stop(): void {
+  public stop(): this {
     this.anims.stop();
+    return this;
   }
 }
