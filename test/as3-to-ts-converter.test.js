@@ -36,3 +36,12 @@ test('convertAs3ToTs writes package header', () => {
   assert.match(output, /Original Package: package_3/);
   assert.match(output, /public static readonly version: string = "1\.0\.0";/);
 });
+
+test('convertAs3ToTs strips imports and emits constructor without access modifier', () => {
+  const input = `package\n{\n   import flash.display.MovieClip;\n\n   public class ArenaData extends MovieClip\n   {\n      public function ArenaData()\n      {\n      }\n   }\n}`;
+
+  const output = convertAs3ToTs(input);
+  assert.doesNotMatch(output, /^import\s+/m);
+  assert.match(output, /constructor\(\)/);
+  assert.doesNotMatch(output, /public constructor\(\)/);
+});

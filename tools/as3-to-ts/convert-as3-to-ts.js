@@ -144,9 +144,10 @@ function convertAs3ToTs(source) {
   const className = classMatch ? classMatch[4] : null;
   let converted = stripped.source;
 
-  converted = converted.replace(/^\s*import\s+[^;]+;\s*\n?/gm, '');
-  converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*\n?/gm, '');
-  converted = converted.replace(/^\s*\[[^\]]+\]\s*\n?/gm, '');
+  converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
+  converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*$/gm, '');
+  converted = converted.replace(/^\s*\[[^\]]+\]\s*$/gm, '');
+  converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
 
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
   converted = converted.replace(/\bfor\s+each\s*\(\s*(?:var|let)\s+(\w+)\s+in\s+([^\)]+)\)/g, 'for (const $1 of $2)');
