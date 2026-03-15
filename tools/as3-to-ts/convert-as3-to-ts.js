@@ -203,6 +203,11 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(/\btrace\(/g, 'console.log(');
 
+  // Some decompiled casts arrive as empty constructor/call args: `foo( as T)`.
+  // Normalize them after cast expansion so TS parser remains valid.
+  converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
+  converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
+
   const flashMethods = [
     'addChild',
     'addChildAt',
@@ -246,6 +251,11 @@ function convertAs3ToTs(source) {
   });
 
   converted = converted.replace(/\b(?:int|uint)\(([^)]+)\)/g, 'Math.floor($1)');
+
+  // Some decompiled casts arrive as empty constructor/call args: `foo( as T)`.
+  // Normalize them after all cast rewrites so TS parser remains valid.
+  converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
+  converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
 
   if (classMatch && className) {
     converted = converted.replace(
