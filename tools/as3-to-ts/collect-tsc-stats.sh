@@ -4,9 +4,18 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG_FILE="${1:-tsc_output.log}"
 
+if [[ "$LOG_FILE" != /* ]]; then
+  LOG_FILE="$ROOT_DIR/$LOG_FILE"
+fi
+
 cd "$ROOT_DIR"
 
-npx tsc --pretty false > "$LOG_FILE" 2>&1 || true
+if [[ -f "$LOG_FILE" ]]; then
+  printf 'Using existing log: %s\n' "$LOG_FILE"
+else
+  printf 'Generating log via npx tsc: %s\n' "$LOG_FILE"
+  npx tsc --pretty false > "$LOG_FILE" 2>&1 || true
+fi
 
 total_errors="$( (grep "error TS" "$LOG_FILE" || true) | wc -l | tr -d ' ')"
 printf 'Total errors: %s\n' "$total_errors"
