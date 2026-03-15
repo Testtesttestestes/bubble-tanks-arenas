@@ -26,4 +26,8 @@ export class BaseEntity extends Phaser.GameObjects.Container {
     this.remove(child);
     return child;
   }
+
+  public stop(): void {
+    // Container has no timeline/animation state; this keeps converted AS3 `stop()` calls safe.
+  }
 }
