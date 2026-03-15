@@ -28,3 +28,7 @@ cp flash-shims.d.ts migrated-ts/flash-shims.d.ts
 ## Что делает `flash-shims.d.ts`
 
 `flash-shims.d.ts` объявляет базовые классы Flash API (`MovieClip`, `Sprite`, `Event`, `ByteArray` и др.), чтобы сгенерированные `.ts` файлы корректно линковались TypeScript-компилятором до фактического переноса runtime-логики на Phaser 3.
+
+## План следующего этапа (Phaser 3)
+
+Подробный план «Большой трансплантации» вынесен в `docs/phaser-3-transplant-plan.md` (базовые классы, перенос `BTAGameWorld` в `Phaser.Scene`, миграция `ENTER_FRAME` -> `update`, стратегия по ассетам).
