@@ -1,3 +1,5 @@
+import { TankView } from '../entities/tank/TankView';
+
 /**
  * Transitional adapter between Phaser Scene lifecycle and legacy BTAGameWorld logic.
  *
@@ -6,17 +8,28 @@
  */
 export class LegacyBTAGameWorldAdapter {
   private rootContainer?: Phaser.GameObjects.Container;
+  private tankView?: TankView;
 
   constructor(private readonly bootData: unknown) {}
 
   public assignRoot(root: Phaser.GameObjects.Container): void {
     this.rootContainer = root;
+
+    const centerX = root.scene.cameras.main.centerX;
+    const centerY = root.scene.cameras.main.centerY;
+
+    this.tankView = new TankView(root.scene, centerX, centerY);
+    this.rootContainer.add(this.tankView);
   }
 
   public customUpdate(_deltaMs: number): void {
-    if (!this.rootContainer) {
+    if (!this.rootContainer || !this.tankView) {
       return;
     }
+
+    const pointer = this.rootContainer.scene.input.activePointer;
+    this.tankView.aimAtWorldPoint(pointer.worldX, pointer.worldY);
+    this.tankView.spinHull(_deltaMs);
 
     // Placeholder for wiring legacy BTAGameWorld frame logic during migration.
   }
