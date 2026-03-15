@@ -273,7 +273,7 @@ function convertAs3ToTs(source) {
 
   if (interfaceMatch) {
     converted = converted.replace(
-      /^\s*(?:public\s+)?function\s+get\s+(\w+)\s*\([^)]*\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
+      /^\s*(?:public\s+)?function\s+get\s+(\w+)\s*\([^)]*\)\s*(?:\:\s*([^\s;{]+(?:<[^>]+>)?[^\s;{]*))?\s*;/gm,
       (_, name, ret) => `    ${name}: ${mapType(ret || 'any')};`
     );
     converted = converted.replace(
@@ -323,6 +323,9 @@ function convertAs3ToTs(source) {
       return match.replace(body, bodyWithDeclarations);
     }
   );
+
+  // Repair malformed switch labels produced by downstream rewrites.
+  converted = converted.replace(/\bthis\.default\s*:/g, 'default:');
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
