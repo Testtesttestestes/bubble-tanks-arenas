@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { LegacyBTAGameWorldAdapter } from '../logic/LegacyBTAGameWorldAdapter';
 import { TankView } from '../entities/tank/TankView';
+import type { TankInputState } from '../logic/class_113';
 
 export class BTAGameWorldScene extends Phaser.Scene {
   private static readonly EFFECTS_ATLAS_KEY = 'effects_atlas';
@@ -9,6 +10,13 @@ export class BTAGameWorldScene extends Phaser.Scene {
     'effect_massive_bullet_impact';
 
   private worldLogic!: LegacyBTAGameWorldAdapter;
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private wasd!: {
+    W: Phaser.Input.Keyboard.Key;
+    A: Phaser.Input.Keyboard.Key;
+    S: Phaser.Input.Keyboard.Key;
+    D: Phaser.Input.Keyboard.Key;
+  };
 
   constructor() {
     super({ key: 'BTAGameWorldScene' });
@@ -29,12 +37,30 @@ export class BTAGameWorldScene extends Phaser.Scene {
 
     this.ensureMassiveBulletImpactAnimation();
 
+    const keyboard = this.input.keyboard;
+    if (!keyboard) {
+      throw new Error('Keyboard plugin is unavailable for BTAGameWorldScene.');
+    }
+
+    this.cursors = keyboard.createCursorKeys();
+    this.wasd = keyboard.addKeys('W,A,S,D') as BTAGameWorldScene['wasd'];
+
     const rootContainer = this.add.container(0, 0);
     this.worldLogic.assignRoot(rootContainer);
   }
 
   public update(_time: number, delta: number): void {
-    this.worldLogic.customUpdate(delta);
+    const pointer = this.input.activePointer;
+    const inputState: TankInputState = {
+      up: this.cursors.up.isDown || this.wasd.W.isDown,
+      down: this.cursors.down.isDown || this.wasd.S.isDown,
+      left: this.cursors.left.isDown || this.wasd.A.isDown,
+      right: this.cursors.right.isDown || this.wasd.D.isDown,
+      targetX: pointer.worldX,
+      targetY: pointer.worldY,
+    };
+
+    this.worldLogic.customUpdate(delta, inputState);
   }
 
   private ensureMassiveBulletImpactAnimation(): void {

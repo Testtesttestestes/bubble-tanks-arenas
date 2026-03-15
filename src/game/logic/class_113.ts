@@ -1,3 +1,4 @@
+import * as Phaser from 'phaser';
 import { TankView } from '../entities/tank/TankView';
 
 /**
@@ -6,6 +7,15 @@ import { TankView } from '../entities/tank/TankView';
  * IMPORTANT: this intentionally keeps legacy naming and frame-based logic so we can
  * migrate callers incrementally before deeper refactors.
  */
+export interface TankInputState {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+  targetX: number;
+  targetY: number;
+}
+
 export class class_113 {
   // MovieClip-like transform state now owned by logic.
   public x = 0;
@@ -29,6 +39,18 @@ export class class_113 {
   public intState = 1;
   public funCallback: ((tank: class_113, tankType: number) => void) | null = null;
   public var_349 = 0;
+
+  private static readonly BASE_MOVE_SPEED = 0.26;
+  private static readonly BASE_TURN_SPEED = 0.2;
+
+  private currentInput: TankInputState = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+    targetX: 0,
+    targetY: 0,
+  };
 
   public constructor(public readonly view: TankView) {
     this.syncView();
@@ -62,7 +84,34 @@ export class class_113 {
   }
 
   public Move(): void {
-    // Stub for migrated movement logic.
+    const speed = (this.objData?.numSpeed as number | undefined) ?? class_113.BASE_MOVE_SPEED;
+
+    const horizontalAxis = Number(this.currentInput.right) - Number(this.currentInput.left);
+    const verticalAxis = Number(this.currentInput.down) - Number(this.currentInput.up);
+
+    if (horizontalAxis !== 0 || verticalAxis !== 0) {
+      const angle = Math.atan2(verticalAxis, horizontalAxis);
+      this.x += Math.cos(angle) * speed;
+      this.y += Math.sin(angle) * speed;
+
+      const targetRotation = Phaser.Math.RadToDeg(angle);
+      const turnSpeed = (this.objData?.numSpeed as number | undefined)
+        ? Math.max(2.5, speed * 12)
+        : class_113.BASE_TURN_SPEED * 16;
+      this.rotation = Phaser.Math.Angle.RotateTo(
+        Phaser.Math.DegToRad(this.rotation),
+        Phaser.Math.DegToRad(targetRotation),
+        Phaser.Math.DegToRad(turnSpeed),
+      );
+      this.rotation = Phaser.Math.RadToDeg(this.rotation);
+    }
+
+    this.view.aimAtWorldPoint(this.currentInput.targetX, this.currentInput.targetY);
+  }
+
+
+  public setInput(inputData: TankInputState): void {
+    this.currentInput = inputData;
   }
 
   public SetCallback(param1: (tank: class_113, tankType: number) => void): void {

@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { TankView } from '../entities/tank/TankView';
-import { class_113 } from './class_113';
+import { class_113, type TankInputState } from './class_113';
 
 /**
  * Transitional adapter between Phaser Scene lifecycle and legacy BTAGameWorld logic.
@@ -26,14 +26,12 @@ export class LegacyBTAGameWorldAdapter {
     this.playerTankLogic = new class_113(this.tankView);
   }
 
-  public customUpdate(deltaMs: number): void {
+  public customUpdate(deltaMs: number, inputState: TankInputState): void {
     if (!this.rootContainer || !this.tankView) {
       return;
     }
 
-    const pointer = this.rootContainer.scene.input.activePointer;
-    this.tankView.aimAtWorldPoint(pointer.worldX, pointer.worldY);
-    this.tankView.spinHull(deltaMs);
+    this.playerTankLogic?.setInput(inputState);
     this.playerTankLogic?.update(deltaMs);
   }
 

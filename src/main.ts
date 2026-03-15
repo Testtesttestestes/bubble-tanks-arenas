@@ -6,7 +6,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 1280,
   height: 720,
   parent: 'game-root',
-  backgroundColor: '#0b1020',
+  backgroundColor: '#241c15',
   scene: [BTAGameWorldScene],
   scale: {
     mode: Phaser.Scale.FIT,
