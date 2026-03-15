@@ -12,6 +12,8 @@ rm -rf "$OUTPUT_DIR"
 
 node tools/as3-to-ts/convert-as3-to-ts.js --input "$INPUT_DIR" --output "$OUTPUT_DIR"
 node tools/as3-to-ts/fix-implicit-this.js --input "$OUTPUT_DIR"
+# Restore `default:` switch labels that can be mistakenly prefixed by implicit-this fixer.
+find "$OUTPUT_DIR" -type f -name "*.ts" -exec sed -i 's/\bthis\.default\s*:/default:/g' {} +
 cp flash-shims.d.ts "$OUTPUT_DIR/"
 
 cat > "$OUTPUT_DIR/tsconfig.json" <<'JSON'
