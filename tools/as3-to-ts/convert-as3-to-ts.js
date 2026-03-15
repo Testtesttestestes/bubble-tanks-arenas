@@ -167,6 +167,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bbi_internal\s+/g, 'public ');
   converted = converted.replace(/\.\*/g, '._star');
   converted = converted.replace(/\*\./g, '_star.');
+  converted = converted.replace(/\.\s*\(/g, '._filter(');
   converted = converted.replace(/(\w+)\.\(([^)]*)\)/g, '$1["$2"]');
   converted = converted.replace(/\bcatch\s*\(\s*([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
   converted = converted.replace(/^\s*include\s+"[^"]+"\s*;/gm, '// include removed');
