@@ -1,0 +1,49 @@
+// AUTO-GENERATED AS3 TO TS CONVERSION
+// Original Package: fl.events
+
+export class DataChangeEvent extends Event{
+      
+      public static readonly DATA_CHANGE: string = "dataChange";
+      public static readonly PRE_DATA_CHANGE: string = "preDataChange";
+      protected _items: any[];
+      protected _changeType: string;
+      protected _startIndex: number;
+      protected _endIndex: number;
+      constructor(param1: string, param2: string, param3: any[], param4: number = -1, param5: number = -1){
+         super(param1);
+         _changeType = param2;
+         _startIndex = param4;
+         _items = param3;
+         _endIndex = param5 == -1 ? _startIndex : Math.floor(param5);
+      }
+      
+      public get items(): any[]
+      {
+         return _items;
+      }
+      
+      public get changeType(): string
+      {
+         return _changeType;
+      }
+      
+      public get startIndex(): number
+      {
+         return _startIndex;
+      }
+      
+      public get endIndex(): number
+      {
+         return _endIndex;
+      }
+      
+      public toString(): string
+      {
+         return formatToString("DataChangeEvent","type","changeType","startIndex","endIndex","bubbles","cancelable");
+      }
+      
+      public clone(): Event
+      {
+         return new DataChangeEvent(type,_changeType,_items,_startIndex,_endIndex);
+      }
+   }

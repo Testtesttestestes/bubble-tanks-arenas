@@ -1,0 +1,17 @@
+// AUTO-GENERATED AS3 TO TS CONVERSION
+// Original Package: BTA_fla
+
+export class AutoDestroyplaceholder_450 extends MovieClip{
+      
+      constructor(){
+         super();
+         addFrameScript(0,this.frame1);
+      }
+      
+      public frame1(): any
+      {
+         alpha = 0;
+         mouseEnabled = false;
+         mouseChildren = false;
+      }
+   }
