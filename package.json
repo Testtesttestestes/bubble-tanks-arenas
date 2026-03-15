@@ -10,9 +10,10 @@
     "tsc:stats": "bash tools/as3-to-ts/collect-tsc-stats.sh",
     "tsc:tmp-run": "bash tools/as3-to-ts/run-migrated-tsc.sh",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "npm run build:migrated-manifest && vite",
+    "build": "npm run build:migrated-manifest && vite build",
+    "preview": "vite preview",
+    "build:migrated-manifest": "node tools/phaser-pipeline/build-migrated-manifest.js"
   },
   "dependencies": {
     "phaser": "^3.90.0"
