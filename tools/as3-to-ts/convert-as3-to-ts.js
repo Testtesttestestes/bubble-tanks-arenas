@@ -142,6 +142,7 @@ function convertAs3ToTs(source) {
   const interfaceMatch = stripped.source.match(/(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/);
 
   const className = classMatch ? classMatch[4] : null;
+  const hasExtends = Boolean(classMatch && classMatch[5]);
   let converted = stripped.source;
 
   converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
@@ -182,6 +183,16 @@ function convertAs3ToTs(source) {
   ];
   const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
   converted = converted.replace(methodsRegex, '$1this.$2(');
+
+  converted = converted.replace(
+    /(\b[\w$.]+\.)?(addEventListener|removeEventListener)\s*\(([^,]+),\s*([a-zA-Z0-9_$.]+)(?:\s*,[^)]*)?\)/g,
+    (match, receiver = '', method, eventType, callback) => {
+      if (callback.includes('function') || callback.includes('bind(') || callback.includes('=>')) {
+        return match;
+      }
+      return `${receiver || ''}${method}(${eventType}, ${callback}.bind(this))`;
+    }
+  );
 
   const classCastIgnoreList = new Set(['Array', 'Vector', 'Math', 'String', 'Number', 'Boolean']);
   converted = converted.replace(/\b([A-Z][a-zA-Z0-9_]*)\(([^)]+)\)/g, (match, asClassName, inner, offset, whole) => {
@@ -225,6 +236,11 @@ function convertAs3ToTs(source) {
     /^(\s*)var\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, name, type, init) => `${indent}let ${name}: ${mapType(type)}${init || ''};`
   );
+
+  if (classMatch && className && hasExtends) {
+    const constructorRegex = /(constructor\s*\([^)]*\)\s*\{)(?!\s*super\s*\()/g;
+    converted = converted.replace(constructorRegex, '$1\n    super(); // AUTO-INJECTED');
+  }
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
