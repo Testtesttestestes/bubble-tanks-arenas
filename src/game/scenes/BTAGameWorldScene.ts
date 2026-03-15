@@ -1,21 +1,12 @@
 import * as Phaser from 'phaser';
 import { TankView } from '../entities/tank/TankView';
-<<<<<<< HEAD
-<<<<<<< HEAD
-import type { TankInputState } from '../logic/class_113';
-=======
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
 import { LegacyBTAGameWorldAdapter } from '../logic/LegacyBTAGameWorldAdapter';
+import type { TankInputState } from '../logic/class_113';
 import {
   MigratedPhaserPipeline,
   type MigratedManifest,
 } from '../runtime/MigratedPhaserPipeline';
 import migratedManifest from '../runtime/generated/migrated-manifest.json';
-<<<<<<< HEAD
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
 
 export class BTAGameWorldScene extends Phaser.Scene {
   private static readonly MASSIVE_BULLET_TEXTURE_KEY = 'effect_massive_bullet';
@@ -52,10 +43,6 @@ export class BTAGameWorldScene extends Phaser.Scene {
   public create(data: unknown): void {
     this.worldLogic = new LegacyBTAGameWorldAdapter(data);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    this.ensureMassiveBulletImpactAnimation();
-
     const keyboard = this.input.keyboard;
     if (!keyboard) {
       throw new Error('Keyboard plugin is unavailable for BTAGameWorldScene.');
@@ -64,16 +51,11 @@ export class BTAGameWorldScene extends Phaser.Scene {
     this.cursors = keyboard.createCursorKeys();
     this.wasd = keyboard.addKeys('W,A,S,D') as BTAGameWorldScene['wasd'];
 
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
     const rootContainer = this.add.container(0, 0);
     this.worldLogic.assignRoot(rootContainer);
   }
 
   public update(_time: number, delta: number): void {
-<<<<<<< HEAD
     const pointer = this.input.activePointer;
     const inputState: TankInputState = {
       up: this.cursors.up.isDown || this.wasd.W.isDown,
@@ -85,8 +67,5 @@ export class BTAGameWorldScene extends Phaser.Scene {
     };
 
     this.worldLogic.customUpdate(delta, inputState);
-=======
-    this.worldLogic.customUpdate(delta);
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   }
 }
