@@ -242,6 +242,26 @@ function convertAs3ToTs(source) {
     converted = converted.replace(constructorRegex, '$1\n    super(); // AUTO-INJECTED');
   }
 
+  // Inject undeclared local variables produced by AS3 decompilers (_loc1_, _loc2_, ...).
+  converted = converted.replace(
+    /^(\s*)(?:(?:override|public|private|protected|static|internal)\s+)*function\s+\w+\s*\([^)]*\)\s*(?::\s*[^{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
+    (match, fnIndent, body) => {
+      const locMatches = [...body.matchAll(/\b(_loc\d+_)\b/g)];
+      if (locMatches.length === 0) return match;
+
+      const uniqueLocs = [...new Set(locMatches.map((m) => m[1]))];
+      const declaredLocs = new Set(
+        [...body.matchAll(/\b(?:let|var|const)\s+(_loc\d+_)\b/g)].map((m) => m[1])
+      );
+      const undeclaredLocs = uniqueLocs.filter((loc) => !declaredLocs.has(loc));
+      if (undeclaredLocs.length === 0) return match;
+
+      const declarations = `let ${undeclaredLocs.map((loc) => `${loc}: any`).join(', ')};`;
+      const bodyWithDeclarations = body.replace(/^(\s*)/, `$1${declarations}\n$1`);
+      return match.replace(body, bodyWithDeclarations);
+    }
+  );
+
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
     packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
