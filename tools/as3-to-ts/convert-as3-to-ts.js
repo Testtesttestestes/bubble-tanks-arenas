@@ -219,7 +219,8 @@ function convertAs3ToTs(source) {
     'getChildIndex',
     'contains'
   ];
-  const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
+  // Do not prefix declarations like `function getChildIndex(` or accessors `get/set foo(`.
+  const methodsRegex = new RegExp(`(?<!\\bfunction\\s+|\\bget\\s+|\\bset\\s+)(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
   converted = converted.replace(methodsRegex, '$1this.$2(');
 
   converted = converted.replace(
