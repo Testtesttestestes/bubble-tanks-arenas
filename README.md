@@ -2,9 +2,10 @@
 
 Этот репозиторий содержит декомпилированные исходники ActionScript (`scripts/**/*.as`).
 
-Чтобы начать миграцию на TypeScript/Phaser 3, добавлен стартовый автоматический конвертер ActionScript -> TypeScript:
+Чтобы начать миграцию на TypeScript/Phaser 3, добавлен автоматический конвертер ActionScript -> TypeScript и типовые flash-заглушки:
 
 - Скрипт: `tools/as3-to-ts/convert-as3-to-ts.js`
+- Заглушки API: `flash-shims.d.ts`
 - Тесты: `test/as3-to-ts-converter.test.js`
 
 ## Быстрый запуск
@@ -12,28 +13,18 @@
 ```bash
 npm test
 node tools/as3-to-ts/convert-as3-to-ts.js --input scripts --output migrated-ts
-```
-
-Dry-run (без записи файлов):
-
-```bash
-node tools/as3-to-ts/convert-as3-to-ts.js --input scripts --dry-run
+cp flash-shims.d.ts migrated-ts/flash-shims.d.ts
 ```
 
 ## Что делает конвертер
 
-- Конвертирует `class` в `export class`.
-- Переносит поля `var/const` в TS-стиль с типами.
-- Переносит сигнатуры методов/конструкторов и типы параметров.
-- Преобразует локальные `var` в `let`.
-- Добавляет в заголовок файла исходный `package` и список `import` для дальнейшей ручной доработки.
+- Удаляет `package`, `import`, метаданные и `use namespace`.
+- Конвертирует `class` / `interface` в `export class` / `export interface`.
+- Переносит поля `var/const` и сигнатуры методов в TS-стиль с типами.
+- Конвертирует `trace(...)` в `console.log(...)`.
+- Поддерживает `Vector.<T>`, `for each`, `is`, `as` и локальные `var` -> `let`.
+- Добавляет заголовок с исходным `package`.
 
-## Ограничения текущей версии
+## Что делает `flash-shims.d.ts`
 
-Это intentionally MVP-конвертер для ускоренного старта:
-
-- не генерирует корректные ES `import` автоматически;
-- не обрабатывает все edge-cases AS3 синтаксиса;
-- не решает различия runtime Flash vs Phaser.
-
-Следующий шаг: наращивать трансформации по результатам прогонов по `scripts/` и фиксировать регрессии тестами.
+`flash-shims.d.ts` объявляет базовые классы Flash API (`MovieClip`, `Sprite`, `Event`, `ByteArray` и др.), чтобы сгенерированные `.ts` файлы корректно линковались TypeScript-компилятором до фактического переноса runtime-логики на Phaser 3.
