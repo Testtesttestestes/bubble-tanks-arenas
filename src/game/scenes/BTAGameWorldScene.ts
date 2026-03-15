@@ -1,4 +1,5 @@
 import { LegacyBTAGameWorldAdapter } from '../logic/LegacyBTAGameWorldAdapter';
+import { TankView } from '../entities/tank/TankView';
 
 export class BTAGameWorldScene extends Phaser.Scene {
   private static readonly EFFECTS_ATLAS_KEY = 'effects_atlas';
@@ -18,6 +19,8 @@ export class BTAGameWorldScene extends Phaser.Scene {
       BTAGameWorldScene.MASSIVE_BULLET_TEXTURE_KEY,
       'images/100.png',
     );
+    this.load.image(TankView.HULL_TEXTURE_KEY, 'images/100.png');
+    this.load.image(TankView.TURRET_TEXTURE_KEY, 'images/100.png');
   }
 
   public create(data: unknown): void {
