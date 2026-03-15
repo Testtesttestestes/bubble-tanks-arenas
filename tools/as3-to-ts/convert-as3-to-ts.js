@@ -149,6 +149,14 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*\[[^\]]+\]\s*$/gm, '');
   converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
 
+  // Parser-stabilization hacks for decompiled AS3/E4X artifacts.
+  converted = converted.replace(/\.@([a-zA-Z_]\w*)/g, '._attr_$1');
+  converted = converted.replace(/\.\.([a-zA-Z_]\w*)/g, '._descendants_$1');
+  converted = converted.replace(/\bfor\s+each\s*\(\s*([a-zA-Z_]\w*)\s+in\s+([^\)]+)\)/g, 'for (let $1 of $2)');
+  converted = converted.replace(/new\s+<[\w\.]+>\s*\[/g, '[');
+  converted = converted.replace(/:\s*Object\b/g, ': Record<string, any>');
+  converted = converted.replace(/(?<!function\s+|new\s+)\bArray\(([^)]+)\)/g, '($1 as unknown as any[])');
+
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
   converted = converted.replace(/\bfor\s+each\s*\(\s*(?:var|let)\s+(\w+)\s+in\s+([^\)]+)\)/g, 'for (const $1 of $2)');
   converted = converted.replace(/\b([\w\.\]\)]+)\s+is\s+([A-Za-z_][\w\.]*)/g, '$1 instanceof $2');

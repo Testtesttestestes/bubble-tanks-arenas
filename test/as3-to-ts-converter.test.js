@@ -65,6 +65,34 @@ test('convertAs3ToTs rewrites AS3 casts and int/uint casts', () => {
   assert.match(output, /let p: MovieClip = \(parent as unknown as MovieClip\);/);
 });
 
+
+
+test('convertAs3ToTs applies parser-stabilization rewrites for E4X and vector artifacts', () => {
+  const input = `package
+{
+   public class WeirdSyntax
+   {
+      public function WeirdSyntax()
+      {
+         var xml:XML;
+         var id:String = xml.@id;
+         var node:XMLList = xml..node;
+         for each (item in list)
+         {
+         }
+         var nums:Array = new <int>[1, 2, 3];
+         var data:Object = Array(buffer);
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /xml\._attr_id/);
+  assert.match(output, /xml\._descendants_node/);
+  assert.match(output, /for \(let item of list\)/);
+  assert.match(output, /let nums: any\[] = \[1, 2, 3\];/);
+  assert.match(output, /let data: Record<string, any> = \(buffer[\s\S]*as any\[]\);/);
+});
 test('fix-implicit-this extracts class properties and prefixes usages', () => {
   const input = `export class ArenaData extends MovieClip {\n  public x: number = 0;\n  private alpha: number = 1;\n\n  public move(): void {\n    x += 10;\n    alpha = 0.5;\n  }\n}`;
 
