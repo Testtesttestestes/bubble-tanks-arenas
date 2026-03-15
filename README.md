@@ -34,6 +34,24 @@ cp flash-shims.d.ts migrated-ts/flash-shims.d.ts
 Подробный план «Большой трансплантации» вынесен в `docs/phaser-3-transplant-plan.md` (базовые классы, перенос `BTAGameWorld` в `Phaser.Scene`, миграция `ENTER_FRAME` -> `update`, стратегия по ассетам).
 
 
+## Pipeline запуска migrated-ts в Phaser
+
+Добавлен генератор runtime-манифеста: `tools/phaser-pipeline/build-migrated-manifest.js`.
+
+Он:
+- сканирует `migrated-ts/**/*.ts`;
+- строит карту классов, зависимостей и кандидатов ассетов из `images/`, `sprites/`, `frames/`;
+- пишет результат в `src/game/runtime/generated/migrated-manifest.json`.
+
+Дальше `BTAGameWorldScene` использует `MigratedPhaserPipeline`, чтобы preload-ить ассеты для ключевых классов (`class_113`, `class_90`, `class_89`) с оригинальными ссылками на файлы.
+
+Команды:
+
+```bash
+npm run build:migrated-manifest
+npm run dev
+```
+
 ## Локальный запуск Phaser-сцены
 
 Добавлен минимальный bootstrap для запуска `BTAGameWorldScene` в браузере через Vite:

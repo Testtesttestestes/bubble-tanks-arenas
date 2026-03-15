@@ -34,7 +34,7 @@ export class LegacyBTAGameWorldAdapter {
     const pointer = this.rootContainer.scene.input.activePointer;
     this.tankView.aimAtWorldPoint(pointer.worldX, pointer.worldY);
     this.tankView.spinHull(deltaMs);
-    this.playerTankLogic?.update(deltaMs);
+    this.playerTankLogic?.update();
   }
 
   public getData(): unknown {
