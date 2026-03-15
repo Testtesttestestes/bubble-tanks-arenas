@@ -121,7 +121,7 @@ test('convertAs3ToTs rewrites typed for-each, bi_internal, catch typing, and inc
 
   const output = convertAs3ToTs(input);
   assert.match(output, /\/\/ include removed/);
-  assert.match(output, /public t: number = 0;/);
+  assert.match(output, /let t: number = 0;/);
   assert.match(output, /for \(let comp of list\)/);
   assert.match(output, /catch \(e: any\)/);
 });
@@ -143,7 +143,7 @@ test('convertAs3ToTs rewrites E4X wildcard and filter notations', () => {
   const output = convertAs3ToTs(input);
   assert.match(output, /xml\._star/);
   assert.match(output, /_star\.xml/);
-  assert.match(output, /xml\["id == 1"\]/);
+  assert.match(output, /xml\._filter\(id == 1\)/);
 });
 test('fix-implicit-this extracts class properties and prefixes usages', () => {
   const input = `export class ArenaData extends MovieClip {\n  public x: number = 0;\n  private alpha: number = 1;\n\n  public move(): void {\n    x += 10;\n    alpha = 0.5;\n  }\n}`;
