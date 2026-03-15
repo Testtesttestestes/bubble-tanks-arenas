@@ -1,3 +1,4 @@
+import * as Phaser from 'phaser';
 import { LegacyBTAGameWorldAdapter } from '../logic/LegacyBTAGameWorldAdapter';
 import { TankView } from '../entities/tank/TankView';
 
