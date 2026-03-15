@@ -1,0 +1,10 @@
+{
+  "name": "bubble-tanks-arenas-migration-tools",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ActionScript to TypeScript migration helpers",
+  "scripts": {
+    "test": "node --test",
+    "convert:as3": "node tools/as3-to-ts/convert-as3-to-ts.js"
+  }
+}
