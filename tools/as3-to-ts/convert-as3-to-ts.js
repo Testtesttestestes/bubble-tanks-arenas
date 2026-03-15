@@ -16,7 +16,10 @@ function mapType(asType) {
     ['String', 'string'],
     ['Array', 'any[]'],
     ['Object', 'Record<string, any>'],
-    ['void', 'void']
+    ['void', 'void'],
+    ['*', 'any'],
+    ['Class', 'any'],
+    ['Function', 'Function']
   ]);
 
   if (simpleMap.has(raw)) return simpleMap.get(raw);
@@ -36,7 +39,14 @@ function convertParams(paramString) {
       const [, rest, name, type, defaultValue] = match;
       const mapped = type ? mapType(type) : 'any';
       const spread = rest ? '...' : '';
-      const suffix = defaultValue ? ` = ${defaultValue.trim()}` : '';
+      let suffix = '';
+      if (defaultValue) {
+        let dv = defaultValue.trim();
+        if (dv === 'null' && mapped !== 'any') {
+          dv = 'null as any';
+        }
+        suffix = ` = ${dv}`;
+      }
       return `${spread}${name}: ${mapped}${suffix}`;
     })
     .join(', ');
@@ -44,14 +54,14 @@ function convertParams(paramString) {
 
 function convertClassMembers(source, className) {
   let out = source;
-  const normalizeModifiers = (modifiers, keepOverride = true) => {
-    const allowed = new Set(['public', 'private', 'protected', 'static', 'override']);
+
+  const normalizeModifiers = (modifiers) => {
+    const allowed = new Set(['public', 'private', 'protected', 'static']);
     return (modifiers || '')
       .replace(/\binternal\b/g, 'public')
       .split(/\s+/)
       .filter(Boolean)
       .filter((token) => allowed.has(token))
-      .filter((token) => keepOverride || token !== 'override')
       .join(' ')
       .trim();
   };
@@ -63,30 +73,9 @@ function convertClassMembers(source, className) {
       const staticPart = isStatic ? 'static ' : '';
       const readonly = kind === 'const' ? 'readonly ' : '';
       const mappedType = mapType(type);
-      const initializer = init ? init : '';
+      let initializer = init ? init : '';
+      if (initializer.includes('null') && mappedType !== 'any') initializer = ' = null as any';
       return `${indent}${vis}${staticPart}${readonly}${name}: ${mappedType}${initializer};`;
-    }
-  );
-
-
-  out = out.replace(
-    /^(\s*)(\w+)\s+(static\s+)?(const|var)\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
-    (_, indent, _ns, isStatic, kind, name, type, init) => {
-      const staticPart = isStatic ? 'static ' : '';
-      const readonly = kind === 'const' ? 'readonly ' : '';
-      const mappedType = mapType(type);
-      const initializer = init ? init : '';
-      return `${indent}public ${staticPart}${readonly}${name}: ${mappedType}${initializer};`;
-    }
-  );
-
-  out = out.replace(
-    /^(\s{6})(const|var)\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
-    (_, indent, kind, name, type, init) => {
-      const readonly = kind === 'const' ? 'readonly ' : '';
-      const mappedType = mapType(type);
-      const initializer = init ? init : '';
-      return `${indent}public ${readonly}${name}: ${mappedType}${initializer};`;
     }
   );
 
@@ -107,7 +96,7 @@ function convertClassMembers(source, className) {
   out = out.replace(
     /^(\s*)((?:(?:override|public|private|protected|internal|\w+)\s+)*(?:static\s+)?)function\s+(get|set)\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
     (_, indent, modifiers, accessorKind, name, params, returnType) => {
-      const normalizedMods = normalizeModifiers(modifiers, false);
+      const normalizedMods = normalizeModifiers(modifiers);
       const paramList = convertParams(params);
       const mappedReturn = returnType ? mapType(returnType) : 'any';
       if (accessorKind === 'get') {
@@ -117,20 +106,13 @@ function convertClassMembers(source, className) {
     }
   );
 
-  out = out.replace(
-    /^(\s{8,})var\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
-    (_, indent, name, type, init) => `${indent}let ${name}: ${mapType(type)}${init || ''};`
-  );
-
   return out;
 }
 
-
 function stripPackageWrapper(source) {
-  const pkg = source.match(/^\s*package\s*[\w\.]*\s*\{/m);
+  const pkg = source.match(/^\s*package\s*([\w\.]+)?\s*\{/m);
   if (!pkg) return { source, packageName: null };
-  const packageNameMatch = source.match(/package\s*([\w\.]+)?\s*\{/);
-  const packageName = packageNameMatch && packageNameMatch[1] ? packageNameMatch[1] : null;
+  const packageName = pkg[1] || null;
   const openIndex = source.indexOf('{', pkg.index);
   let depth = 0;
   let closeIndex = -1;
@@ -153,81 +135,63 @@ function stripPackageWrapper(source) {
 function convertAs3ToTs(source) {
   const stripped = stripPackageWrapper(source);
   const packageName = stripped.packageName;
-  const imports = [...source.matchAll(/^\s*import\s+([\w\.]+);\s*$/gm)].map((m) => m[1]);
 
-  const classMatch = source.match(
-    /(public\s+|internal\s+)?(dynamic\s+)?(final\s+)?class\s+(\w+)\s*(extends\s+\w+)?\s*(implements\s+[\w\s,]+)?/
+  const classMatch = stripped.source.match(
+    /(public\s+|internal\s+)?(dynamic\s+)?(final\s+)?class\s+(\w+)\s*(extends\s+[\w\.]+)?\s*(implements\s+[\w\s,\.]+)?/
   );
-  const interfaceMatch = source.match(/(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,]+)?/);
+  const interfaceMatch = stripped.source.match(/(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/);
 
   const className = classMatch ? classMatch[4] : null;
   let converted = stripped.source;
 
-  converted = converted.replace(/^\s*import\s+[^;]+;\s*\n?/gm, '');
+  converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
+  converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*$/gm, '');
+  converted = converted.replace(/^\s*\[[^\]]+\]\s*$/gm, '');
   converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
-  converted = converted.replace(/^\s*use\s+namespace\s+\w+;\s*\n?/gm, '');
-  converted = converted.replace(/^\s*\[[^\]]+\]\s*\n?/gm, '');
-  converted = converted.replace(/^\s*(?:let|var)\s+_temp_\d+\s*:[^;]+;\s*\n\s*(?:true|false);\s*\n\s*_temp_\d+;\s*\n?/gm, '');
-  converted = converted.replace(/^\s*_temp_\d+;\s*$/gm, '');
-  converted = converted.split('\n').filter((line) => !/^\s*import\s+/.test(line)).join('\n');
+
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
-  converted = converted.replace(/\.\*/g, '');
-  converted = converted.replace(/(\w+)\.\(([^)]*)\)/g, '$1["$2"]');
-  converted = converted.replace(/\*\./g, '.');
-  converted = converted.replace(/^(\s*)bi_internal\s+/gm, '$1');
-  converted = converted.replace(/\bfor\s+each\s*\(\s*var\s+(\w+)\s+in\s+([^\)]+)\)/g, 'for (const $1 of $2)');
-  converted = converted.replace(/\bfor\s+each\s*\(\s*(\w+)\s+in\s+([^\)]+)\)/g, 'for (const $1 of $2)');
-  converted = converted.replace(/\b([\w\.\]\)]+)\s+is\s+([A-Za-z_]\w*)/g, '$1 instanceof $2');
+  converted = converted.replace(/\bfor\s+each\s*\(\s*(?:var|let)\s+(\w+)\s+in\s+([^\)]+)\)/g, 'for (const $1 of $2)');
+  converted = converted.replace(/\b([\w\.\]\)]+)\s+is\s+([A-Za-z_][\w\.]*)/g, '$1 instanceof $2');
+  converted = converted.replace(/\bas\s+([A-Za-z_][\w\.]*)/g, ' as unknown as $1');
+
+  converted = converted.replace(/\btrace\(/g, 'console.log(');
 
   if (classMatch && className) {
     converted = converted.replace(
-      /(public\s+|internal\s+)?(dynamic\s+)?(final\s+)?class\s+(\w+)\s*(extends\s+\w+)?\s*(implements\s+[\w\s,]+)?/,
+      /(public\s+|internal\s+)?(dynamic\s+)?(final\s+)?class\s+(\w+)\s*(extends\s+[\w\.]+)?\s*(implements\s+[\w\s,\.]+)?/,
       (_, _vis, _dyn, _final, name, ext, impl) => {
-        const extension = ext ? ` ${ext}` : '';
-        const implText = impl ? ` ${impl}` : '';
-        return `export class ${name}${extension}${implText}`;
+        let extension = ext ? ` ${ext}` : '';
+        if (extension.includes('.')) extension = ` extends ${extension.split('.').pop()}`;
+
+        let implementation = impl ? ` ${impl}` : '';
+        if (implementation.includes('.')) implementation = ` implements ${implementation.split('.').pop()}`;
+
+        return `export class ${name}${extension}${implementation}`;
       }
     );
 
     converted = convertClassMembers(converted, className);
-
-    if (className === 'class_32') {
-      converted = converted.replace(
-        /private static i:[^;]+;\s*\n\s*while\(i < 256\)\s*\{([\s\S]*?)\n\s*\}\s*\n\s*private static Rcon:/m,
-        (_, body) => `private static i: number = 0;\n\n      static {\n         while(i < 256) {${body}\n         }\n      }\n\n      private static Rcon:`
-      );
-      converted = converted.replace(
-        /private static Rcon:[^;]+;\s*\n\s*i\s*=\s*0;\s*\n\s*while\(i < _Rcon\.length\)\s*\{([\s\S]*?)\n\s*\}\s*\n\s*private state:/m,
-        (_, body) => `private static Rcon: ByteArray = new ByteArray();\n\n      static {\n         i = 0;\n         while(i < _Rcon.length) {${body}\n         }\n      }\n\n      private state:`
-      );
-    }
   }
 
   if (interfaceMatch) {
     converted = converted.replace(
-      /(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,]+)?/,
-      (_, _vis, name, ext) => `export interface ${name}${ext ? ` ${ext}` : ''}`
+      /(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/,
+      (_, _vis, name, ext) => {
+        let extension = ext ? ` ${ext}` : '';
+        if (extension.includes('.')) extension = ` extends ${extension.split('.').pop()}`;
+        return `export interface ${name}${extension}`;
+      }
     );
   }
 
   converted = converted.replace(
-    /^(\s*)function\s+set\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
-    (_, indent, name, params) => `${indent}set ${name}(${convertParams(params)});`
+    /^(\s*)var\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
+    (_, indent, name, type, init) => `${indent}let ${name}: ${mapType(type)}${init || ''};`
   );
-  converted = converted.replace(
-    /^(\s*)function\s+get\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
-    (_, indent, name, _params, type) => `${indent}get ${name}(): ${mapType(type || 'any')};`
-  );
-  converted = converted.replace(
-    /^(\s*)function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
-    (_, indent, name, params, type) => `${indent}${name}(${convertParams(params)}): ${mapType(type || 'void')};`
-  );
-
 
   const header = [
-    '// AUTO-GENERATED by tools/as3-to-ts/convert-as3-to-ts.js',
-    packageName ? `// Source package: ${packageName}` : '// Source package: <root>',
-    imports.length ? `// Original imports: ${imports.join(', ')}` : '// Original imports: <none>'
+    '// AUTO-GENERATED AS3 TO TS CONVERSION',
+    packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
   ].join('\n');
 
   return `${header}\n\n${converted.trim()}\n`;
@@ -244,11 +208,8 @@ function collectAsFiles(inputPath) {
     const entries = fs.readdirSync(current, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
-      if (entry.isDirectory()) {
-        stack.push(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith('.as')) {
-        files.push(fullPath);
-      }
+      if (entry.isDirectory()) stack.push(fullPath);
+      else if (entry.isFile() && entry.name.endsWith('.as')) files.push(fullPath);
     }
   }
 
@@ -256,7 +217,7 @@ function collectAsFiles(inputPath) {
 }
 
 function parseArgs(argv) {
-  const args = { input: null, output: null, dryRun: false };
+  const args = { input: null, output: null };
 
   for (let i = 2; i < argv.length; i += 1) {
     const token = argv[i];
@@ -264,13 +225,13 @@ function parseArgs(argv) {
       args.input = argv[++i];
     } else if (token === '--output' || token === '-o') {
       args.output = argv[++i];
-    } else if (token === '--dry-run') {
-      args.dryRun = true;
     }
   }
 
-  if (!args.input) throw new Error('Missing --input path.');
-  if (!args.dryRun && !args.output) throw new Error('Missing --output path (or pass --dry-run).');
+  if (!args.input || !args.output) {
+    throw new Error('Usage: node convert-as3-to-ts.js --input <dir> --output <dir>');
+  }
+
   return args;
 }
 
@@ -283,16 +244,11 @@ function runCli() {
     return;
   }
 
+  fs.mkdirSync(args.output, { recursive: true });
+
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
     const converted = convertAs3ToTs(source);
-
-    if (args.dryRun) {
-      console.log(`--- ${file} ---`);
-      console.log(converted.slice(0, 300));
-      continue;
-    }
-
     const rel = path.relative(args.input, file);
     const target = path.join(args.output, rel).replace(/\.as$/i, '.ts');
     fs.mkdirSync(path.dirname(target), { recursive: true });
