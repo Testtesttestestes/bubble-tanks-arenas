@@ -93,6 +93,58 @@ test('convertAs3ToTs applies parser-stabilization rewrites for E4X and vector ar
   assert.match(output, /let nums: any\[] = \[1, 2, 3\];/);
   assert.match(output, /let data: Record<string, any> = \(buffer[\s\S]*as any\[]\);/);
 });
+
+test('convertAs3ToTs rewrites typed for-each, bi_internal, catch typing, and include directives', () => {
+  const input = `package
+{
+   public class CryptoLike
+   {
+      include "../core/Version.as";
+
+      bi_internal var t:int = 0;
+
+      public function parse(list:Array) : void
+      {
+         for each (var comp:IFocusManagerComponent in list)
+         {
+         }
+
+         try
+         {
+         }
+         catch (e:Error)
+         {
+         }
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /\/\/ include removed/);
+  assert.match(output, /public t: number = 0;/);
+  assert.match(output, /for \(let comp of list\)/);
+  assert.match(output, /catch \(e: any\)/);
+});
+
+test('convertAs3ToTs rewrites E4X wildcard and filter notations', () => {
+  const input = `package
+{
+   public class TankViewerScreen
+   {
+      public function TankViewerScreen(xml:XML) : void
+      {
+         var a:XMLList = xml.*;
+         var b:XMLList = *.xml;
+         var c:XMLList = xml.(id == 1);
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /xml\._star/);
+  assert.match(output, /_star\.xml/);
+  assert.match(output, /xml\["id == 1"\]/);
+});
 test('fix-implicit-this extracts class properties and prefixes usages', () => {
   const input = `export class ArenaData extends MovieClip {\n  public x: number = 0;\n  private alpha: number = 1;\n\n  public move(): void {\n    x += 10;\n    alpha = 0.5;\n  }\n}`;
 
