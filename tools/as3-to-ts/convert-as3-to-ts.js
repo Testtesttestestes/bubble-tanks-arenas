@@ -147,7 +147,14 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
   converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*$/gm, '');
-  converted = converted.replace(/^\s*\[[^\]]+\]\s*$/gm, '');
+  converted = converted.replace(/^\s*\[[^\]]+\]\s*\n?/gm, '');
+  converted = converted.replace(/^\s*default\s+xml\s+namespace\s*=\s*[^;]+;\s*\n?/gm, '');
+  converted = converted.replace(/^(\s*)(?:fl_internal|mx_internal|bi_internal)\s+/gm, '$1');
+  converted = converted.replace(
+    /^\s*(?:let|var)\s+_temp_\d+\s*:[^;]+;\s*\n\s*(?:true|false);\s*\n\s*_temp_\d+;\s*\n?/gm,
+    ''
+  );
+  converted = converted.replace(/^\s*_temp_\d+;\s*$/gm, '');
   converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
 
   // Parser-stabilization hacks for decompiled AS3/E4X artifacts.
@@ -227,6 +234,17 @@ function convertAs3ToTs(source) {
     );
 
     converted = convertClassMembers(converted, className);
+
+    if (className === 'class_32') {
+      converted = converted.replace(
+        /private static i:[^;]+;\s*\n\s*while\(i < 256\)\s*\{([\s\S]*?)\n\s*\}\s*\n\s*private static Rcon:/m,
+        (_, body) => `private static i: number = 0;\n\n  static {\n    while(i < 256) {${body}\n    }\n  }\n\n  private static Rcon:`
+      );
+      converted = converted.replace(
+        /private static Rcon:[^;]+;\s*\n\s*i\s*=\s*0;\s*\n\s*while\(i < _Rcon\.length\)\s*\{([\s\S]*?)\n\s*\}\s*\n\s*private state:/m,
+        (_, body) => `private static Rcon: ByteArray = new ByteArray();\n\n  static {\n    i = 0;\n    while(i < _Rcon.length) {${body}\n    }\n  }\n\n  private state:`
+      );
+    }
   }
 
   if (interfaceMatch) {
