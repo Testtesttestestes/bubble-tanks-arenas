@@ -1,3 +1,4 @@
+import * as Phaser from 'phaser';
 export class BaseEntity extends Phaser.GameObjects.Container {
   constructor(scene: Phaser.Scene, x = 0, y = 0) {
     super(scene, x, y);

@@ -1,3 +1,4 @@
+import * as Phaser from 'phaser';
 import { TankView } from '../entities/tank/TankView';
 import { class_113 } from './class_113';
 

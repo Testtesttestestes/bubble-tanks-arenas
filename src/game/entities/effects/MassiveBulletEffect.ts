@@ -1,3 +1,4 @@
+import * as Phaser from 'phaser';
 /**
  * Phaser replacement for `BTA_fla/effect_Massive_Bullet_125`.
  *
