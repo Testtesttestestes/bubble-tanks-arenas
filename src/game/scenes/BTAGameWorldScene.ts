@@ -1,13 +1,18 @@
 import * as Phaser from 'phaser';
-import { LegacyBTAGameWorldAdapter } from '../logic/LegacyBTAGameWorldAdapter';
 import { TankView } from '../entities/tank/TankView';
+<<<<<<< HEAD
 import type { TankInputState } from '../logic/class_113';
+=======
+import { LegacyBTAGameWorldAdapter } from '../logic/LegacyBTAGameWorldAdapter';
+import {
+  MigratedPhaserPipeline,
+  type MigratedManifest,
+} from '../runtime/MigratedPhaserPipeline';
+import migratedManifest from '../runtime/generated/migrated-manifest.json';
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
 
 export class BTAGameWorldScene extends Phaser.Scene {
-  private static readonly EFFECTS_ATLAS_KEY = 'effects_atlas';
   private static readonly MASSIVE_BULLET_TEXTURE_KEY = 'effect_massive_bullet';
-  private static readonly MASSIVE_BULLET_IMPACT_ANIMATION_KEY =
-    'effect_massive_bullet_impact';
 
   private worldLogic!: LegacyBTAGameWorldAdapter;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -23,11 +28,17 @@ export class BTAGameWorldScene extends Phaser.Scene {
   }
 
   public preload(): void {
-    // Temporary placeholder so effect entities can be instantiated before atlas export is ready.
+    MigratedPhaserPipeline.preloadFromManifest(
+      this,
+      migratedManifest as MigratedManifest,
+      ['class_113', 'class_90', 'class_89'],
+    );
+
     this.load.image(
       BTAGameWorldScene.MASSIVE_BULLET_TEXTURE_KEY,
       'images/100.png',
     );
+
     this.load.image(TankView.HULL_TEXTURE_KEY, 'images/100.png');
     this.load.image(TankView.TURRET_TEXTURE_KEY, 'images/100.png');
   }
@@ -35,6 +46,7 @@ export class BTAGameWorldScene extends Phaser.Scene {
   public create(data: unknown): void {
     this.worldLogic = new LegacyBTAGameWorldAdapter(data);
 
+<<<<<<< HEAD
     this.ensureMassiveBulletImpactAnimation();
 
     const keyboard = this.input.keyboard;
@@ -45,6 +57,8 @@ export class BTAGameWorldScene extends Phaser.Scene {
     this.cursors = keyboard.createCursorKeys();
     this.wasd = keyboard.addKeys('W,A,S,D') as BTAGameWorldScene['wasd'];
 
+=======
+>>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
     const rootContainer = this.add.container(0, 0);
     this.worldLogic.assignRoot(rootContainer);
   }
@@ -61,24 +75,5 @@ export class BTAGameWorldScene extends Phaser.Scene {
     };
 
     this.worldLogic.customUpdate(delta, inputState);
-  }
-
-  private ensureMassiveBulletImpactAnimation(): void {
-    if (
-      !this.textures.exists(BTAGameWorldScene.EFFECTS_ATLAS_KEY) ||
-      this.anims.exists(BTAGameWorldScene.MASSIVE_BULLET_IMPACT_ANIMATION_KEY)
-    ) {
-      return;
-    }
-
-    this.anims.create({
-      key: BTAGameWorldScene.MASSIVE_BULLET_IMPACT_ANIMATION_KEY,
-      frames: this.anims.generateFrameNames(BTAGameWorldScene.EFFECTS_ATLAS_KEY, {
-        prefix: 'impact_',
-        end: 10,
-      }),
-      frameRate: 24,
-      repeat: 0,
-    });
   }
 }
