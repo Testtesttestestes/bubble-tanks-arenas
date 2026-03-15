@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { convertAs3ToTs, mapType, convertParams } = require('../tools/as3-to-ts/convert-as3-to-ts');
+const { extractClassScopePropertyNames, addThisToPropertyUsage } = require('../tools/as3-to-ts/fix-implicit-this');
 
 test('mapType maps primitive and special ActionScript types', () => {
   assert.equal(mapType('Number'), 'number');
@@ -44,4 +45,33 @@ test('convertAs3ToTs strips imports and emits constructor without access modifie
   assert.doesNotMatch(output, /^import\s+/m);
   assert.match(output, /constructor\(\)/);
   assert.doesNotMatch(output, /public constructor\(\)/);
+});
+
+test('convertAs3ToTs prefixes frequent Flash API calls with this', () => {
+  const input = `package\n{\n   public class Hud extends MovieClip\n   {\n      public function Hud()\n      {\n         addChild(inner);\n         gotoAndStop(2);\n         this.stop();\n      }\n   }\n}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /this\.addChild\(inner\);/);
+  assert.match(output, /this\.gotoAndStop\(2\);/);
+  assert.match(output, /this\.stop\(\);/);
+});
+
+test('convertAs3ToTs rewrites AS3 casts and int/uint casts', () => {
+  const input = `package\n{\n   public class Hud extends MovieClip\n   {\n      public function Hud()\n      {\n         var x:Number = int(scaleX);\n         var y:Number = uint(scaleY);\n         var p:MovieClip = MovieClip(parent);\n      }\n   }\n}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /let x: number = Math\.floor\(scaleX\);/);
+  assert.match(output, /let y: number = Math\.floor\(scaleY\);/);
+  assert.match(output, /let p: MovieClip = \(parent as unknown as MovieClip\);/);
+});
+
+test('fix-implicit-this extracts class properties and prefixes usages', () => {
+  const input = `export class ArenaData extends MovieClip {\n  public x: number = 0;\n  private alpha: number = 1;\n\n  public move(): void {\n    x += 10;\n    alpha = 0.5;\n  }\n}`;
+
+  const props = extractClassScopePropertyNames(input);
+  assert.deepEqual([...props].sort(), ['alpha', 'x']);
+
+  const fixed = addThisToPropertyUsage(input, props);
+  assert.match(fixed, /this\.x \+= 10;/);
+  assert.match(fixed, /this\.alpha = 0\.5;/);
 });

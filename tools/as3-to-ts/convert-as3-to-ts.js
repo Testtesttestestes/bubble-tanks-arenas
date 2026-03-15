@@ -86,7 +86,7 @@ function convertClassMembers(source, className) {
       const head = fnName === className ? 'constructor' : fnName;
       const paramList = convertParams(params);
       if (fnName === className) {
-        return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}constructor(${paramList})`;
+        return `${indent}constructor(${paramList})`;
       }
       const mappedReturn = mapType(returnType || 'void');
       return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}${head}(${paramList}): ${mappedReturn}`;
@@ -155,6 +155,35 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bas\s+([A-Za-z_][\w\.]*)/g, ' as unknown as $1');
 
   converted = converted.replace(/\btrace\(/g, 'console.log(');
+
+  const flashMethods = [
+    'addChild',
+    'addChildAt',
+    'removeChild',
+    'removeChildAt',
+    'gotoAndStop',
+    'gotoAndPlay',
+    'play',
+    'stop',
+    'addEventListener',
+    'removeEventListener',
+    'dispatchEvent',
+    'setChildIndex',
+    'getChildIndex',
+    'contains'
+  ];
+  const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
+  converted = converted.replace(methodsRegex, '$1this.$2(');
+
+  const classCastIgnoreList = new Set(['Array', 'Vector', 'Math', 'String', 'Number', 'Boolean']);
+  converted = converted.replace(/\b([A-Z][a-zA-Z0-9_]*)\(([^)]+)\)/g, (match, asClassName, inner, offset, whole) => {
+    if (classCastIgnoreList.has(asClassName)) return match;
+    const before = whole.slice(0, offset);
+    if (/\b(function|new)\s*$/.test(before)) return match;
+    return `(${inner} as unknown as ${asClassName})`;
+  });
+
+  converted = converted.replace(/\b(?:int|uint)\(([^)]+)\)/g, 'Math.floor($1)');
 
   if (classMatch && className) {
     converted = converted.replace(
