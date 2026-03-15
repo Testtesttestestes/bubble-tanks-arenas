@@ -32,3 +32,15 @@ cp flash-shims.d.ts migrated-ts/flash-shims.d.ts
 ## План следующего этапа (Phaser 3)
 
 Подробный план «Большой трансплантации» вынесен в `docs/phaser-3-transplant-plan.md` (базовые классы, перенос `BTAGameWorld` в `Phaser.Scene`, миграция `ENTER_FRAME` -> `update`, стратегия по ассетам).
+
+
+## Локальный запуск Phaser-сцены
+
+Добавлен минимальный bootstrap для запуска `BTAGameWorldScene` в браузере через Vite:
+
+```bash
+npm install
+npm run dev
+```
+
+Точка входа: `src/main.ts`, HTML-контейнер: `index.html`.

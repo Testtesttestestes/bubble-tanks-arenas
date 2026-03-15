@@ -9,12 +9,16 @@
     "fix:implicit-this": "node tools/as3-to-ts/fix-implicit-this.js",
     "tsc:stats": "bash tools/as3-to-ts/collect-tsc-stats.sh",
     "tsc:tmp-run": "bash tools/as3-to-ts/run-migrated-tsc.sh",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "phaser": "^3.90.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^5.4.11"
   }
 }
