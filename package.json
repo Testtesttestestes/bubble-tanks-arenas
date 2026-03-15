@@ -7,6 +7,7 @@
     "test": "node --test",
     "convert:as3": "node tools/as3-to-ts/convert-as3-to-ts.js",
     "fix:implicit-this": "node tools/as3-to-ts/fix-implicit-this.js",
-    "tsc:stats": "bash tools/as3-to-ts/collect-tsc-stats.sh"
+    "tsc:stats": "bash tools/as3-to-ts/collect-tsc-stats.sh",
+    "tsc:tmp-run": "bash tools/as3-to-ts/run-migrated-tsc.sh"
   }
 }
