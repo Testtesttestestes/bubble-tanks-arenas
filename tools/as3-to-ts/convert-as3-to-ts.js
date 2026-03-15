@@ -165,8 +165,9 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
   converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*$/gm, '');
   converted = converted.replace(/^\s*\[[^\]]+\]\s*\n?/gm, '');
+  converted = converted.replace(/^[ \t]*\[(?:Inspectable|Bindable|Event|Style|DefaultProperty|HostComponent|Embed|SWF|IconFile)[^\]]*\][ \t]*\n?/gm, '');
   converted = converted.replace(/^\s*default\s+xml\s+namespace\s*=\s*[^;]+;\s*\n?/gm, '');
-  converted = converted.replace(/^(\s*)(?:fl_internal|mx_internal|bi_internal)\s+/gm, '$1');
+  converted = converted.replace(/\b(?:fl_internal|mx_internal|bi_internal)\b/g, 'public');
   converted = converted.replace(
     /^\s*(?:let|var)\s+_temp_\d+\s*:[^;]+;\s*\n\s*(?:true|false);\s*\n\s*_temp_\d+;\s*\n?/gm,
     ''
@@ -181,7 +182,7 @@ function convertAs3ToTs(source) {
     /\bfor\s+each\s*\(\s*(?:var\s+|let\s+)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g,
     'for (let $1 of $2)'
   );
-  converted = converted.replace(/\bbi_internal\s+/g, 'public ');
+  converted = converted.replace(/\bfor\s*\(\s*(?:var\s+|let\s+)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g, 'for (let $1 in $2)');
   converted = converted.replace(/\.\*/g, '._star');
   converted = converted.replace(/\*\./g, '_star.');
   converted = converted.replace(/^(\s*)(\d+|"[^"]+"|'[^']+'):\s*$/gm, '$1case $2:');
@@ -271,6 +272,18 @@ function convertAs3ToTs(source) {
   }
 
   if (interfaceMatch) {
+    converted = converted.replace(
+      /^\s*(?:public\s+)?function\s+get\s+(\w+)\s*\([^)]*\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
+      (_, name, ret) => `    ${name}: ${mapType(ret || 'any')};`
+    );
+    converted = converted.replace(
+      /^\s*(?:public\s+)?function\s+set\s+(\w+)\s*\([^)]*\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
+      '    /* set $1 */'
+    );
+    converted = converted.replace(
+      /^\s*(?:public\s+)?function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
+      (_, name, params, ret) => `    ${name}(${convertParams(params)}): ${mapType(ret || 'void')};`
+    );
     converted = converted.replace(
       /(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/,
       (_, _vis, name, ext) => {
