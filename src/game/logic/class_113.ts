@@ -17,12 +17,6 @@ interface TankDataLike {
   numBubblesReturned?: number;
 }
 
-/**
- * Runtime-adapted port of migrated-ts/class_113.ts.
- *
- * Методики и порядок вызовов сохранены по оригинальной логике класса из Flash-версии,
- * а визуальный стейт синхронизируется через TankView.
- */
 export interface TankInputState {
   up: boolean;
   down: boolean;
@@ -55,10 +49,7 @@ export class class_113 {
   public funCallback: ((tank: class_113, tankType: number) => void) | null = null;
   public var_349 = 0;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  private static readonly BASE_MOVE_SPEED = 0.26;
-  private static readonly BASE_TURN_SPEED = 0.2;
+  private static readonly BASE_MOVE_SPEED = 1.8;
 
   private currentInput: TankInputState = {
     up: false,
@@ -69,28 +60,24 @@ export class class_113 {
     targetY: 0,
   };
 
-  public constructor(public readonly view: TankView) {
-=======
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   public constructor(public readonly view: TankView, data?: Partial<TankDataLike>) {
     this.Setup({
       numLife: data?.numLife ?? 100,
-      numSpeed: data?.numSpeed ?? 1.8,
+      numSpeed: data?.numSpeed ?? class_113.BASE_MOVE_SPEED,
       intType: data?.intType ?? 1,
       arrTankDetails: data?.arrTankDetails ?? [],
       numBubblesReturned: data?.numBubblesReturned ?? 0,
     });
-<<<<<<< HEAD
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
     this.syncView();
   }
 
   public update(): void {
     this.Run();
     this.syncView();
+  }
+
+  public setInput(inputData: TankInputState): void {
+    this.currentInput = inputData;
   }
 
   public Setup(param1: TankDataLike): void {
@@ -108,7 +95,6 @@ export class class_113 {
     this.blnOkToTeleport = true;
     this.var_345 = false;
     this.var_349 = 0;
-    this.MoveWanderSetup();
   }
 
   public Run(): void {
@@ -131,10 +117,7 @@ export class class_113 {
   }
 
   public Move(): void {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const speed = (this.objData?.numSpeed as number | undefined) ?? class_113.BASE_MOVE_SPEED;
-
+    const speed = this.objData?.numSpeed ?? class_113.BASE_MOVE_SPEED;
     const horizontalAxis = Number(this.currentInput.right) - Number(this.currentInput.left);
     const verticalAxis = Number(this.currentInput.down) - Number(this.currentInput.up);
 
@@ -142,85 +125,10 @@ export class class_113 {
       const angle = Math.atan2(verticalAxis, horizontalAxis);
       this.x += Math.cos(angle) * speed;
       this.y += Math.sin(angle) * speed;
-
-      const targetRotation = Phaser.Math.RadToDeg(angle);
-      const turnSpeed = (this.objData?.numSpeed as number | undefined)
-        ? Math.max(2.5, speed * 12)
-        : class_113.BASE_TURN_SPEED * 16;
-      this.rotation = Phaser.Math.Angle.RotateTo(
-        Phaser.Math.DegToRad(this.rotation),
-        Phaser.Math.DegToRad(targetRotation),
-        Phaser.Math.DegToRad(turnSpeed),
-      );
-      this.rotation = Phaser.Math.RadToDeg(this.rotation);
+      this.rotation = Phaser.Math.RadToDeg(angle);
     }
 
     this.view.aimAtWorldPoint(this.currentInput.targetX, this.currentInput.targetY);
-  }
-
-
-  public setInput(inputData: TankInputState): void {
-    this.currentInput = inputData;
-=======
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
-    this.method_406();
-  }
-
-  public MoveWanderSetup(): void {
-    this.objMovementData = {
-      intFramesToTurn: 0,
-      intMinFramesToHoldTurning: 0,
-      numAmountToTurn: 0,
-      blnSafetyTurn: false,
-      numLastAngle: this.method_286(),
-    };
-  }
-
-  public method_406(): void {
-    const moveDistance = this.objData.numSpeed;
-    const angleRad = Phaser.Math.DegToRad(this.rotation);
-
-    this.x += Math.cos(angleRad) * moveDistance;
-    this.y += Math.sin(angleRad) * moveDistance;
-
-    const turnFrames = Number(this.objMovementData.intFramesToTurn ?? 0);
-    if (turnFrames > 0) {
-      this.objMovementData.intFramesToTurn = turnFrames - 1;
-      this.rotation += Number(this.objMovementData.numAmountToTurn ?? 0);
-      this.objMovementData.numLastAngle = this.method_286();
-      return;
-    }
-
-    const holdFrames = Number(this.objMovementData.intMinFramesToHoldTurning ?? 0);
-    if (holdFrames > 0) {
-      this.objMovementData.intMinFramesToHoldTurning = holdFrames - 1;
-      return;
-    }
-
-    if (this.RandNum(0, 1000) < 20) {
-      const randomTurn = this.RandNum(-100, 100);
-      const speedTurn = this.objData.numSpeed * 1.5;
-      this.objMovementData.intFramesToTurn = Math.max(
-        1,
-        Math.round(Math.abs(randomTurn) / speedTurn),
-      );
-      this.objMovementData.numAmountToTurn =
-        speedTurn * (randomTurn === 0 ? 1 : Math.sign(randomTurn));
-      this.objMovementData.blnSafetyTurn = false;
-    }
-  }
-
-  public method_286(): number {
-    return Phaser.Math.RadToDeg(Math.atan2(this.y, this.x));
-  }
-
-  private RandNum(min: number, max: number): number {
-    return Math.round(Math.random() * (max - min + 0.8) + min - 0.4);
-<<<<<<< HEAD
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   }
 
   public SetCallback(param1: (tank: class_113, tankType: number) => void): void {

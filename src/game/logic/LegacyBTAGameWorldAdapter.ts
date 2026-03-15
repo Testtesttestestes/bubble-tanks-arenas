@@ -26,23 +26,13 @@ export class LegacyBTAGameWorldAdapter {
     this.playerTankLogic = new class_113(this.tankView);
   }
 
-  public customUpdate(deltaMs: number, inputState: TankInputState): void {
+  public customUpdate(_deltaMs: number, inputState: TankInputState): void {
     if (!this.rootContainer || !this.tankView) {
       return;
     }
 
-<<<<<<< HEAD
     this.playerTankLogic?.setInput(inputState);
-    this.playerTankLogic?.update(deltaMs);
-=======
-    const pointer = this.rootContainer.scene.input.activePointer;
-    this.tankView.aimAtWorldPoint(pointer.worldX, pointer.worldY);
-    this.tankView.spinHull(deltaMs);
     this.playerTankLogic?.update();
-<<<<<<< HEAD
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
-=======
->>>>>>> aad03ca55ed52d73e0d61dd08bceb7c9e8081791
   }
 
   public getData(): unknown {
