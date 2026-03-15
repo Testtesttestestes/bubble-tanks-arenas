@@ -4,15 +4,6 @@ export class BaseEntity extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
-  // Flash compatibility: in AS3 rotation is degrees, in Phaser rotation is radians.
-  public get rotation(): number {
-    return this.angle;
-  }
-
-  public set rotation(value: number) {
-    this.angle = value;
-  }
-
   public get parent(): Phaser.GameObjects.Container | null {
     return this.parentContainer ?? null;
   }
