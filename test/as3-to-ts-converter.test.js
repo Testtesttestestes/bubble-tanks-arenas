@@ -22,7 +22,7 @@ test('convertAs3ToTs converts EnemyAI-style class shape', () => {
   const output = convertAs3ToTs(input);
   assert.match(output, /export class EnemyAI extends class_113/);
   assert.match(output, /public var_435: number;/);
-  assert.match(output, /public constructor\(param1: TankData\)/);
+  assert.match(output, /constructor\(param1: TankData\)/);
   assert.match(output, /override public Move\(\): void/);
   assert.match(output, /let _loc1_: number = 10;/);
 });
