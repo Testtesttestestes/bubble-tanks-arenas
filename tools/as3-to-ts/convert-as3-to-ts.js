@@ -86,7 +86,7 @@ function convertClassMembers(source, className) {
       const head = fnName === className ? 'constructor' : fnName;
       const paramList = convertParams(params);
       if (fnName === className) {
-        return `${indent}constructor(${paramList})`;
+        return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}constructor(${paramList})`;
       }
       const mappedReturn = mapType(returnType || 'void');
       return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}${head}(${paramList}): ${mappedReturn}`;
