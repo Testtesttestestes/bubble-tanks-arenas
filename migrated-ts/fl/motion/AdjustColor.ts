@@ -48,7 +48,7 @@ export class AdjustColor{
          }
          else if(param1 > 0)
          {
-            _loc2_ = s_arrayOfDeltaIndex[Math.floor(param1)] * 127 + 127;
+            _loc2_ = this.s_arrayOfDeltaIndex[Math.floor(param1)] * 127 + 127;
          }
          else
          {

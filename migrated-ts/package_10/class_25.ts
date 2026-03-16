@@ -4,16 +4,16 @@
 export class class_25{
       
       public static readonly const_3: number = 30;
-      public static readonly const_6: number = 1 << const_3;
-      public static readonly const_5: number = const_6 - 1;
+      public static readonly const_6: number = 1 << this.const_3;
+      public static readonly const_5: number = this.const_6 - 1;
       public static readonly const_13: number = 52;
-      public static readonly const_22: number = Math.pow(2,const_13);
-      public static readonly F1: number = const_13 - const_3;
-      public static readonly F2: number = 2 * const_3 - const_13;
+      public static readonly const_22: number = Math.pow(2,this.const_13);
+      public static readonly F1: number = this.const_13 - this.const_3;
+      public static readonly F2: number = 2 * this.const_3 - this.const_13;
       public static readonly const_9: class_25 = method_28(0);
       public static readonly const_4: class_25 = method_28(1);
       public static readonly const_7: any[] = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509];
-      public static readonly const_21: number = (1 << 26) / const_7[const_7.length - 1];
+      public static readonly const_21: number = (1 << 26) / this.const_7[this.const_7.length - 1];
       public a: any[];
       public s: number;
       public t: number;
@@ -55,7 +55,7 @@ export class class_25{
       public method_175(): class_25
       {
          let _loc1_: class_25 = this.method_81();
-         const_9.method_15(this,_loc1_);
+         this.const_9.method_15(this,_loc1_);
          return _loc1_;
       }
       
@@ -141,7 +141,7 @@ export class class_25{
                _loc12_ = (param1.a[_loc11_] & (1 << _loc3_ + 1) - 1) << _loc9_ - _loc3_;
                if(_loc11_ > 0)
                {
-                  _loc12_ |= param1.a[_loc11_ - 1] >> const_3 + _loc3_ - _loc9_;
+                  _loc12_ |= param1.a[_loc11_ - 1] >> this.const_3 + _loc3_ - _loc9_;
                }
             }
             _loc8_ = _loc4_;
@@ -153,7 +153,7 @@ export class class_25{
             _loc3_ = _loc3_ - _loc8_;
             if(_loc3_ < 0)
             {
-               _loc3_ += const_3;
+               _loc3_ += this.const_3;
                _loc11_--;
             }
             _loc7_[_loc12_].copyTo(_loc5_);
@@ -166,7 +166,7 @@ export class class_25{
                _loc14_ = null;
                if(--_loc3_ < 0)
                {
-                  _loc3_ = const_3 - 1;
+                  _loc3_ = this.const_3 - 1;
                   _loc11_--;
                }
             }
@@ -180,12 +180,12 @@ export class class_25{
          let _loc4_: number = 0;
          let _loc5_: any = 0;
          let _loc3_: class_25 = this.abs();
-         if(_loc3_.t == 1 && _loc3_.a[0] <= const_7[const_7.length - 1])
+         if(_loc3_.t == 1 && _loc3_.a[0] <= this.const_7[this.const_7.length - 1])
          {
             _loc2_ = 0;
-            while(_loc2_ < const_7.length)
+            while(_loc2_ < this.const_7.length)
             {
-               if(_loc3_[0] == const_7[_loc2_])
+               if(_loc3_[0] == this.const_7[_loc2_])
                {
                   return true;
                }
@@ -198,18 +198,18 @@ export class class_25{
             return false;
          }
          _loc2_ = 1;
-         while(_loc2_ < const_7.length)
+         while(_loc2_ < this.const_7.length)
          {
-            _loc4_ = Math.floor(const_7[_loc2_]);
+            _loc4_ = Math.floor(this.const_7[_loc2_]);
             _loc5_ = Math.floor(_loc2_ + 1);
-            while(_loc5_ < const_7.length && _loc4_ < const_21)
+            while(_loc5_ < this.const_7.length && _loc4_ < this.const_21)
             {
-               _loc4_ *= const_7[_loc5_++];
+               _loc4_ *= this.const_7[_loc5_++];
             }
             _loc4_ = _loc3_.method_683(_loc4_);
             while(_loc2_ < _loc5_)
             {
-               if(_loc4_ % const_7[_loc2_++] == 0)
+               if(_loc4_ % this.const_7[_loc2_++] == 0)
                {
                   return false;
                }
@@ -229,7 +229,7 @@ export class class_25{
       {
          let _loc2_: class_25 = this.method_81();
          this.abs().divRemTo(param1,null,_loc2_);
-         if(this.s < 0 && _loc2_.method_16(const_9) > 0)
+         if(this.s < 0 && _loc2_.method_16(this.const_9) > 0)
          {
             param1.method_15(_loc2_,_loc2_);
          }
@@ -245,8 +245,8 @@ export class class_25{
          {
             _loc4_ += this.a[_loc3_] + param1.a[_loc3_];
             let _loc6_: number;
-            param2.a[_loc6_ = _loc3_++] = _loc4_ & const_5;
-            _loc4_ >>= const_3;
+            param2.a[_loc6_ = _loc3_++] = _loc4_ & this.const_5;
+            _loc4_ >>= this.const_3;
          }
          if(param1.t < this.t)
          {
@@ -254,8 +254,8 @@ export class class_25{
             while(_loc3_ < this.t)
             {
                _loc4_ += this.a[_loc3_];
-               param2.a[_loc6_ = _loc3_++] = _loc4_ & const_5;
-               _loc4_ >>= const_3;
+               param2.a[_loc6_ = _loc3_++] = _loc4_ & this.const_5;
+               _loc4_ >>= this.const_3;
             }
             _loc4_ += this.s;
          }
@@ -265,8 +265,8 @@ export class class_25{
             while(_loc3_ < param1.t)
             {
                _loc4_ += param1.a[_loc3_];
-               param2.a[_loc6_ = _loc3_++] = _loc4_ & const_5;
-               _loc4_ >>= const_3;
+               param2.a[_loc6_ = _loc3_++] = _loc4_ & this.const_5;
+               _loc4_ >>= this.const_3;
             }
             _loc4_ += param1.s;
          }
@@ -277,7 +277,7 @@ export class class_25{
          }
          else if(_loc4_ < -1)
          {
-            param2.a[_loc6_ = _loc3_++] = const_6 + _loc4_;
+            param2.a[_loc6_ = _loc3_++] = this.const_6 + _loc4_;
          }
          param2.t = _loc3_;
          param2.method_45();
@@ -296,7 +296,7 @@ export class class_25{
          }
          if(param1.t < this.t)
          {
-            _loc5_ = param1.s & const_5;
+            _loc5_ = param1.s & this.const_5;
             _loc4_ = _loc6_;
             while(_loc4_ < this.t)
             {
@@ -307,7 +307,7 @@ export class class_25{
          }
          else
          {
-            _loc5_ = this.s & const_5;
+            _loc5_ = this.s & this.const_5;
             _loc4_ = _loc6_;
             while(_loc4_ < param1.t)
             {
@@ -327,7 +327,7 @@ export class class_25{
          {
             return 0;
          }
-         let _loc2_: number = const_6 % param1;
+         let _loc2_: number = this.const_6 % param1;
          let _loc3_: number = this.s < 0 ? Math.floor(param1 - 1) : 0;
          if(this.t > 0)
          {
@@ -350,7 +350,7 @@ export class class_25{
       
       protected method_468(param1: number): number
       {
-         return Math.floor(Math.LN2 * const_3 / Math.log(param1));
+         return Math.floor(Math.LN2 * this.const_3 / Math.log(param1));
       }
       
       public method_279(param1: class_25): class_25
@@ -416,9 +416,9 @@ export class class_25{
             this.a[this.t++] = 0;
          }
          this.a[param2] += param1;
-         while(this.a[param2] >= const_6)
+         while(this.a[param2] >= this.const_6)
          {
-            this.a[param2] -= const_6;
+            this.a[param2] -= this.const_6;
             if(++param2 >= this.t)
             {
                this.a[this.t++] = 0;
@@ -430,11 +430,11 @@ export class class_25{
       public method_158(param1: number, param2: class_25): void
       {
          let _loc8_: any = 0;
-         let _loc3_: number = param1 % const_3;
-         let _loc4_: number = const_3 - _loc3_;
+         let _loc3_: number = param1 % this.const_3;
+         let _loc4_: number = this.const_3 - _loc3_;
          let _loc5_: number = (1 << _loc4_) - 1;
-         let _loc6_: number = param1 / const_3;
-         let _loc7_: number = this.s << _loc3_ & const_5;
+         let _loc6_: number = param1 / this.const_3;
+         let _loc7_: number = this.s << _loc3_ & this.const_5;
          _loc8_ = Math.floor(this.t - 1);
          while(_loc8_ >= 0)
          {
@@ -461,13 +461,13 @@ export class class_25{
          {
             if(this.a[_loc1_] != 0)
             {
-               return _loc1_ * const_3 + this.method_749(this.a[_loc1_]);
+               return _loc1_ * this.const_3 + this.method_749(this.a[_loc1_]);
             }
             _loc1_++;
          }
          if(this.s < 0)
          {
-            return this.t * const_3;
+            return this.t * this.const_3;
          }
          return -1;
       }
@@ -546,12 +546,12 @@ export class class_25{
       
       public method_652(param1: number): boolean
       {
-         let _loc2_: number = Math.floor(param1 / const_3);
+         let _loc2_: number = Math.floor(param1 / this.const_3);
          if(_loc2_ >= this.t)
          {
             return this.s != 0;
          }
-         return (this.a[_loc2_] & 1 << param1 % const_3) != 0;
+         return (this.a[_loc2_] & 1 << param1 % this.const_3) != 0;
       }
       
       public method_318(param1: number, param2: IReduction): class_25
@@ -559,7 +559,7 @@ export class class_25{
          let _loc7_: class_25 = null;
          if(param1 > 4294967295 || param1 < 1)
          {
-            return const_4;
+            return this.const_4;
          }
          let _loc3_: class_25 = this.method_81();
          let _loc4_: class_25 = this.method_81();
@@ -588,12 +588,12 @@ export class class_25{
          Math.floor((1 << 8) - 1);
          let _loc4_: number = 0;
          let _loc5_: any = this.t;
-         let _loc6_: number = const_3 - _loc5_ * const_3 % 8;
+         let _loc6_: number = this.const_3 - _loc5_ * this.const_3 % 8;
          let _loc7_: boolean = false;
          let _loc8_: number = 0;
          if(_loc5_-- > 0)
          {
-            if(_loc6_ < const_3 && (_loc4_ = this.a[_loc5_] >> _loc6_) > 0)
+            if(_loc6_ < this.const_3 && (_loc4_ = this.a[_loc5_] >> _loc6_) > 0)
             {
                _loc7_ = true;
                param1.writeByte(_loc4_);
@@ -604,14 +604,14 @@ export class class_25{
                if(_loc6_ < 8)
                {
                   _loc4_ = (this.a[_loc5_] & (1 << _loc6_) - 1) << 8 - _loc6_;
-                  _loc4_ = _loc4_ | this.a[--_loc5_] >> (_loc6_ = _loc6_ + (const_3 - 8));
+                  _loc4_ = _loc4_ | this.a[--_loc5_] >> (_loc6_ = _loc6_ + (this.const_3 - 8));
                }
                else
                {
                   _loc4_ = this.a[_loc5_] >> (_loc6_ = _loc6_ - 8) & _loc3_;
                   if(_loc6_ <= 0)
                   {
-                     _loc6_ += const_3;
+                     _loc6_ += this.const_3;
                      _loc5_--;
                   }
                }
@@ -724,7 +724,7 @@ export class class_25{
          y = this.method_81();
          ts = this.s;
          ms = m.s;
-         nsh = const_3 - this.method_226(pm.a[pm.t - 1]);
+         nsh = this.const_3 - this.method_226(pm.a[pm.t - 1]);
          if(nsh > 0)
          {
             pm.method_158(nsh,y);
@@ -741,36 +741,36 @@ export class class_25{
          {
             return;
          }
-         yt = y0 * (1 << F1) + (ys > 1 ? y.a[ys - 2] >> F2 : 0);
-         d1 = const_22 / yt;
-         d2 = (1 << F1) / yt;
-         e = 1 << F2;
+         yt = y0 * (1 << this.F1) + (ys > 1 ? y.a[ys - 2] >> this.F2 : 0);
+         d1 = this.const_22 / yt;
+         d2 = (1 << this.F1) / yt;
+         e = 1 << this.F2;
          i = r.t;
          j = i - ys;
-         t = q == null ? this.method_81() : q;
-         y.method_144(j,t);
-         if(r.method_16(t) >= 0)
+         this.t = q == null ? this.method_81() : q;
+         y.method_144(j,this.t);
+         if(r.method_16(this.t) >= 0)
          {
             let _loc5_: number;
             r.a[_loc5_ = r.t++] = 1;
-            r.method_15(t,r);
+            r.method_15(this.t,r);
          }
-         const_4.method_144(ys,t);
-         t.method_15(y,y);
+         this.const_4.method_144(ys,this.t);
+         this.t.method_15(y,y);
          while(y.t < ys)
          {
             y._filter(++y.t,false);
          }
          while(--j >= 0)
          {
-            qd = r.a[--i] == y0 ? const_5 : Math.floor(Number(r.a[i]) * d1 + (Number(r.a[i - 1]) + e) * d2);
+            qd = r.a[--i] == y0 ? this.const_5 : Math.floor(Number(r.a[i]) * d1 + (Number(r.a[i - 1]) + e) * d2);
             if((r.a[i] = r.a[i] + y.method_75(0,qd,r,j,0,ys)) < qd)
             {
-               y.method_144(j,t);
-               r.method_15(t,r);
+               y.method_144(j,this.t);
+               r.method_15(this.t,r);
                while(r.a[i] < --qd)
                {
-                  r.method_15(t,r);
+                  r.method_15(this.t,r);
                }
             }
          }
@@ -779,7 +779,7 @@ export class class_25{
             r.method_227(ys,q);
             if(ts != ms)
             {
-               const_9.method_15(q,q);
+               this.const_9.method_15(q,q);
             }
          }
          r.t = ys;
@@ -790,7 +790,7 @@ export class class_25{
          }
          if(ts < 0)
          {
-            const_9.method_15(r,r);
+            this.const_9.method_15(r,r);
          }
       }
       
@@ -836,7 +836,7 @@ export class class_25{
          while(_loc3_ < this.t)
          {
             _loc2_ += this.a[_loc3_] * _loc1_;
-            _loc1_ *= const_6;
+            _loc1_ *= this.const_6;
             _loc3_++;
          }
          return _loc2_;
@@ -920,15 +920,15 @@ export class class_25{
          }
          let _loc4_: class_25 = _loc2_.shiftRight(_loc3_);
          param1 = param1 + 1 >> 1;
-         if(param1 > const_7.length)
+         if(param1 > this.const_7.length)
          {
-            param1 = Math.floor(const_7.length);
+            param1 = Math.floor(this.const_7.length);
          }
          let _loc5_: class_25 = new class_25();
          let _loc6_: number = 0;
          while(_loc6_ < param1)
          {
-            _loc5_.method_194(const_7[_loc6_]);
+            _loc5_.method_194(this.const_7[_loc6_]);
             _loc7_ = _loc5_.method_102(_loc4_,this);
             if(_loc7_.method_16(class_25.const_4) != 0 && _loc7_.method_16(_loc2_) != 0)
             {
@@ -965,7 +965,7 @@ export class class_25{
       
       public method_45(): void
       {
-         let _loc1_: number = this.s & const_5;
+         let _loc1_: number = this.s & this.const_5;
          while(this.t > 0 && this.a[this.t - 1] == _loc1_)
          {
             --this.t;
@@ -987,8 +987,8 @@ export class class_25{
          _loc2_ = _loc2_ * (2 - (_loc1_ & 0x0F) * _loc2_) & 0x0F;
          _loc2_ = _loc2_ * (2 - (_loc1_ & 0xFF) * _loc2_) & 0xFF;
          _loc2_ = _loc2_ * (2 - ((_loc1_ & 0xFFFF) * _loc2_ & 0xFFFF)) & 0xFFFF;
-         _loc2_ = _loc2_ * (2 - _loc1_ * _loc2_ % const_6) % const_6;
-         return _loc2_ > 0 ? Math.floor(const_6 - _loc2_) : Math.floor(-_loc2_);
+         _loc2_ = _loc2_ * (2 - _loc1_ * _loc2_ % this.const_6) % this.const_6;
+         return _loc2_ > 0 ? Math.floor(this.const_6 - _loc2_) : Math.floor(-_loc2_);
       }
       
       protected method_233(param1: number, param2: Function): class_25
@@ -1061,14 +1061,14 @@ export class class_25{
          param2.method_45();
          if(this.s != param1.s)
          {
-            const_9.method_15(param2,param2);
+            this.const_9.method_15(param2,param2);
          }
       }
       
       public method_833(): number
       {
          let _loc1_: number = 0;
-         let _loc2_: number = this.s & const_5;
+         let _loc2_: number = this.s & this.const_5;
          let _loc3_: number = 0;
          while(_loc3_ < this.t)
          {
@@ -1114,14 +1114,14 @@ export class class_25{
       {
          let _loc7_: number = 0;
          param2.s = this.s;
-         let _loc3_: number = param1 / const_3;
+         let _loc3_: number = param1 / this.const_3;
          if(_loc3_ >= this.t)
          {
             param2.t = 0;
             return;
          }
-         let _loc4_: number = param1 % const_3;
-         let _loc5_: number = const_3 - _loc4_;
+         let _loc4_: number = param1 % this.const_3;
+         let _loc5_: number = this.const_3 - _loc4_;
          let _loc6_: number = (1 << _loc4_) - 1;
          param2.a[0] = this.a[_loc3_] >> _loc4_;
          _loc7_ = _loc3_ + 1;
@@ -1245,19 +1245,19 @@ export class class_25{
                let _loc8_: number;
                this.a[_loc8_ = this.t++] = _loc7_;
             }
-            else if(_loc5_ + 8 > const_3)
+            else if(_loc5_ + 8 > this.const_3)
             {
-               this.a[this.t - 1] |= (_loc7_ & (1 << const_3 - _loc5_) - 1) << _loc5_;
-               this.a[_loc8_ = this.t++] = _loc7_ >> const_3 - _loc5_;
+               this.a[this.t - 1] |= (_loc7_ & (1 << this.const_3 - _loc5_) - 1) << _loc5_;
+               this.a[_loc8_ = this.t++] = _loc7_ >> this.const_3 - _loc5_;
             }
             else
             {
                this.a[this.t - 1] |= _loc7_ << _loc5_;
             }
             _loc5_ += 8;
-            if(_loc5_ >= const_3)
+            if(_loc5_ >= this.const_3)
             {
-               _loc5_ -= const_3;
+               _loc5_ -= this.const_3;
             }
          }
          this.method_45();
@@ -1282,7 +1282,7 @@ export class class_25{
          {
             if(this.t == 1)
             {
-               return this.a[0] - const_6;
+               return this.a[0] - this.const_6;
             }
             if(this.t == 0)
             {
@@ -1300,7 +1300,7 @@ export class class_25{
                return 0;
             }
          }
-         return (this.a[1] & (1 << 32 - const_3) - 1) << const_3 | this.a[0];
+         return (this.a[1] & (1 << 32 - this.const_3) - 1) << this.const_3 | this.a[0];
       }
       
       public min(param1: class_25): class_25
@@ -1314,7 +1314,7 @@ export class class_25{
          {
             return 0;
          }
-         return const_3 * (this.t - 1) + this.method_226(this.a[this.t - 1] ^ this.s & const_5);
+         return this.const_3 * (this.t - 1) + this.method_226(this.a[this.t - 1] ^ this.s & this.const_5);
       }
       
       public method_831(): number
@@ -1340,7 +1340,7 @@ export class class_25{
          let _loc2_: number = 0;
          while(_loc2_ < this.t)
          {
-            _loc1_[_loc2_] = const_5 & ~this.a[_loc2_];
+            _loc1_[_loc2_] = this.const_5 & ~this.a[_loc2_];
             _loc2_++;
          }
          _loc1_.t = this.t;
@@ -1357,8 +1357,8 @@ export class class_25{
          {
             _loc4_ += this.a[_loc3_] - param1.a[_loc3_];
             let _loc6_: number;
-            param2.a[_loc6_ = _loc3_++] = _loc4_ & const_5;
-            _loc4_ >>= const_3;
+            param2.a[_loc6_ = _loc3_++] = _loc4_ & this.const_5;
+            _loc4_ >>= this.const_3;
          }
          if(param1.t < this.t)
          {
@@ -1366,8 +1366,8 @@ export class class_25{
             while(_loc3_ < this.t)
             {
                _loc4_ += this.a[_loc3_];
-               param2.a[_loc6_ = _loc3_++] = _loc4_ & const_5;
-               _loc4_ >>= const_3;
+               param2.a[_loc6_ = _loc3_++] = _loc4_ & this.const_5;
+               _loc4_ >>= this.const_3;
             }
             _loc4_ += this.s;
          }
@@ -1377,15 +1377,15 @@ export class class_25{
             while(_loc3_ < param1.t)
             {
                _loc4_ -= param1.a[_loc3_];
-               param2.a[_loc6_ = _loc3_++] = _loc4_ & const_5;
-               _loc4_ >>= const_3;
+               param2.a[_loc6_ = _loc3_++] = _loc4_ & this.const_5;
+               _loc4_ >>= this.const_3;
             }
             _loc4_ -= param1.s;
          }
          param2.s = _loc4_ < 0 ? -1 : 0;
          if(_loc4_ < -1)
          {
-            param2.a[_loc6_ = _loc3_++] = const_6 + _loc4_;
+            param2.a[_loc6_ = _loc3_++] = this.const_6 + _loc4_;
          }
          else if(_loc4_ > 0)
          {
@@ -1441,7 +1441,7 @@ export class class_25{
          }
          else if(param1 < -1)
          {
-            this.a[0] = param1 + const_6;
+            this.a[0] = param1 + this.const_6;
          }
          else
          {
@@ -1483,10 +1483,10 @@ export class class_25{
          let _loc5_: boolean = false;
          let _loc6_: string = "";
          let _loc7_: any = this.t;
-         let _loc8_: number = const_3 - _loc7_ * const_3 % _loc2_;
+         let _loc8_: number = this.const_3 - _loc7_ * this.const_3 % _loc2_;
          if(_loc7_-- > 0)
          {
-            if(_loc8_ < const_3 && (_loc4_ = this.a[_loc7_] >> _loc8_) > 0)
+            if(_loc8_ < this.const_3 && (_loc4_ = this.a[_loc7_] >> _loc8_) > 0)
             {
                _loc5_ = true;
                _loc6_ = _loc4_.toString(36);
@@ -1496,14 +1496,14 @@ export class class_25{
                if(_loc8_ < _loc2_)
                {
                   _loc4_ = (this.a[_loc7_] & (1 << _loc8_) - 1) << _loc2_ - _loc8_;
-                  _loc4_ = _loc4_ | this.a[--_loc7_] >> (_loc8_ = _loc8_ + (const_3 - _loc2_));
+                  _loc4_ = _loc4_ | this.a[--_loc7_] >> (_loc8_ = _loc8_ + (this.const_3 - _loc2_));
                }
                else
                {
                   _loc4_ = this.a[_loc7_] >> (_loc8_ = _loc8_ - _loc2_) & _loc3_;
                   if(_loc8_ <= 0)
                   {
-                     _loc8_ += const_3;
+                     _loc8_ += this.const_3;
                      _loc7_--;
                   }
                }
@@ -1586,28 +1586,28 @@ export class class_25{
          let _loc1_: any = this.t;
          let _loc2_: ByteArray = new ByteArray();
          _loc2_[0] = this.s;
-         let _loc3_: number = const_3 - _loc1_ * const_3 % 8;
+         let _loc3_: number = this.const_3 - _loc1_ * this.const_3 % 8;
          let _loc5_: any = 0;
          if(_loc1_-- > 0)
          {
-            if(_loc3_ < const_3 && (_loc4_ = this.a[_loc1_] >> _loc3_) != (this.s & const_5) >> _loc3_)
+            if(_loc3_ < this.const_3 && (_loc4_ = this.a[_loc1_] >> _loc3_) != (this.s & this.const_5) >> _loc3_)
             {
                let _loc6_: number;
-               _loc2_[_loc6_ = _loc5_++] = _loc4_ | this.s << const_3 - _loc3_;
+               _loc2_[_loc6_ = _loc5_++] = _loc4_ | this.s << this.const_3 - _loc3_;
             }
             while(_loc1_ >= 0)
             {
                if(_loc3_ < 8)
                {
                   _loc4_ = (this.a[_loc1_] & (1 << _loc3_) - 1) << 8 - _loc3_;
-                  _loc4_ = _loc4_ | this.a[--_loc1_] >> (_loc3_ = _loc3_ + (const_3 - 8));
+                  _loc4_ = _loc4_ | this.a[--_loc1_] >> (_loc3_ = _loc3_ + (this.const_3 - 8));
                }
                else
                {
                   _loc4_ = this.a[_loc1_] >> (_loc3_ = _loc3_ - 8) & 0xFF;
                   if(_loc3_ <= 0)
                   {
-                     _loc3_ += const_3;
+                     _loc3_ += this.const_3;
                      _loc1_--;
                   }
                }
@@ -1641,9 +1641,9 @@ export class class_25{
          while(_loc3_ < _loc2_.t - 1)
          {
             _loc4_ = _loc2_.method_75(_loc3_,_loc2_.a[_loc3_],param1,2 * _loc3_,0,1);
-            if((param1.a[_loc3_ + _loc2_.t] = param1.a[_loc3_ + _loc2_.t] + _loc2_.method_75(_loc3_ + 1,2 * _loc2_.a[_loc3_],param1,2 * _loc3_ + 1,_loc4_,_loc2_.t - _loc3_ - 1)) >= const_6)
+            if((param1.a[_loc3_ + _loc2_.t] = param1.a[_loc3_ + _loc2_.t] + _loc2_.method_75(_loc3_ + 1,2 * _loc2_.a[_loc3_],param1,2 * _loc3_ + 1,_loc4_,_loc2_.t - _loc3_ - 1)) >= this.const_6)
             {
-               param1.a[_loc3_ + _loc2_.t] -= const_6;
+               param1.a[_loc3_ + _loc2_.t] -= this.const_6;
                param1.a[_loc3_ + _loc2_.t + 1] = 1;
             }
             _loc3_++;

@@ -22,17 +22,36 @@ fi
 total_errors="$( (grep "error TS" "$LOG_FILE" || true) | wc -l | tr -d ' ')"
 printf 'Total errors: %s\n' "$total_errors"
 
-printf 'Top-5 files:\n'
-(grep "error TS" "$LOG_FILE" || true) | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 5 || true
+printf 'Top-10 files:\n'
+(grep "error TS" "$LOG_FILE" || true) | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 10 || true
 
 printf '\nTop error codes:\n'
-(grep -o "TS[0-9]\+" "$LOG_FILE" || true) | sort | uniq -c | sort -nr | head -n 10 || true
+(grep -o "TS[0-9]\+" "$LOG_FILE" || true) | sort | uniq -c | sort -nr | head -n 15 || true
 
-printf '\nclass_25.ts sample:\n'
-grep "class_25.ts" "$LOG_FILE" | head -n 20 || true
+printf '\nTop file+code pairs:\n'
+(grep "error TS" "$LOG_FILE" || true) | sed -E 's#^(.+)\([0-9]+,[0-9]+\): error (TS[0-9]+):.*$#\1 :: \2#' | sort | uniq -c | sort -nr | head -n 20 || true
 
-printf '\nTankViewerScreen.ts sample:\n'
-grep "TankViewerScreen.ts" "$LOG_FILE" | head -n 20 || true
+
+resolve_ts_path() {
+  local ts_path="$1"
+
+  if [[ -f "$ts_path" ]]; then
+    printf '%s\n' "$ts_path"
+    return
+  fi
+
+  if [[ -f "$ROOT_DIR/$ts_path" ]]; then
+    printf '%s\n' "$ROOT_DIR/$ts_path"
+    return
+  fi
+
+  if [[ -f "$ROOT_DIR/migrated-ts/$ts_path" ]]; then
+    printf '%s\n' "$ROOT_DIR/migrated-ts/$ts_path"
+    return
+  fi
+
+  printf '%s\n' "$ts_path"
+}
 
 print_context_slice() {
   local file_path="$1"
@@ -69,10 +88,20 @@ print_context_slice() {
 
 resolve_as_source() {
   local ts_path="$1"
-  local candidate rel
+  local rel candidate
 
-  if [[ "$ts_path" == migrated-ts/* ]]; then
-    rel="${ts_path#migrated-ts/}"
+  rel="$ts_path"
+  rel="${rel#${ROOT_DIR}/}"
+  rel="${rel#migrated-ts/}"
+
+  if [[ "$rel" == agi/* ]]; then
+    candidate="binaryData/AGI decomp/scripts/${rel#agi/}"
+    candidate="${candidate%.ts}.as"
+    if [[ -f "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  else
     candidate="scripts/${rel%.ts}.as"
     if [[ -f "$candidate" ]]; then
       printf '%s\n' "$candidate"
@@ -116,7 +145,8 @@ while IFS= read -r error_line; do
   printf '\n[%s/%s] %s:%s:%s %s %s\n' \
     "$error_context_count" "$MAX_ERROR_CONTEXTS" "$ts_file" "$err_line_no" "$err_col_no" "$err_code" "$err_message"
 
-  print_context_slice "$ts_file" "$err_line_no" "$ERROR_SLICE_RADIUS" "TS"
+  ts_file_resolved="$(resolve_ts_path "$ts_file")"
+  print_context_slice "$ts_file_resolved" "$err_line_no" "$ERROR_SLICE_RADIUS" "TS"
 
   as_source_path="$(resolve_as_source "$ts_file")"
   if [[ -n "$as_source_path" ]]; then

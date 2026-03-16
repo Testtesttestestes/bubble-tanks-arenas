@@ -1,8 +1,6 @@
 // AUTO-GENERATED AS3 TO TS CONVERSION
 // Original Package: <root>
 
-import { AGI } from "./agi/com/armorgames/AGI";
-
 export class class_79 extends MovieClip{
       
       public objCurrentPlayer: PlayerProfile;
@@ -15,7 +13,7 @@ export class class_79 extends MovieClip{
       private var_491: URLRequest;
       public arrTankViewerData: any[];
       public var_344: boolean;
-      private agi_url: string = "http://agi.armorgames.com/assets/agi/AGI.swf";
+      private agi_url: string = "http://this.agi.armorgames.com/assets/this.agi/AGI.swf";
       public var_184: string;
       public Player1Profile: SharedObject;
       public intArenaCreatorTemporaryArenaBubbleFieldLocatrion: number = 0;
@@ -133,7 +131,8 @@ export class class_79 extends MovieClip{
          Security.allowDomain(this.agi_url);
          this.var_526 = "0e7119b0e84444cfdd62a971cf60d6c4";
          this.var_510 = "bta";
-         this.initializeAgiModule();
+         this.loader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.loadComplete.bind(this));
+         this.loader.loadBytes(new AgiClass());
          this.objGameObjectLibrary = class_2.getInstance();
          class_2.method_592(this);
          this.method_574();
@@ -149,9 +148,9 @@ export class class_79 extends MovieClip{
          this.arrLocalRatings = new Array();
          this.var_125 = true;
          this.sharedObj = SharedObject.getLocal("BTA");
-         this.Player1Profile = SharedObject.getLocal("Player1Profile");
-         this.Player2Profile = SharedObject.getLocal("Player2Profile");
-         this.Player3Profile = SharedObject.getLocal("Player3Profile");
+         this.Player1Profile = SharedObject.getLocal("this.Player1Profile");
+         this.Player2Profile = SharedObject.getLocal("this.Player2Profile");
+         this.Player3Profile = SharedObject.getLocal("this.Player3Profile");
          this.objPlayer1Profile = new PlayerProfile(this.Player1Profile);
          this.objPlayer2Profile = new PlayerProfile(this.Player2Profile);
          this.objPlayer3Profile = new PlayerProfile(this.Player3Profile);
@@ -331,25 +330,16 @@ export class class_79 extends MovieClip{
          this.mainmenu.profile.blnOverwriteMode = false;
       }
       
-      private loadComplete(param1: Event | null = null): void
+      private loadComplete(param1: Event): void
       {
-         if(param1 != null && param1.currentTarget != null && param1.currentTarget.content != null)
-         {
-            this.method_715(param1.currentTarget.content);
-         }
+         this.method_715(param1.currentTarget.content);
          this.addChild(this.agi);
-         this["agi"].init(this.var_526,this.var_510);
-         this["agi"].retrieveGameData(this.method_635);
+         this["this.agi"].init(this.var_526,this.var_510);
+         this["this.agi"].retrieveGameData(this.method_635);
          let _loc2_: Record<string, any> = new Object();
          _loc2_.naviX = -500;
          _loc2_.naviY = -500;
-         this["agi"].initAGUI(_loc2_);
-      }
-
-      private initializeAgiModule(): void
-      {
-         this.method_715(new AGI());
-         this.loadComplete();
+         this["this.agi"].initAGUI(_loc2_);
       }
       
       private LoadStartUpTank(param1: string): void
@@ -676,7 +666,7 @@ export class class_79 extends MovieClip{
             }
             catch (e: any)
             {
-               var_125 = false;
+               this.var_125 = false;
                return;
             }
          }
@@ -769,7 +759,7 @@ export class class_79 extends MovieClip{
          }
          catch (error: any)
          {
-            var_125 = false;
+            this.var_125 = false;
          }
          if(flushStatus != null)
          {
@@ -915,7 +905,7 @@ export class class_79 extends MovieClip{
          {
             this.preloader.y = stage.stageHeight / 2 - this.preloader.height / 2 + 140;
          }
-         this.preloader.name = "preloader";
+         this.preloader.name = "this.preloader";
          this.addChild(this.preloader);
          this.preloader.Setup(this);
          this.preloader.PL_Listeners();
@@ -1039,7 +1029,7 @@ export class class_79 extends MovieClip{
       public method_416(param1: string, param2: string, param3: DisplayObject = null as any, param4: Function = null as any): void
       {
          this.intArmorTier = 0;
-         this["agi"].showGameShareSubmit(param2,param1,param3,param4);
+         this["this.agi"].showGameShareSubmit(param2,param1,param3,param4);
       }
       
       public method_355(param1: string = "Avatar", param2: TankData = null as any, param3: boolean = false): void
@@ -1310,24 +1300,24 @@ export class class_79 extends MovieClip{
          let var_106: number = 0;
          let var_56: number = 0;
          let var_40: number = 0;
-         if(this["agi"] != null && this.intArmorTier >= 0)
+         if(this["this.agi"] != null && this.intArmorTier >= 0)
          {
             var_126 = true;
             var_106 = 0;
-            while(var_106 < this["agi"].numChildren)
+            while(var_106 < this["this.agi"].numChildren)
             {
                var_126 = false;
                try
                {
                   var_56 = 0;
-                  while(var_56 < this["agi"].getChildAt(var_106).numChildren)
+                  while(var_56 < this["this.agi"].getChildAt(var_106).numChildren)
                   {
                      try
                      {
                         var_40 = 0;
-                        while(var_40 < this["agi"].getChildAt(var_106).getChildAt(var_56).numChildren)
+                        while(var_40 < this["this.agi"].getChildAt(var_106).getChildAt(var_56).numChildren)
                         {
-                           if(this["agi"].getChildAt(var_106).getChildAt(var_56).getChildAt(var_40).name == "title_txt" && this.intArmorTier == 0)
+                           if(this["this.agi"].getChildAt(var_106).getChildAt(var_56).getChildAt(var_40).name == "title_txt" && this.intArmorTier == 0)
                            {
                               this.var_193 = new class_98();
                               this.var_193.x = 280;
@@ -1335,7 +1325,7 @@ export class class_79 extends MovieClip{
                               this.addChild(this.var_193);
                               ++this.intArmorTier;
                            }
-                           if(this["agi"].getChildAt(var_106).getChildAt(var_56).getChildAt(var_40).name == "copy_btn" && this.intArmorTier == 1)
+                           if(this["this.agi"].getChildAt(var_106).getChildAt(var_56).getChildAt(var_40).name == "copy_btn" && this.intArmorTier == 1)
                            {
                               this.var_193.x = 197;
                               this.var_193.y = 341;
@@ -1369,7 +1359,7 @@ export class class_79 extends MovieClip{
                {
                   this.var_90.method_419();
                }
-               this["agi"].closeAGUI();
+               this["this.agi"].closeAGUI();
                this.intArmorTier = -1;
             }
          }
@@ -1797,7 +1787,7 @@ export class class_79 extends MovieClip{
          }
          catch (e: any)
          {
-            var_125 = false;
+            this.var_125 = false;
          }
       }
       

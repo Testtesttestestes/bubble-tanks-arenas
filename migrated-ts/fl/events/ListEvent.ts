@@ -13,15 +13,15 @@ export class ListEvent extends Event{
       protected _columnIndex: number;
       constructor(param1: string, param2: boolean = false, param3: boolean = false, param4: number = -1, param5: number = -1, param6: number = -1, param7: Record<string, any> = null){
          super(param1,param2,param3);
-         _rowIndex = param5;
-         _columnIndex = param4;
-         _index = param6;
-         _item = param7;
+         this._rowIndex = param5;
+         this._columnIndex = param4;
+         this._index = param6;
+         this._item = param7;
       }
       
       public get item(): Record<string, any>
       {
-         return _item;
+         return this._item;
       }
       
       public toString(): string
@@ -31,21 +31,21 @@ export class ListEvent extends Event{
       
       public clone(): Event
       {
-         return new ListEvent(type,bubbles,cancelable,_columnIndex,_rowIndex);
+         return new ListEvent(type,bubbles,cancelable,this._columnIndex,this._rowIndex);
       }
       
       public get rowIndex(): Record<string, any>
       {
-         return _rowIndex;
+         return this._rowIndex;
       }
       
       public get index(): number
       {
-         return _index;
+         return this._index;
       }
       
       public get columnIndex(): number
       {
-         return _columnIndex;
+         return this._columnIndex;
       }
    }

@@ -129,15 +129,15 @@ export class ColorMatrix extends DynamicMatrix{
             return;
          }
          let _loc2_: number = 1 - param1;
-         let _loc3_: number = _loc2_ * LUMINANCER;
+         let _loc3_: number = _loc2_ * this.LUMINANCER;
          m_matrix[0][0] = _loc3_ + param1;
          m_matrix[1][0] = _loc3_;
          m_matrix[2][0] = _loc3_;
-         _loc3_ = _loc2_ * LUMINANCEG;
+         _loc3_ = _loc2_ * this.LUMINANCEG;
          m_matrix[0][1] = _loc3_;
          m_matrix[1][1] = _loc3_ + param1;
          m_matrix[2][1] = _loc3_;
-         _loc3_ = _loc2_ * LUMINANCEB;
+         _loc3_ = _loc2_ * this.LUMINANCEB;
          m_matrix[0][2] = _loc3_;
          m_matrix[1][2] = _loc3_;
          m_matrix[2][2] = _loc3_ + param1;

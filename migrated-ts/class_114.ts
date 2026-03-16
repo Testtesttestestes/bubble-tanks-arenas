@@ -10,7 +10,7 @@ export class class_114 extends MovieClip{
       
       public static method_774(param1: string, param2: string = "_blank", param3: string = ""): void
       {
-         ExternalInterface.call(const_19,param1,param2,param3);
+         ExternalInterface.call(this.const_19,param1,param2,param3);
       }
       
       public method_104(param1: string, param2: string = null as any): void

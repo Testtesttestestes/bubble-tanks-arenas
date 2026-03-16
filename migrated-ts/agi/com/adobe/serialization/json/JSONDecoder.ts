@@ -115,7 +115,7 @@ export class JSONDecoder{
             case JSONTokenType.FALSE:
             case JSONTokenType.NULL:
                return this.token.value;
-            this.default:
+            default:
                this.tokenizer.parseError("Unexpected " + this.token.value);
                return null;
          }

@@ -25,25 +25,25 @@ let _temp_2: any = false;
 _loc3_ = "";
 let _temp_4: any = 0;
 _loc4_ = _temp_4;
-let _temp_8: any = const_1;
+let _temp_8: any = this.const_1;
          let _temp_7: any = param1;
 _loc5_ = Math.floor(_temp_8[_temp_7 - 5 ^ 0x02F6].length);
          while(_loc4_ < _loc5_)
          {
-            _loc6_ = Math.floor(const_1[param1 - 5 ^ 0x02F6][_loc4_]);
+            _loc6_ = Math.floor(this.const_1[param1 - 5 ^ 0x02F6][_loc4_]);
             let _temp_10: any = _loc4_;
 let _temp_12: any = _temp_10 + 1;
 let _temp_14: any = Math.floor(_temp_12);
 _loc4_++;
-            _loc7_ = Math.floor(const_1[param1 - 5 ^ 0x02F6][_loc4_]);
+            _loc7_ = Math.floor(this.const_1[param1 - 5 ^ 0x02F6][_loc4_]);
 _loc8_ = 2654435769;
             _loc9_ = 84941944608;
 while(_loc9_ != 0)
             {
                let _temp_20: any = _loc7_;
 let _temp_19: any = _loc6_;
-let _temp_22: any = Math.floor(_temp_20 - ((_temp_19 << 4 ^ _loc6_ >>> 5) + _loc6_ ^ _loc9_ + Math.floor(const_2[param2 + 3 ^ 0x0304][_loc9_ >>> 11 & 3])));
-_loc7_ -= (_temp_19 << 4 ^ _loc6_ >>> 5) + _loc6_ ^ _loc9_ + Math.floor(const_2[param2 + 3 ^ 0x0304][_loc9_ >>> 11 & 3]);
+let _temp_22: any = Math.floor(_temp_20 - ((_temp_19 << 4 ^ _loc6_ >>> 5) + _loc6_ ^ _loc9_ + Math.floor(this.const_2[param2 + 3 ^ 0x0304][_loc9_ >>> 11 & 3])));
+_loc7_ -= (_temp_19 << 4 ^ _loc6_ >>> 5) + _loc6_ ^ _loc9_ + Math.floor(this.const_2[param2 + 3 ^ 0x0304][_loc9_ >>> 11 & 3]);
 _loc9_ -= _loc8_;
 let _temp_34: any = _loc6_;
                let _temp_27: any = _loc7_;
@@ -51,7 +51,7 @@ let _temp_34: any = _loc6_;
 let _temp_31: any = _temp_27 << _temp_26;
 let _temp_30: any = _loc7_;
 let _temp_33: any = _temp_31 ^ _temp_30 >>> 5;
-_loc6_ -= _temp_33 + _loc7_ ^ _loc9_ + Math.floor(const_2[param2 + 3 ^ 0x0304][_loc9_ & 3]);
+_loc6_ -= _temp_33 + _loc7_ ^ _loc9_ + Math.floor(this.const_2[param2 + 3 ^ 0x0304][_loc9_ & 3]);
             }
 _loc3_ += String.fromCharCode(_loc6_) + String.fromCharCode(_loc7_);
             _loc4_++;

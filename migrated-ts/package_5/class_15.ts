@@ -37,23 +37,23 @@ export class class_15{
       
       public static View(param1: number = 0, param2: string = "", param3: string = ""): void
       {
-         SWFID = param1;
-         GUID = param2;
-         var_93 = true;
-         if(SWFID == 0 || GUID == "")
+         this.SWFID = param1;
+         this.GUID = param2;
+         this.var_93 = true;
+         if(this.SWFID == 0 || this.GUID == "")
          {
-            var_93 = false;
+            this.var_93 = false;
             return;
          }
          if(param3.indexOf("http://") != 0 && Security.sandboxType != "localWithNetwork" && Security.sandboxType != "localTrusted")
          {
-            var_93 = false;
+            this.var_93 = false;
             return;
          }
-         var_339 = method_470(param3);
-         if(var_339 == null || var_339 == "")
+         this.var_339 = method_470(param3);
+         if(this.var_339 == null || this.var_339 == "")
          {
-            var_93 = false;
+            this.var_93 = false;
             return;
          }
          Security.allowDomain("http://tracker.swfstats.com/");
@@ -66,13 +66,13 @@ export class class_15{
          _loc4_ = _loc4_ + 1;
          method_304("views",_loc4_);
          ("View","views=" + _loc4_ as unknown as Send);
-         PingF.addEventListener(TimerEvent.TIMER, PingServer.bind(this));
-         PingF.start();
+         this.PingF.addEventListener(TimerEvent.TIMER, PingServer.bind(this));
+         this.PingF.start();
       }
       
       public static method_857(param1: string, param2: any): void
       {
-         if(!var_93)
+         if(!this.var_93)
          {
             return;
          }
@@ -85,17 +85,17 @@ export class class_15{
          _loc3_.addEventListener(IOErrorEvent.IO_ERROR, method_428.bind(this));
          _loc3_.addEventListener(HTTPStatusEvent.HTTP_STATUS, method_550.bind(this));
          _loc3_.addEventListener(SecurityErrorEvent.SECURITY_ERROR, method_428.bind(this));
-         _loc3_.load(new URLRequest("http://tracker.swfstats.com/Games/" + param1 + ".html?guid=" + GUID + "&swfid=" + SWFID + "&" + param2 + "&url=" + var_339 + "&" + class_26));
+         _loc3_.load(new URLRequest("http://tracker.swfstats.com/Games/" + param1 + ".html?guid=" + this.GUID + "&swfid=" + this.SWFID + "&" + param2 + "&url=" + this.var_339 + "&" + this.class_26));
       }
       
       public static Play(): void
       {
-         if(!var_93)
+         if(!this.var_93)
          {
             return;
          }
-         ++Plays;
-         ("Play","plays=" + Plays as unknown as Send);
+         ++this.Plays;
+         ("Play","plays=" + this.Plays as unknown as Send);
       }
       
       private static method_470(param1: string): string
@@ -133,12 +133,12 @@ export class class_15{
       
       private static method_428(... rest): void
       {
-         var_93 = false;
+         this.var_93 = false;
       }
       
       public static method_856(param1: string, param2: any, param3: number): void
       {
-         if(!var_93)
+         if(!this.var_93)
          {
             return;
          }
@@ -155,24 +155,24 @@ export class class_15{
       
       private static PingServer(... rest): void
       {
-         if(!var_93)
+         if(!this.var_93)
          {
             return;
          }
-         ++Pings;
-         ("Ping",(FirstPing ? "&firstping=yes" : "" as unknown as Send) + "&pings=" + Pings);
-         if(FirstPing)
+         ++this.Pings;
+         ("Ping",(this.FirstPing ? "&firstping=yes" : "" as unknown as Send) + "&pings=" + this.Pings);
+         if(this.FirstPing)
          {
-            PingF.stop();
-            PingR.addEventListener(TimerEvent.TIMER, PingServer.bind(this));
-            PingR.start();
-            FirstPing = false;
+            this.PingF.stop();
+            this.PingR.addEventListener(TimerEvent.TIMER, PingServer.bind(this));
+            this.PingR.start();
+            this.FirstPing = false;
          }
       }
       
       public static method_777(param1: string, param2: any, param3: number): void
       {
-         if(!var_93)
+         if(!this.var_93)
          {
             return;
          }
@@ -181,7 +181,7 @@ export class class_15{
       
       public static CustomMetric(param1: string, param2: string = null as any): void
       {
-         if(!var_93)
+         if(!this.var_93)
          {
             return;
          }

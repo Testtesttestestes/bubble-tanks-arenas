@@ -48,7 +48,7 @@ export class Base64{
             _loc7_ = 0;
             while(_loc7_ < _loc4_.length)
             {
-               _loc2_ += BASE64_CHARS.charAt(_loc4_[_loc7_]);
+               _loc2_ += this.BASE64_CHARS.charAt(_loc4_[_loc7_]);
                _loc7_++;
             }
          }
@@ -74,7 +74,7 @@ export class Base64{
             _loc6_ = 0;
             while(_loc6_ < 4 && _loc5_ + _loc6_ < param1.length)
             {
-               _loc3_[_loc6_] = BASE64_CHARS.indexOf(param1.charAt(_loc5_ + _loc6_));
+               _loc3_[_loc6_] = this.BASE64_CHARS.indexOf(param1.charAt(_loc5_ + _loc6_));
                _loc6_++;
             }
             _loc4_[0] = (_loc3_[0] << 2) + ((_loc3_[1] & 0x30) >> 4);

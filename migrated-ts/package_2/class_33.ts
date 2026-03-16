@@ -20,7 +20,7 @@ export class class_33 implements class_18
       private static readonly const_11: number = 16;
       private static readonly const_25: number = 8;
       private static readonly const_12: number = 256;
-      private static readonly const_14: number = const_11 + 2;
+      private static readonly const_14: number = this.const_11 + 2;
       private S3: any[];
       private P: any[];
       private S1: any[];
@@ -47,8 +47,8 @@ export class class_33 implements class_18
       {
          let _loc5_: number = this.BytesTo32bits(param1,param2);
          let _loc6_: number = this.BytesTo32bits(param1,param2 + 4);
-         _loc5_ ^= this.P[const_11 + 1];
-         let _loc7_: number = const_11;
+         _loc5_ ^= this.P[this.const_11 + 1];
+         let _loc7_: number = this.const_11;
          while(_loc7_ > 0)
          {
             _loc6_ ^= this.F(_loc5_) ^ this.P[_loc7_];
@@ -67,22 +67,22 @@ export class class_33 implements class_18
       
       public method_53(): number
       {
-         return const_25;
+         return this.const_25;
       }
       
       private method_478(param1: ByteArray): void
       {
          let _loc5_: number = 0;
          let _loc6_: number = 0;
-         this.S0 = KS0.concat();
-         this.S1 = KS1.concat();
-         this.S2 = KS2.concat();
-         this.S3 = KS3.concat();
-         this.P = const_26.concat();
+         this.S0 = this.KS0.concat();
+         this.S1 = this.KS1.concat();
+         this.S2 = this.KS2.concat();
+         this.S3 = this.KS3.concat();
+         this.P = this.const_26.concat();
          let _loc2_: number = param1.length;
          let _loc3_: number = 0;
          0;
-         while(0 < const_14)
+         while(0 < this.const_14)
          {
             _loc5_ = 0;
             _loc6_ = 0;
@@ -99,10 +99,10 @@ export class class_33 implements class_18
             let _loc4_: number = 0 + 1;
          }
          this.method_146(0,0,this.P);
-         this.method_146(this.P[const_14 - 2],this.P[const_14 - 1],this.S0);
-         this.method_146(this.S0[const_12 - 2],this.S0[const_12 - 1],this.S1);
-         this.method_146(this.S1[const_12 - 2],this.S1[const_12 - 1],this.S2);
-         this.method_146(this.S2[const_12 - 2],this.S2[const_12 - 1],this.S3);
+         this.method_146(this.P[this.const_14 - 2],this.P[this.const_14 - 1],this.S0);
+         this.method_146(this.S0[this.const_12 - 2],this.S0[this.const_12 - 1],this.S1);
+         this.method_146(this.S1[this.const_12 - 2],this.S1[this.const_12 - 1],this.S2);
+         this.method_146(this.S2[this.const_12 - 2],this.S2[this.const_12 - 1],this.S3);
       }
       
       private method_146(param1: number, param2: number, param3: any[]): void
@@ -114,13 +114,13 @@ export class class_33 implements class_18
          {
             param1 ^= this.P[0];
             _loc6_ = 1;
-            while(_loc6_ < const_11)
+            while(_loc6_ < this.const_11)
             {
                param2 ^= this.F(param1) ^ this.P[_loc6_];
                param1 ^= this.F(param2) ^ this.P[_loc6_ + 1];
                _loc6_ += 2;
             }
-            param2 ^= this.P[const_11 + 1];
+            param2 ^= this.P[this.const_11 + 1];
             param3[_loc5_] = param2;
             param3[_loc5_ + 1] = param1;
             param2 = param1;
@@ -189,13 +189,13 @@ export class class_33 implements class_18
          let _loc6_: number = this.BytesTo32bits(param1,param2 + 4);
          _loc5_ ^= this.P[0];
          let _loc7_: number = 1;
-         while(_loc7_ < const_11)
+         while(_loc7_ < this.const_11)
          {
             _loc6_ ^= this.F(_loc5_) ^ this.P[_loc7_];
             _loc5_ ^= this.F(_loc6_) ^ this.P[_loc7_ + 1];
             _loc7_ += 2;
          }
-         _loc6_ ^= this.P[const_11 + 1];
+         _loc6_ ^= this.P[this.const_11 + 1];
          this.Bits32ToBytes(_loc6_,param3,param4);
          this.Bits32ToBytes(_loc5_,param3,param4 + 4);
       }

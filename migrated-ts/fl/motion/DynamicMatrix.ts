@@ -104,7 +104,7 @@ export class DynamicMatrix{
          }
          let _loc3_: number = param1.GetHeight();
          let _loc4_: number = param1.GetWidth();
-         if(param2 == MATRIX_ORDER_APPEND)
+         if(param2 == this.MATRIX_ORDER_APPEND)
          {
             if(this.m_width != _loc3_)
             {

@@ -38,7 +38,7 @@ export class Animator3D extends AnimatorBase{
       
       protected static getSign(param1: number): number
       {
-         return param1 < -EPSILON ? -1 : (param1 > EPSILON ? 1 : 0);
+         return param1 < -this.EPSILON ? -1 : (param1 > this.EPSILON ? 1 : 0);
       }
       
       protected setTime3D(param1: number, param2: MotionBase): boolean

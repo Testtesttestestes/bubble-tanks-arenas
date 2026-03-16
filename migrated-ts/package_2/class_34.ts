@@ -41,8 +41,8 @@ export class class_34 implements class_18
          let _loc8_: number = 0;
          while(_loc8_ < 56)
          {
-            _loc7_ = Math.floor(pc1[_loc8_]);
-            _loc5_[_loc8_] = (param2[param3 + (_loc7_ >>> 3)] & const_18[_loc7_ & 7]) != 0;
+            _loc7_ = Math.floor(this.pc1[_loc8_]);
+            _loc5_[_loc8_] = (param2[param3 + (_loc7_ >>> 3)] & this.const_18[_loc7_ & 7]) != 0;
             _loc8_++;
          }
          0;
@@ -68,7 +68,7 @@ export class class_34 implements class_18
             _loc8_ = 0;
             while(_loc8_ < 28)
             {
-               _loc7_ = _loc8_ + totrot[0];
+               _loc7_ = _loc8_ + this.totrot[0];
                if(_loc7_ < 28)
                {
                   _loc6_[_loc8_] = _loc5_[_loc7_];
@@ -82,7 +82,7 @@ export class class_34 implements class_18
             _loc8_ = 28;
             while(_loc8_ < 56)
             {
-               _loc7_ = _loc8_ + totrot[0];
+               _loc7_ = _loc8_ + this.totrot[0];
                if(_loc7_ < 56)
                {
                   _loc6_[_loc8_] = _loc5_[_loc7_];
@@ -96,13 +96,13 @@ export class class_34 implements class_18
             _loc8_ = 0;
             while(_loc8_ < 24)
             {
-               if(_loc6_[pc2[_loc8_]])
+               if(_loc6_[this.pc2[_loc8_]])
                {
-                  _loc4_[_loc10_] |= const_15[_loc8_];
+                  _loc4_[_loc10_] |= this.const_15[_loc8_];
                }
-               if(_loc6_[pc2[_loc8_ + 24]])
+               if(_loc6_[this.pc2[_loc8_ + 24]])
                {
-                  _loc4_[_loc11_] |= const_15[_loc8_];
+                  _loc4_[_loc11_] |= this.const_15[_loc8_];
                }
                _loc8_++;
             }
@@ -161,27 +161,27 @@ export class class_34 implements class_18
          {
             _loc6_ = Math.floor(_loc7_ << 28 | _loc7_ >>> 4);
             _loc6_ = Math.floor(_loc6_ ^ param1[_loc9_ * 4 + 0]);
-            _loc10_ = Math.floor(SP7[_loc6_ & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP5[_loc6_ >>> 8 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP3[_loc6_ >>> 16 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP1[_loc6_ >>> 24 & 0x3F]);
+            _loc10_ = Math.floor(this.SP7[_loc6_ & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP5[_loc6_ >>> 8 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP3[_loc6_ >>> 16 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP1[_loc6_ >>> 24 & 0x3F]);
             _loc6_ = Math.floor(_loc7_ ^ param1[_loc9_ * 4 + 1]);
-            _loc10_ |= SP8[_loc6_ & 0x3F];
-            _loc10_ = Math.floor(_loc10_ | SP6[_loc6_ >>> 8 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP4[_loc6_ >>> 16 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP2[_loc6_ >>> 24 & 0x3F]);
+            _loc10_ |= this.SP8[_loc6_ & 0x3F];
+            _loc10_ = Math.floor(_loc10_ | this.SP6[_loc6_ >>> 8 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP4[_loc6_ >>> 16 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP2[_loc6_ >>> 24 & 0x3F]);
             _loc8_ ^= _loc10_;
             _loc6_ = Math.floor(_loc8_ << 28 | _loc8_ >>> 4);
             _loc6_ = Math.floor(_loc6_ ^ param1[_loc9_ * 4 + 2]);
-            _loc10_ = Math.floor(SP7[_loc6_ & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP5[_loc6_ >>> 8 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP3[_loc6_ >>> 16 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP1[_loc6_ >>> 24 & 0x3F]);
+            _loc10_ = Math.floor(this.SP7[_loc6_ & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP5[_loc6_ >>> 8 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP3[_loc6_ >>> 16 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP1[_loc6_ >>> 24 & 0x3F]);
             _loc6_ = Math.floor(_loc8_ ^ param1[_loc9_ * 4 + 3]);
-            _loc10_ |= SP8[_loc6_ & 0x3F];
-            _loc10_ = Math.floor(_loc10_ | SP6[_loc6_ >>> 8 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP4[_loc6_ >>> 16 & 0x3F]);
-            _loc10_ = Math.floor(_loc10_ | SP2[_loc6_ >>> 24 & 0x3F]);
+            _loc10_ |= this.SP8[_loc6_ & 0x3F];
+            _loc10_ = Math.floor(_loc10_ | this.SP6[_loc6_ >>> 8 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP4[_loc6_ >>> 16 & 0x3F]);
+            _loc10_ = Math.floor(_loc10_ | this.SP2[_loc6_ >>> 24 & 0x3F]);
             _loc7_ ^= _loc10_;
             _loc9_++;
          }

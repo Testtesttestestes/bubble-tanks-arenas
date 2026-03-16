@@ -20,7 +20,7 @@ export class Base64{
             case "\n":
             case "\f":
                return true;
-            this.default:
+            default:
                return false;
          }
       }
@@ -96,7 +96,7 @@ export class Base64{
                _loc2_ += this._b64Chars[param1[1] << 2 & 0x3C | param1[2] >> 6];
                _loc2_ += this._b64Chars[param1[2] & 0x3F];
                break;
-            this.default:
+            default:
                console.log("Base64 byteBuffer outOfRange");
          }
          return _loc2_.toString();

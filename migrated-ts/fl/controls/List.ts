@@ -18,37 +18,37 @@ export class List extends SelectableList implements IFocusManagerComponent
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return mergeStyles(defaultStyles,SelectableList.getStyleDefinition());
+         return mergeStyles(this.defaultStyles,SelectableList.getStyleDefinition());
       }
       
       public get iconField(): string
       {
-         return _iconField;
+         return this._iconField;
       }
       
       public set iconField(param1: string)
       {
-         if(param1 == _iconField)
+         if(param1 == this._iconField)
          {
             return;
          }
-         _iconField = param1;
+         this._iconField = param1;
          invalidate(InvalidationType.DATA);
       }
       
       public set labelField(param1: string)
       {
-         if(param1 == _labelField)
+         if(param1 == this._labelField)
          {
             return;
          }
-         _labelField = param1;
+         this._labelField = param1;
          invalidate(InvalidationType.DATA);
       }
       
       public set rowHeight(param1: number)
       {
-         _rowHeight = param1;
+         this._rowHeight = param1;
          invalidate(InvalidationType.SIZE);
       }
       
@@ -64,10 +64,10 @@ export class List extends SelectableList implements IFocusManagerComponent
             {
                invalidate(InvalidationType.SIZE,false);
             }
-            if(_cellRenderer != getStyleValue("cellRenderer"))
+            if(this._cellRenderer != getStyleValue("cellRenderer"))
             {
                _invalidateList();
-               _cellRenderer = getStyleValue("cellRenderer");
+               this._cellRenderer = getStyleValue("cellRenderer");
             }
          }
          if(isInvalid(InvalidationType.SIZE,InvalidationType.STATE) || _loc1_)
@@ -101,11 +101,11 @@ export class List extends SelectableList implements IFocusManagerComponent
       
       public set labelFunction(param1: Function)
       {
-         if(_labelFunction == param1)
+         if(this._labelFunction == param1)
          {
             return;
          }
-         _labelFunction = param1;
+         this._labelFunction = param1;
          invalidate(InvalidationType.DATA);
       }
       
@@ -229,7 +229,7 @@ export class List extends SelectableList implements IFocusManagerComponent
       
       public get rowHeight(): number
       {
-         return _rowHeight;
+         return this._rowHeight;
       }
       
       protected initializeAccessibility(): void
@@ -242,16 +242,16 @@ export class List extends SelectableList implements IFocusManagerComponent
       
       public get labelField(): string
       {
-         return _labelField;
+         return this._labelField;
       }
       
       public set iconFunction(param1: Function)
       {
-         if(_iconFunction == param1)
+         if(this._iconFunction == param1)
          {
             return;
          }
-         _iconFunction = param1;
+         this._iconFunction = param1;
          invalidate(InvalidationType.DATA);
       }
       
@@ -264,7 +264,7 @@ export class List extends SelectableList implements IFocusManagerComponent
       
       public get labelFunction(): Function
       {
-         return _labelFunction;
+         return this._labelFunction;
       }
       
       protected setVerticalScrollPosition(param1: number, param2: boolean = false): void
@@ -356,13 +356,13 @@ export class List extends SelectableList implements IFocusManagerComponent
             null.setSize(availableWidth + _maxHorizontalScrollPosition,rowHeight);
             let _loc10_: string = itemToLabel(null);
             let _loc11_: Record<string, any> = null;
-            if(_iconFunction != null)
+            if(this._iconFunction != null)
             {
-               _loc11_ = _iconFunction(null);
+               _loc11_ = this._iconFunction(null);
             }
-            else if(_iconField != null)
+            else if(this._iconField != null)
             {
-               _loc11_ = null[_iconField];
+               _loc11_ = null[this._iconField];
             }
             null.data = null;
             null.listData = new ListData(null,null,this,0,0,0);
@@ -417,16 +417,16 @@ export class List extends SelectableList implements IFocusManagerComponent
       
       public get iconFunction(): Function
       {
-         return _iconFunction;
+         return this._iconFunction;
       }
       
       public itemToLabel(param1: Record<string, any>): string
       {
-         if(_labelFunction != null)
+         if(this._labelFunction != null)
          {
-            return String(_labelFunction(param1));
+            return String(this._labelFunction(param1));
          }
-         return param1[_labelField] != null ? String(param1[_labelField]) : "";
+         return param1[this._labelField] != null ? String(param1[this._labelField]) : "";
       }
       
       protected calculateAvailableHeight(): number

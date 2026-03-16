@@ -40,7 +40,7 @@ export class buttonsmotionback_280 extends MovieClip{
             this.__motion_btnSortByBubbles_mcExport3D1.addPropertyArray("matrix3D",new Array(new Matrix3D(this.____motion_btnSortByBubbles_mcExport3D1_mat3DVec_9_)));
             this.__animFactory_btnSortByBubbles_mcExport3D1 = new AnimatorFactory3D(this.__motion_btnSortByBubbles_mcExport3D1);
             this.__animFactory_btnSortByBubbles_mcExport3D1.sceneName = "buttons motion back";
-            this.__animFactory_btnSortByBubbles_mcExport3D1.addTargetInfo(this,"btnSortByBubbles_mc",0,true,9,true,null);
+            this.__animFactory_btnSortByBubbles_mcExport3D1.addTargetInfo(this,"this.btnSortByBubbles_mc",0,true,9,true,null);
          }
       }
       

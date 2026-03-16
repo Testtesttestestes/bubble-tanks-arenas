@@ -516,7 +516,7 @@ export class PlayerProfile{
          }
          catch (error: any)
          {
-            var_226 = false;
+            this.var_226 = false;
          }
          if(var_56 != null)
          {

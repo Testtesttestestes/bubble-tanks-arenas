@@ -22,7 +22,7 @@ export class MD2 implements class_17
       
       public getHashSize(): number
       {
-         return const_8;
+         return this.const_8;
       }
       
       public name_1(param1: ByteArray): ByteArray
@@ -46,7 +46,7 @@ export class MD2 implements class_17
             _loc8_ = 0;
             while(_loc8_ < 16)
             {
-               _loc6_ = Math.floor(_loc5_[_loc8_] = _loc5_[_loc8_] ^ S[param1[_loc3_ + _loc8_] ^ _loc6_]);
+               _loc6_ = Math.floor(_loc5_[_loc8_] = _loc5_[_loc8_] ^ this.S[param1[_loc3_ + _loc8_] ^ _loc6_]);
                _loc8_++;
             }
             _loc3_ += 16;
@@ -71,7 +71,7 @@ export class MD2 implements class_17
                _loc10_ = 0;
                while(_loc10_ < 48)
                {
-                  _loc7_[_loc10_] = _loc9_ = Math.floor(_loc7_[_loc10_] ^ S[_loc9_]);
+                  _loc7_[_loc10_] = _loc9_ = Math.floor(_loc7_[_loc10_] ^ this.S[_loc9_]);
                   _loc10_++;
                }
                _loc9_ = Math.floor(_loc9_ + _loc8_ & 0xFF);

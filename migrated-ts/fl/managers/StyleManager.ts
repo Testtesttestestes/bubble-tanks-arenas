@@ -11,11 +11,11 @@ export class StyleManager{
       private classToDefaultStylesDict: Dictionary;
       constructor(){
          super();
-         styleToClassesHash = {};
-         classToInstancesDict = new Dictionary(true);
-         classToStylesDict = new Dictionary(true);
-         classToDefaultStylesDict = new Dictionary(true);
-         globalStyles = UIComponent.getStyleDefinition();
+         this.styleToClassesHash = {};
+         this.classToInstancesDict = new Dictionary(true);
+         this.classToStylesDict = new Dictionary(true);
+         this.classToDefaultStylesDict = new Dictionary(true);
+         this.globalStyles = UIComponent.getStyleDefinition();
       }
       
       public static clearComponentStyle(param1: Record<string, any>, param2: string): void
@@ -102,11 +102,11 @@ export class StyleManager{
       
       private static getInstance(): any
       {
-         if(_instance == null)
+         if(this._instance == null)
          {
-            _instance = new StyleManager();
+            this._instance = new StyleManager();
          }
-         return _instance;
+         return this._instance;
       }
       
       private static invalidateComponentStyle(param1: any, param2: string): void

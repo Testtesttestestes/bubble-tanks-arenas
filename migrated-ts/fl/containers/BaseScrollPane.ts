@@ -7,7 +7,7 @@ export class BaseScrollPane extends UIComponent{
          "repeatDelay":500,
          "repeatInterval":35,
          "skin":"ScrollPane_upSkin",
-         "contentPadding":0,
+         "this.contentPadding":0,
          "disabledAlpha":0.5
       };
       protected static readonly SCROLL_BAR_STYLES: Record<string, any> = {
@@ -58,7 +58,7 @@ export class BaseScrollPane extends UIComponent{
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return mergeStyles(defaultStyles,ScrollBar.getStyleDefinition());
+         return mergeStyles(this.defaultStyles,ScrollBar.getStyleDefinition());
       }
       
       public set enabled(param1: boolean)
@@ -67,71 +67,71 @@ export class BaseScrollPane extends UIComponent{
          {
             return;
          }
-         _verticalScrollBar.enabled = param1;
-         _horizontalScrollBar.enabled = param1;
+         this._verticalScrollBar.enabled = param1;
+         this._horizontalScrollBar.enabled = param1;
          super.enabled = param1;
       }
       
       public set useBitmapScrolling(param1: boolean)
       {
-         _useBitmpScrolling = param1;
+         this._useBitmpScrolling = param1;
          invalidate(InvalidationType.STATE);
       }
       
       public set horizontalLineScrollSize(param1: number)
       {
-         _horizontalScrollBar.lineScrollSize = param1;
+         this._horizontalScrollBar.lineScrollSize = param1;
       }
       
       protected drawLayout(): void
       {
          calculateAvailableSize();
          calculateContentWidth();
-         background.width = width;
-         background.height = height;
-         if(vScrollBar)
+         this.background.width = width;
+         this.background.height = height;
+         if(this.vScrollBar)
          {
-            _verticalScrollBar.visible = true;
-            _verticalScrollBar.x = width - ScrollBar.WIDTH - contentPadding;
-            _verticalScrollBar.y = contentPadding;
-            _verticalScrollBar.height = availableHeight;
+            this._verticalScrollBar.visible = true;
+            this._verticalScrollBar.x = width - ScrollBar.WIDTH - this.contentPadding;
+            this._verticalScrollBar.y = this.contentPadding;
+            this._verticalScrollBar.height = this.availableHeight;
          }
          else
          {
-            _verticalScrollBar.visible = false;
+            this._verticalScrollBar.visible = false;
          }
-         _verticalScrollBar.setScrollProperties(availableHeight,0,contentHeight - availableHeight,verticalPageScrollSize);
-         setVerticalScrollPosition(_verticalScrollBar.scrollPosition,false);
-         if(hScrollBar)
+         this._verticalScrollBar.setScrollProperties(this.availableHeight,0,this.contentHeight - this.availableHeight,verticalPageScrollSize);
+         setVerticalScrollPosition(this._verticalScrollBar.scrollPosition,false);
+         if(this.hScrollBar)
          {
-            _horizontalScrollBar.visible = true;
-            _horizontalScrollBar.x = contentPadding;
-            _horizontalScrollBar.y = height - ScrollBar.WIDTH - contentPadding;
-            _horizontalScrollBar.width = availableWidth;
+            this._horizontalScrollBar.visible = true;
+            this._horizontalScrollBar.x = this.contentPadding;
+            this._horizontalScrollBar.y = height - ScrollBar.WIDTH - this.contentPadding;
+            this._horizontalScrollBar.width = this.availableWidth;
          }
          else
          {
-            _horizontalScrollBar.visible = false;
+            this._horizontalScrollBar.visible = false;
          }
-         _horizontalScrollBar.setScrollProperties(availableWidth,0,useFixedHorizontalScrolling ? _maxHorizontalScrollPosition : contentWidth - availableWidth,horizontalPageScrollSize);
-         setHorizontalScrollPosition(_horizontalScrollBar.scrollPosition,false);
+         this._horizontalScrollBar.setScrollProperties(this.availableWidth,0,this.useFixedHorizontalScrolling ? this._maxHorizontalScrollPosition : this.contentWidth - this.availableWidth,horizontalPageScrollSize);
+         setHorizontalScrollPosition(this._horizontalScrollBar.scrollPosition,false);
          drawDisabledOverlay();
       }
       
       protected handleWheel(param1: MouseEvent): void
       {
-         if(!enabled || !_verticalScrollBar.visible || contentHeight <= availableHeight)
+         if(!enabled || !this._verticalScrollBar.visible || this.contentHeight <= this.availableHeight)
          {
             return;
          }
-         _verticalScrollBar.scrollPosition -= param1.delta * verticalLineScrollSize;
-         setVerticalScrollPosition(_verticalScrollBar.scrollPosition);
+         this._verticalScrollBar.scrollPosition -= param1.delta * verticalLineScrollSize;
+         setVerticalScrollPosition(this._verticalScrollBar.scrollPosition);
          this.dispatchEvent(new ScrollEvent(ScrollBarDirection.VERTICAL,param1.delta,horizontalScrollPosition));
       }
       
       protected handleScroll(param1: ScrollEvent): void
       {
-         if(param1.target == _verticalScrollBar)
+         if(param1.target == this._verticalScrollBar)
          {
             setVerticalScrollPosition(param1.position);
          }
@@ -143,17 +143,17 @@ export class BaseScrollPane extends UIComponent{
       
       public get verticalLineScrollSize(): number
       {
-         return _verticalScrollBar.lineScrollSize;
+         return this._verticalScrollBar.lineScrollSize;
       }
       
       protected drawBackground(): void
       {
-         let _loc1_: DisplayObject = background;
-         background = getDisplayObjectInstance(getStyleValue("skin"));
-         background.width = width;
-         background.height = height;
-         this.addChildAt(background,0);
-         if(_loc1_ != null && _loc1_ != background)
+         let _loc1_: DisplayObject = this.background;
+         this.background = getDisplayObjectInstance(getStyleValue("skin"));
+         this.background.width = width;
+         this.background.height = height;
+         this.addChildAt(this.background,0);
+         if(_loc1_ != null && _loc1_ != this.background)
          {
             this.removeChild(_loc1_);
          }
@@ -162,33 +162,33 @@ export class BaseScrollPane extends UIComponent{
       protected calculateAvailableSize(): void
       {
          let _loc1_: number = ScrollBar.WIDTH;
-         let _loc2_: number = contentPadding = Number(getStyleValue("contentPadding"));
-         let _loc3_: number = height - 2 * _loc2_ - vOffset;
-         vScrollBar = _verticalScrollPolicy == ScrollPolicy.ON || _verticalScrollPolicy == ScrollPolicy.AUTO && contentHeight > _loc3_;
-         let _loc4_: number = width - (vScrollBar ? _loc1_ : 0) - 2 * _loc2_;
-         let _loc5_: number = useFixedHorizontalScrolling ? _maxHorizontalScrollPosition : contentWidth - _loc4_;
-         hScrollBar = _horizontalScrollPolicy == ScrollPolicy.ON || _horizontalScrollPolicy == ScrollPolicy.AUTO && _loc5_ > 0;
-         if(hScrollBar)
+         let _loc2_: number = this.contentPadding = Number(getStyleValue("this.contentPadding"));
+         let _loc3_: number = height - 2 * _loc2_ - this.vOffset;
+         this.vScrollBar = this._verticalScrollPolicy == ScrollPolicy.ON || this._verticalScrollPolicy == ScrollPolicy.AUTO && this.contentHeight > _loc3_;
+         let _loc4_: number = width - (this.vScrollBar ? _loc1_ : 0) - 2 * _loc2_;
+         let _loc5_: number = this.useFixedHorizontalScrolling ? this._maxHorizontalScrollPosition : this.contentWidth - _loc4_;
+         this.hScrollBar = this._horizontalScrollPolicy == ScrollPolicy.ON || this._horizontalScrollPolicy == ScrollPolicy.AUTO && _loc5_ > 0;
+         if(this.hScrollBar)
          {
             _loc3_ -= _loc1_;
          }
-         if(hScrollBar && !vScrollBar && _verticalScrollPolicy == ScrollPolicy.AUTO && contentHeight > _loc3_)
+         if(this.hScrollBar && !this.vScrollBar && this._verticalScrollPolicy == ScrollPolicy.AUTO && this.contentHeight > _loc3_)
          {
-            vScrollBar = true;
+            this.vScrollBar = true;
             _loc4_ -= _loc1_;
          }
-         availableHeight = _loc3_ + vOffset;
-         availableWidth = _loc4_;
+         this.availableHeight = _loc3_ + this.vOffset;
+         this.availableWidth = _loc4_;
       }
       
       public get verticalScrollPosition(): number
       {
-         return _verticalScrollBar.scrollPosition;
+         return this._verticalScrollBar.scrollPosition;
       }
       
       public get horizontalScrollPolicy(): string
       {
-         return _horizontalScrollPolicy;
+         return this._horizontalScrollPolicy;
       }
       
       protected setVerticalScrollPosition(param1: number, param2: boolean = false): void
@@ -197,34 +197,34 @@ export class BaseScrollPane extends UIComponent{
       
       public get horizontalPageScrollSize(): number
       {
-         if(isNaN(availableWidth))
+         if(isNaN(this.availableWidth))
          {
             drawNow();
          }
-         return _horizontalPageScrollSize == 0 && !isNaN(availableWidth) ? availableWidth : _horizontalPageScrollSize;
+         return this._horizontalPageScrollSize == 0 && !isNaN(this.availableWidth) ? this.availableWidth : this._horizontalPageScrollSize;
       }
       
       public set horizontalScrollPosition(param1: number)
       {
          drawNow();
-         _horizontalScrollBar.scrollPosition = param1;
-         setHorizontalScrollPosition(_horizontalScrollBar.scrollPosition,false);
+         this._horizontalScrollBar.scrollPosition = param1;
+         setHorizontalScrollPosition(this._horizontalScrollBar.scrollPosition,false);
       }
       
       public set verticalLineScrollSize(param1: number)
       {
-         _verticalScrollBar.lineScrollSize = param1;
+         this._verticalScrollBar.lineScrollSize = param1;
       }
       
       public get maxVerticalScrollPosition(): number
       {
          drawNow();
-         return Math.max(0,contentHeight - availableHeight);
+         return Math.max(0,this.contentHeight - this.availableHeight);
       }
       
       public set horizontalPageScrollSize(param1: number)
       {
-         _horizontalPageScrollSize = param1;
+         this._horizontalPageScrollSize = param1;
          invalidate(InvalidationType.SIZE);
       }
       
@@ -234,7 +234,7 @@ export class BaseScrollPane extends UIComponent{
          {
             setStyles();
             drawBackground();
-            if(contentPadding != getStyleValue("contentPadding"))
+            if(this.contentPadding != getStyleValue("this.contentPadding"))
             {
                invalidate(InvalidationType.SIZE,false);
             }
@@ -249,7 +249,7 @@ export class BaseScrollPane extends UIComponent{
       
       public get horizontalScrollBar(): ScrollBar
       {
-         return _horizontalScrollBar;
+         return this._horizontalScrollBar;
       }
       
       protected calculateContentWidth(): void
@@ -258,29 +258,29 @@ export class BaseScrollPane extends UIComponent{
       
       public set horizontalScrollPolicy(param1: string)
       {
-         _horizontalScrollPolicy = param1;
+         this._horizontalScrollPolicy = param1;
          invalidate(InvalidationType.SIZE);
       }
       
       protected configUI(): void
       {
          super.configUI();
-         contentScrollRect = new Rectangle(0,0,85,85);
-         _verticalScrollBar = new ScrollBar();
-         _verticalScrollBar.addEventListener(ScrollEvent.SCROLL, handleScroll.bind(this));
-         _verticalScrollBar.visible = false;
-         _verticalScrollBar.lineScrollSize = defaultLineScrollSize;
-         this.addChild(_verticalScrollBar);
-         copyStylesToChild(_verticalScrollBar,SCROLL_BAR_STYLES);
-         _horizontalScrollBar = new ScrollBar();
-         _horizontalScrollBar.direction = ScrollBarDirection.HORIZONTAL;
-         _horizontalScrollBar.addEventListener(ScrollEvent.SCROLL, handleScroll.bind(this));
-         _horizontalScrollBar.visible = false;
-         _horizontalScrollBar.lineScrollSize = defaultLineScrollSize;
-         this.addChild(_horizontalScrollBar);
-         copyStylesToChild(_horizontalScrollBar,SCROLL_BAR_STYLES);
-         disabledOverlay = new Shape();
-         let _loc1_: Graphics = disabledOverlay.graphics;
+         this.contentScrollRect = new Rectangle(0,0,85,85);
+         this._verticalScrollBar = new ScrollBar();
+         this._verticalScrollBar.addEventListener(ScrollEvent.SCROLL, handleScroll.bind(this));
+         this._verticalScrollBar.visible = false;
+         this._verticalScrollBar.lineScrollSize = this.defaultLineScrollSize;
+         this.addChild(this._verticalScrollBar);
+         copyStylesToChild(this._verticalScrollBar,this.SCROLL_BAR_STYLES);
+         this._horizontalScrollBar = new ScrollBar();
+         this._horizontalScrollBar.direction = ScrollBarDirection.HORIZONTAL;
+         this._horizontalScrollBar.addEventListener(ScrollEvent.SCROLL, handleScroll.bind(this));
+         this._horizontalScrollBar.visible = false;
+         this._horizontalScrollBar.lineScrollSize = this.defaultLineScrollSize;
+         this.addChild(this._horizontalScrollBar);
+         copyStylesToChild(this._horizontalScrollBar,this.SCROLL_BAR_STYLES);
+         this.disabledOverlay = new Shape();
+         let _loc1_: Graphics = this.disabledOverlay.graphics;
          _loc1_.beginFill(16777215);
          _loc1_.drawRect(0,0,width,height);
          _loc1_.endFill();
@@ -291,41 +291,41 @@ export class BaseScrollPane extends UIComponent{
       {
          if(enabled)
          {
-            if(this.contains(disabledOverlay))
+            if(this.contains(this.disabledOverlay))
             {
-               this.removeChild(disabledOverlay);
+               this.removeChild(this.disabledOverlay);
             }
          }
          else
          {
-            disabledOverlay.x = disabledOverlay.y = contentPadding;
-            disabledOverlay.width = availableWidth;
-            disabledOverlay.height = availableHeight;
-            disabledOverlay.alpha = getStyleValue("disabledAlpha")  as unknown as Number;
-            this.addChild(disabledOverlay);
+            this.disabledOverlay.x = this.disabledOverlay.y = this.contentPadding;
+            this.disabledOverlay.width = this.availableWidth;
+            this.disabledOverlay.height = this.availableHeight;
+            this.disabledOverlay.alpha = getStyleValue("disabledAlpha")  as unknown as Number;
+            this.addChild(this.disabledOverlay);
          }
       }
       
       public get horizontalScrollPosition(): number
       {
-         return _horizontalScrollBar.scrollPosition;
+         return this._horizontalScrollBar.scrollPosition;
       }
       
       public get verticalScrollBar(): ScrollBar
       {
-         return _verticalScrollBar;
+         return this._verticalScrollBar;
       }
       
       public get horizontalLineScrollSize(): number
       {
-         return _horizontalScrollBar.lineScrollSize;
+         return this._horizontalScrollBar.lineScrollSize;
       }
       
       public set verticalScrollPosition(param1: number)
       {
          drawNow();
-         _verticalScrollBar.scrollPosition = param1;
-         setVerticalScrollPosition(_verticalScrollBar.scrollPosition,false);
+         this._verticalScrollBar.scrollPosition = param1;
+         setVerticalScrollPosition(this._verticalScrollBar.scrollPosition,false);
       }
       
       protected setHorizontalScrollPosition(param1: number, param2: boolean = false): void
@@ -334,62 +334,62 @@ export class BaseScrollPane extends UIComponent{
       
       protected setStyles(): void
       {
-         copyStylesToChild(_verticalScrollBar,SCROLL_BAR_STYLES);
-         copyStylesToChild(_horizontalScrollBar,SCROLL_BAR_STYLES);
+         copyStylesToChild(this._verticalScrollBar,this.SCROLL_BAR_STYLES);
+         copyStylesToChild(this._horizontalScrollBar,this.SCROLL_BAR_STYLES);
       }
       
       public set verticalPageScrollSize(param1: number)
       {
-         _verticalPageScrollSize = param1;
+         this._verticalPageScrollSize = param1;
          invalidate(InvalidationType.SIZE);
       }
       
       protected setContentSize(param1: number, param2: number): void
       {
-         if((contentWidth == param1 || useFixedHorizontalScrolling) && contentHeight == param2)
+         if((this.contentWidth == param1 || this.useFixedHorizontalScrolling) && this.contentHeight == param2)
          {
             return;
          }
-         contentWidth = param1;
-         contentHeight = param2;
+         this.contentWidth = param1;
+         this.contentHeight = param2;
          invalidate(InvalidationType.SIZE);
       }
       
       public set verticalScrollPolicy(param1: string)
       {
-         _verticalScrollPolicy = param1;
+         this._verticalScrollPolicy = param1;
          invalidate(InvalidationType.SIZE);
       }
       
       public get maxHorizontalScrollPosition(): number
       {
          drawNow();
-         return Math.max(0,contentWidth - availableWidth);
+         return Math.max(0,this.contentWidth - this.availableWidth);
       }
       
       protected updateChildren(): void
       {
-         _verticalScrollBar.enabled = _horizontalScrollBar.enabled = enabled;
-         _verticalScrollBar.drawNow();
-         _horizontalScrollBar.drawNow();
+         this._verticalScrollBar.enabled = this._horizontalScrollBar.enabled = enabled;
+         this._verticalScrollBar.drawNow();
+         this._horizontalScrollBar.drawNow();
       }
       
       public get verticalPageScrollSize(): number
       {
-         if(isNaN(availableHeight))
+         if(isNaN(this.availableHeight))
          {
             drawNow();
          }
-         return _verticalPageScrollSize == 0 && !isNaN(availableHeight) ? availableHeight : _verticalPageScrollSize;
+         return this._verticalPageScrollSize == 0 && !isNaN(this.availableHeight) ? this.availableHeight : this._verticalPageScrollSize;
       }
       
       public get verticalScrollPolicy(): string
       {
-         return _verticalScrollPolicy;
+         return this._verticalScrollPolicy;
       }
       
       public get useBitmapScrolling(): boolean
       {
-         return _useBitmpScrolling;
+         return this._useBitmpScrolling;
       }
    }

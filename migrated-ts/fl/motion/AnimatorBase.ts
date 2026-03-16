@@ -115,12 +115,12 @@ export class AnimatorBase extends EventDispatcher{
       
       public static registerParentFrameHandler(param1: MovieClip, param2: AnimatorBase, param3: number, param4: number = 0, param5: boolean = false): void
       {
-         let _loc6_: AnimatorParent = _registeredParents[param1]  as unknown as AnimatorParent;
+         let _loc6_: AnimatorParent = this._registeredParents[param1]  as unknown as AnimatorParent;
          if(_loc6_ == null)
          {
             _loc6_ = new AnimatorParent();
             _loc6_.parent = param1;
-            _registeredParents[param1] = _loc6_;
+            this._registeredParents[param1] = _loc6_;
          }
          if(param3 == -1)
          {
@@ -145,9 +145,9 @@ export class AnimatorBase extends EventDispatcher{
          let _loc5_: any[] = null;
          let _loc6_: number = 0;
          let _loc7_: AnimatorBase = null;
-         for (let _loc2_ in _registeredParents)
+         for (let _loc2_ in this._registeredParents)
          {
-            _loc3_ = _registeredParents[_loc2_]  as unknown as AnimatorParent;
+            _loc3_ = this._registeredParents[_loc2_]  as unknown as AnimatorParent;
             if(_loc3_)
             {
                _loc4_ = _loc3_.parent;
@@ -196,7 +196,7 @@ export class AnimatorBase extends EventDispatcher{
       {
          let _loc1_: any = undefined;
          let _loc2_: number = 0;
-         let _loc3_: any = _registeredParents;
+         let _loc3_: any = this._registeredParents;
          for (let _loc1_ in _loc3_)
          {
             return true;
@@ -341,7 +341,7 @@ export class AnimatorBase extends EventDispatcher{
       
       public startFrameEvents(): void
       {
-         enterFrameBeacon.addEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
+         this.enterFrameBeacon.addEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
       }
       
       public get frameEvent(): string
@@ -351,7 +351,7 @@ export class AnimatorBase extends EventDispatcher{
       
       public stop(): void
       {
-         enterFrameBeacon.removeEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
+         this.enterFrameBeacon.removeEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
          this._isPlaying = false;
          this.playCount = 0;
          this.rewind();
@@ -391,7 +391,7 @@ export class AnimatorBase extends EventDispatcher{
             }
             if(param2)
             {
-               enterFrameBeacon.addEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
+               this.enterFrameBeacon.addEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
             }
             if(!this.target)
             {
@@ -464,7 +464,7 @@ export class AnimatorBase extends EventDispatcher{
       
       public resume(): void
       {
-         enterFrameBeacon.addEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
+         this.enterFrameBeacon.addEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
          this._isPlaying = true;
       }
       
@@ -487,7 +487,7 @@ export class AnimatorBase extends EventDispatcher{
       {
          if(param2)
          {
-            enterFrameBeacon.removeEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
+            this.enterFrameBeacon.removeEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
          }
          this._isPlaying = false;
          this.playCount = 0;
@@ -523,7 +523,7 @@ export class AnimatorBase extends EventDispatcher{
       
       public pause(): void
       {
-         enterFrameBeacon.removeEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
+         this.enterFrameBeacon.removeEventListener(this.frameEvent, this.enterFrameHandler.bind(this));
          this._isPlaying = false;
       }
       

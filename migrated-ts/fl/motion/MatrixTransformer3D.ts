@@ -79,7 +79,7 @@ export class MatrixTransformer3D{
          let _loc5_: Array<Number> = new Array<Number>();
          switch(param2)
          {
-            case AXIS_X:
+            case this.AXIS_X:
                _loc5_[0] = 1;
                _loc5_[1] = 0;
                _loc5_[2] = 0;
@@ -97,7 +97,7 @@ export class MatrixTransformer3D{
                _loc5_[14] = 0;
                _loc5_[15] = 1;
                break;
-            case AXIS_Y:
+            case this.AXIS_Y:
                _loc5_[0] = _loc3_;
                _loc5_[1] = 0;
                _loc5_[2] = -_loc4_;
@@ -115,7 +115,7 @@ export class MatrixTransformer3D{
                _loc5_[14] = 0;
                _loc5_[15] = 1;
                break;
-            case AXIS_Z:
+            case this.AXIS_Z:
                _loc5_[0] = _loc3_;
                _loc5_[1] = _loc4_;
                _loc5_[2] = 0;

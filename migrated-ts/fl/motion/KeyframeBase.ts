@@ -142,7 +142,7 @@ export class KeyframeBase{
       
       public affectsTweenable(param1: string = ""): boolean
       {
-         return !param1 || !isNaN(this[param1]) || param1 == "color" && this.color || param1 == "filters" && this.filters.length || param1 == "matrix3D" && this.matrix3D || this.blank || this.hasTween();
+         return !param1 || !isNaN(this[param1]) || param1 == "this.color" && this.color || param1 == "this.filters" && this.filters.length || param1 == "this.matrix3D" && this.matrix3D || this.blank || this.hasTween();
       }
       
       public get tweensLength(): number
