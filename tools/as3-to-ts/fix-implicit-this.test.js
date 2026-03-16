@@ -3,8 +3,27 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 const { parseTscLog, processFile, extractClassScopeMembers } = require('./fix-implicit-this');
+
+
+const SCRIPT_INPUT_DIR = path.resolve('scripts');
+let convertedScriptsDir;
+
+test.before(() => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-converted-'));
+  const outputDir = path.join(tempRoot, 'migrated-ts');
+  const converterDir = path.resolve('tools/as3-to-ts');
+
+  execFileSync('node', [path.join(converterDir, 'convert-as3-to-ts.js'), '--input', SCRIPT_INPUT_DIR, '--output', outputDir], { stdio: 'inherit' });
+  execFileSync('node', [path.join(converterDir, 'fix-implicit-this.js'), '--input', outputDir], { stdio: 'inherit' });
+  execFileSync('node', [path.join(converterDir, 'heal-signature-params.js'), '--input', outputDir], { stdio: 'inherit' });
+  execFileSync('node', [path.join(converterDir, 'fix-ts2695-sequences.js'), '--input', outputDir], { stdio: 'inherit' });
+  execFileSync('node', [path.join(converterDir, 'resolve-imports.js'), '--input', outputDir], { stdio: 'inherit' });
+
+  convertedScriptsDir = outputDir;
+});
 
 function lineColAt(source, needle) {
   const index = source.indexOf(needle);
@@ -16,7 +35,7 @@ function lineColAt(source, needle) {
 }
 
 test('second pass applies this. for TS2304 identifiers from migrated Parts sample and is idempotent', () => {
-  const source = fs.readFileSync(path.resolve('migrated-ts/Parts/AGun3ShotSpread.ts'), 'utf8');
+  const source = fs.readFileSync(path.join(convertedScriptsDir, 'Parts/AGun3ShotSpread.ts'), 'utf8');
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
   const samplePath = path.join(tempDir, 'AGun3ShotSpread.ts');
   fs.writeFileSync(samplePath, source, 'utf8');
