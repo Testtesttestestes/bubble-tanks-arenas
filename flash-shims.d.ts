@@ -126,6 +126,52 @@ declare class URLLoader extends EventDispatcher {
   load(req: any): void;
   data: any;
 }
+declare class Loader extends DisplayObjectContainer {
+  contentLoaderInfo: LoaderInfo;
+  content: DisplayObject;
+  load(request: URLRequest, context?: any): void;
+  unload(): void;
+}
+declare class LoaderInfo extends EventDispatcher {
+  bytesTotal: number;
+  parameters: Record<string, any>;
+  url: string;
+}
+declare class URLRequest {
+  url: string;
+  constructor(url?: string);
+}
+declare class Security {
+  static allowDomain(...domains: string[]): void;
+  static allowInsecureDomain(...domains: string[]): void;
+}
+declare class Capabilities {
+  static os: string;
+  static serverString: string;
+}
+declare class IOErrorEvent extends Event { static IO_ERROR: string; }
+declare class SecurityErrorEvent extends Event { static SECURITY_ERROR: string; }
+declare class NetConnection extends EventDispatcher {
+  objectEncoding: number;
+  addHeader(operation: string, mustUnderstand?: boolean, param?: any): void;
+  connect(command: string, ...args: any[]): void;
+  call(command: string, responder: Responder, ...args: any[]): void;
+  close(): void;
+}
+declare class Responder {
+  constructor(result: Function, status?: Function);
+}
+declare class SharedObject {
+  data: Record<string, any>;
+  static getLocal(name: string, localPath?: string, secure?: boolean): SharedObject;
+  flush(minDiskSpace?: number): string;
+}
+declare class ObjectEncoding { static AMF3: number; }
+declare class NetStatusEvent extends Event {
+  static NET_STATUS: string;
+  info: Record<string, any>;
+}
+declare class AsyncErrorEvent extends Event { static ASYNC_ERROR: string; }
 declare class URLRequestMethod { static POST: string; static GET: string; }
 declare class URLLoaderDataFormat { static TEXT: string; static BINARY: string; static VARIABLES: string; }
 declare class XMLList { [key: string]: any; [Symbol.iterator](): IterableIterator<any>; }
