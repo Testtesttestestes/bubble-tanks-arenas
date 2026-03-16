@@ -76,7 +76,8 @@ function convertClassMembers(source, className) {
       const vis = visibility !== 'internal' ? `${visibility} ` : 'public ';
       const staticPart = isStatic ? 'static ' : '';
       const readonly = kind === 'const' ? 'readonly ' : '';
-      const mappedType = mapType(type);
+      const mappedTypeBase = mapType(type);
+      const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
       if (initializer.includes('null') && mappedType !== 'any') initializer = ' = null as any';
       return `${indent}${vis}${staticPart}${readonly}${name}: ${mappedType}${initializer};`;
@@ -92,7 +93,8 @@ function convertClassMembers(source, className) {
     /^(\s*)(static\s+)?(?:const|var)\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, isStatic, name, type, init) => {
       const staticPart = isStatic ? 'static ' : '';
-      const mappedType = mapType(type);
+      const mappedTypeBase = mapType(type);
+      const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
       if (initializer.includes('null') && mappedType !== 'any') initializer = ' = null as any';
       return `${indent}public ${staticPart}${name}: ${mappedType}${initializer};`;
@@ -238,7 +240,8 @@ function convertAs3ToTs(source) {
     'dispatchEvent',
     'setChildIndex',
     'getChildIndex',
-    'contains'
+    'contains',
+    'addFrameScript'
   ];
   const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
   converted = converted.replace(methodsRegex, '$1this.$2(');
