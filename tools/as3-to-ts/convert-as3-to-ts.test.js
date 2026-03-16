@@ -17,3 +17,18 @@ test('functions without visibility are emitted as public methods', () => {
   const output = convertAs3ToTs(input);
   assert.match(output, /public calc\(a: number\): number/);
 });
+
+test('injects Flash built-in stubs into each converted file', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f():void {}',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /type ByteArray = any;/);
+  assert.match(output, /type Sprite = any;/);
+  assert.match(output, /declare const flash: any;/);
+});

@@ -192,7 +192,7 @@ function applyDiagnosticThisFixes(source, diagnostics) {
   const importedNames = parseImportNames(source);
   const { className } = extractClassScopeMembers(source);
   const { classRange, methods } = extractClassAndMethodRanges(source);
-  if (!classRange || methods.length === 0 || !className) return source;
+  if (!classRange || !className) return source;
 
   const lineStarts = computeLineStarts(source);
   const edits = [];
@@ -202,11 +202,13 @@ function applyDiagnosticThisFixes(source, diagnostics) {
     const index = lineColToIndex(lineStarts, diagnostic.line, diagnostic.col);
     if (index < classRange.start || index >= classRange.end) continue;
     const method = methods.find((entry) => index >= entry.start && index < entry.end);
-    if (!method) continue;
+    if (!method && !hasForcedPrefix) continue;
     if (importedNames.has(diagnostic.name)) continue;
-    const locals = collectLocalsInRange(source, method);
-    method.params.forEach((name) => locals.add(name));
-    if (locals.has(diagnostic.name)) continue;
+    if (method) {
+      const locals = collectLocalsInRange(source, method);
+      method.params.forEach((name) => locals.add(name));
+      if (locals.has(diagnostic.name)) continue;
+    }
     const prefixTarget = diagnostic.forcePrefix === 'static' ? `${className}.` : 'this.';
     if (source.slice(Math.max(0, index - prefixTarget.length), index) === prefixTarget) continue;
     if (source[index - 1] === '.') continue;
