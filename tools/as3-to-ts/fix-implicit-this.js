@@ -30,7 +30,7 @@ function extractClassScopeMembers(source) {
   }
 
   const className = classMatch[1];
-  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:var|let|const|function|get|set)\s+([a-zA-Z0-9_$]+)/gm;
+  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z0-9_$]+)/gm;
   let match;
   while ((match = memberRegex.exec(source)) !== null) {
     const isStatic = !!match[2];
@@ -58,6 +58,21 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
   });
 }
 
+
+function extractClassScopePropertyNames(source) {
+  const { instanceMembers } = extractClassScopeMembers(source);
+  const properties = new Set();
+  instanceMembers.forEach((name) => {
+    const methodPattern = new RegExp(`^[ \t]*(?:public|private|protected)\\s+(?:static\\s+)?(?:readonly\\s+)?${escapeRegExp(name)}\\s*\\(`, 'm');
+    if (!methodPattern.test(source)) properties.add(name);
+  });
+  return properties;
+}
+
+function addThisToPropertyUsage(source, propertyNames) {
+  return addClassPrefixToMemberUsage(source, propertyNames, 'this');
+}
+
 function processFile(filePath) {
   const source = fs.readFileSync(filePath, 'utf8');
   const { className, instanceMembers, staticMembers } = extractClassScopeMembers(source);
@@ -75,7 +90,7 @@ function processFile(filePath) {
   });
 
   // Лечим наследуемые обфусцированные переменные и методы
-  converted = converted.replace(/(?<!\.|[a-zA-Z0-9_$]|function\s+|class\s+|var\s+|let\s+|const\s+|:\s*)(var_\d+|method_\d+)\b(?!\s*:)/g, 'this.$1');
+  converted = converted.replace(/(?<!\.|[a-zA-Z0-9_$]|function\s+|class\s+|var\s+|let\s+|const\s+|:\s*)(var_\d+|method_\d+)\b(?!\s*!?\s*:)/g, 'this.$1');
 
   if (converted === source) {
     return { changed: false, replacements: 0 };
@@ -141,6 +156,8 @@ function runCli() {
 module.exports = {
   extractClassScopeMembers,
   addClassPrefixToMemberUsage,
+  extractClassScopePropertyNames,
+  addThisToPropertyUsage,
   processFile,
   collectTsFiles
 };
