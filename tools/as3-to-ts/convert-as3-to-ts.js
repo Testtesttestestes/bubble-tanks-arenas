@@ -419,6 +419,19 @@ function convertAs3ToTs(source) {
   // Убиваем TS2314: Array без типов
   converted = converted.replace(/:\s*Array\b(?!\s*<)/g, ': any[]');
 
+  // Лечим TS2314: Array без типов в as-кастах
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Array\b/g, 'as any[]');
+
+  // Лечим typeof касты для примитивов (исправляем instanceof String/Number/Boolean)
+  converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+String\b/g, 'typeof $1 === "string"');
+  converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Number\b/g, 'typeof $1 === "number"');
+  converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Boolean\b/g, 'typeof $1 === "boolean"');
+
+  // Лечим as-касты для примитивов (исправляем TS2345 Argument of type 'String' is not assignable to 'string')
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?String\b/g, 'as string');
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Number\b/g, 'as number');
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Boolean\b/g, 'as boolean');
+
   // Убиваем TS2322: жесткое приведение ВСЕХ null-инициализаций
   converted = converted.replace(/=\s*null\s*([,;])/g, '= null as any$1');
 
@@ -430,6 +443,25 @@ function convertAs3ToTs(source) {
 
   // Лечим switch-касты в JSONTokenizer
   converted = converted.replace(/switch\s*\(([^)]+)\)\s*\{/g, 'switch(String($1)) {');
+
+  // Лечим if-касты в JSONTokenizer (TS2367 narrow type inference bug)
+  converted = converted.replace(/this\.ch\s*(==|!=)\s*/g, 'String(this.ch) $1 ');
+
+  // Полностью переписываем objectToString в JSONEncoder, чтобы убрать E4X, XML и describeType (TS2304 / TS2349)
+  converted = converted.replace(
+    /var\s+classInfo\s*:\s*(?:XML|any)\s*=\s*describeType\(o\);[\s\S]*?return\s+"\{"\s*\+\s*s\s*\+\s*"\}";/,
+    `for (let key in o) {
+            value = o[key];
+            if (!(value instanceof Function)) {
+               if (s.length > 0) {
+                  s += ",";
+               }
+               s += this.escapeString(key) + ":" + this.convertToString(value);
+            }
+         }
+         return "{" + s + "}";`
+  );
+  converted = converted.replace(/\bvar\s+v\s*:\s*XML\s*=\s*.*?;\n?/g, '');
 
   // --- ТЕРМИНАТОР СИНТАКСИСА ---
   // Лечим дикие подстановки 'this.' к зарезервированным словам, которые могли проскочить
@@ -448,6 +480,16 @@ function convertAs3ToTs(source) {
 
   // Защита от Error.name (TS2588)
   converted = converted.replace(/^\s*name\s*=\s*(["'].*?["']);/gm, 'this.name = $1;');
+
+  // Устраняем внутрипакетные проблемы импортов com.adobe.serialization.json
+  const jsonClasses = ['JSONEncoder', 'JSONDecoder', 'JSONTokenizer', 'JSONToken', 'JSONTokenType'];
+  const missingImports = [];
+  for (const cls of jsonClasses) {
+    if (new RegExp(`\\b${cls}\\b`).test(converted) && !new RegExp(`class\\s+${cls}\\b`).test(converted)) {
+      missingImports.push(`import { ${cls} } from "./${cls}";`);
+    }
+  }
+  if (missingImports.length > 0) converted = `${missingImports.join('\n')}\n\n${converted}`;
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
