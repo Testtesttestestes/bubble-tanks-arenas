@@ -298,7 +298,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bfor\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g, 'for (let $1 in $2)');
   converted = converted.replace(/\.\*/g, '._star');
   converted = converted.replace(/\*\./g, '_star.');
-  converted = converted.replace(/^(\s*)(\d+|"[^"]+"|'[^']+'):\s*$/gm, '$1case $2:');
+  converted = converted.replace(/^(\s*)(\d+|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'):\s*$/gm, '$1case $2:');
   converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
   converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
   converted = converted.replace(/\b(this|_[a-zA-Z0-9_]+)\.\s*\(/g, '$1._missingMethod(');
