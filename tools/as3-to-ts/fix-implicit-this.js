@@ -67,6 +67,7 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const rightTrimmed = right.trimStart();
     if ([':', '<', '|', '&', ','].includes(prevTypeToken)) return token;
     if (/^(?:>|\[\]|\||&|,|;)/.test(rightTrimmed)) return token;
+    if (name === 'type' && /^\s+[A-Za-z_$]/.test(right)) return token;
     if (blockedPrefix.test(left)) return token;
     const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
     if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;

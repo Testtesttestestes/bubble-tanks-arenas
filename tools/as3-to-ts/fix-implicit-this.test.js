@@ -142,3 +142,28 @@ test('TS2662/TS2663 forced prefixes are applied outside methods (e.g. static blo
   assert.match(updated, /BigInteger\.DB = 28;/);
   assert.match(updated, /BigInteger\.t = 52;/);
 });
+
+
+test('does not prefix type keyword in type alias declarations but prefixes member usage named type', () => {
+  const source = [
+    'export class Sample {',
+    '  public type: number = 0;',
+    '  public tick(): void {',
+    '    type Example = string;',
+    '    type = 1;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'Sample.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const result = processFile(samplePath);
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /type Example = string;/);
+  assert.match(updated, /this\.type = 1;/);
+  assert.doesNotMatch(updated, /this\.type Example = string;/);
+});
