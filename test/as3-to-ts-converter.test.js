@@ -380,6 +380,29 @@ test('healFunctionParamThisPrefixes removes this. from function signatures only'
 });
 
 
+
+
+test('fix-implicit-this does not prefix imported type identifiers in class fields', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-type-import-'));
+  const file = path.join(dir, 'Sample.ts');
+  fs.writeFileSync(file, `import { BigInteger } from './BigInteger';
+
+export class Sample {
+  private r2!: BigInteger;
+
+  public tick(): void {
+    r2 = new BigInteger();
+  }
+}
+`);
+
+  processFile(file);
+  const fixed = fs.readFileSync(file, 'utf8');
+
+  assert.match(fixed, /private r2!: BigInteger;/);
+  assert.match(fixed, /this\.r2 = new BigInteger\(\);/);
+  assert.doesNotMatch(fixed, /this\.BigInteger/);
+});
 test('fix-implicit-this does not prefix obfuscated class field declarations with this', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
   const file = path.join(dir, 'Sample.ts');
