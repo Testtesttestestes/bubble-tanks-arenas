@@ -28,6 +28,59 @@ error_stream() {
   grep "error TS" "$LOG_FILE" || true
 }
 
+get_ts_line() {
+  local file_path="$1"
+  local line_number="$2"
+
+  if [[ ! -f "$file_path" ]]; then
+    return
+  fi
+
+  sed -n "${line_number}p" "$file_path" 2>/dev/null || true
+}
+
+has_index_signature_nearby() {
+  local file_path="$1"
+  local line_number="$2"
+  local radius="${3:-3}"
+
+  if [[ ! -f "$file_path" ]]; then
+    return 1
+  fi
+
+  local total_lines start_line end_line
+  total_lines="$(wc -l < "$file_path" | tr -d ' ')"
+  start_line=$((line_number - radius))
+  if (( start_line < 1 )); then
+    start_line=1
+  fi
+  end_line=$((line_number + radius))
+  if (( end_line > total_lines )); then
+    end_line="$total_lines"
+  fi
+
+  sed -n "${start_line},${end_line}p" "$file_path" | grep -Eq '\[[^]]+:[^]]+\]'
+}
+
+infer_likely_stage() {
+  local err_message="$1"
+  local ts_line="$2"
+  local ts_file="$3"
+  local err_line_no="$4"
+
+  if [[ "$ts_line" =~ this\.[A-Z] ]]; then
+    printf 'fix-implicit-this.js ("this.[A-Z]" in type-position heuristic)\n'
+    return
+  fi
+
+  if [[ "$err_message" == *"Expected '=' for property initializer"* ]] && has_index_signature_nearby "$ts_file" "$err_line_no" 4; then
+    printf 'convert-as3-to-ts.js (index-signature/class-header dynamic injection heuristic)\n'
+    return
+  fi
+
+  printf 'unknown (manual inspection required)\n'
+}
+
 if [[ -f "$LOG_FILE" ]]; then
   printf 'Using existing log: %s\n' "$LOG_FILE"
 else
@@ -51,6 +104,12 @@ fi
 
 printf 'Top-10 files:\n'
 error_stream | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 10 || true
+
+top_file="$(error_stream | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 1 | sed -E 's/^\s*[0-9]+\s+//')"
+if [[ -n "$top_file" ]] && [[ "$(basename "$top_file")" == "BarrettReduction.ts" ]]; then
+  printf '\nFirst-fix recommendation for top file (BarrettReduction.ts):\n'
+  printf '  Start with convert-as3-to-ts.js, then rerun collect-tsc-stats to confirm whether fix-implicit-this.js becomes the next bottleneck.\n'
+fi
 
 printf '\nTop error codes:\n'
 (error_stream | grep -o "TS[0-9]\+" || true) | sort | uniq -c | sort -nr | head -n 15 || true
@@ -205,6 +264,9 @@ print_detailed_contexts() {
     "$error_context_count" "$max_contexts" "$ts_file" "$err_line_no" "$err_col_no" "$err_code" "$err_message"
 
   ts_file_resolved="$(resolve_ts_path "$ts_file")"
+  ts_line="$(get_ts_line "$ts_file_resolved" "$err_line_no")"
+  likely_stage="$(infer_likely_stage "$err_message" "$ts_line" "$ts_file_resolved" "$err_line_no")"
+  printf '  Likely stage: %s\n' "$likely_stage"
   print_context_slice "$ts_file_resolved" "$err_line_no" "$ERROR_SLICE_RADIUS" "TS"
   print_error_pointer "$err_line_no" "$err_col_no"
 
