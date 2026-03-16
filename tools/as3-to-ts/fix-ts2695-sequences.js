@@ -201,30 +201,17 @@ function hasAssignmentLikeExpression(expression) {
 }
 
 function transformBase64CommaAssignments(source) {
-  const pattern = /\(([^()]*)\)/g;
+  const pattern = /\(([A-Za-z0-9_$.]+\s*=[^,]+),\s*([^)]+)\)/g;
   let output = source;
   let replacements = 0;
-  let tempCounter = 0;
   let changed = true;
 
   while (changed) {
     changed = false;
-    output = output.replace(pattern, (match, inner, offset, fullSource) => {
-      const expressions = splitTopLevelComma(inner);
-      if (expressions.length < 2) return match;
-
-      if (!expressions.some(hasAssignmentLikeExpression)) return match;
-
-      const openParen = offset;
-      const closeParen = offset + match.length - 1;
-      if (isLikelyParameterList(fullSource, openParen, closeParen)) return match;
-
-      const lineStart = fullSource.lastIndexOf('\n', openParen) + 1;
-      const indent = fullSource.slice(lineStart, openParen).match(/^\s*/)?.[0] ?? '';
-      const tempName = `__base64Ts2695Tmp${tempCounter++}`;
+    output = output.replace(pattern, (match, assignment, result) => {
       replacements += 1;
       changed = true;
-      return buildGenericIifeReplacement(expressions, indent, tempName);
+      return `(() => { ${assignment}; return ${result}; })()`;
     });
   }
 
