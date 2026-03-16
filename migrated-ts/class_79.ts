@@ -1,6 +1,8 @@
 // AUTO-GENERATED AS3 TO TS CONVERSION
 // Original Package: <root>
 
+import { AGI } from "./agi/com/armorgames/AGI";
+
 export class class_79 extends MovieClip{
       
       public objCurrentPlayer: PlayerProfile;
@@ -131,8 +133,7 @@ export class class_79 extends MovieClip{
          Security.allowDomain(this.agi_url);
          this.var_526 = "0e7119b0e84444cfdd62a971cf60d6c4";
          this.var_510 = "bta";
-         this.loader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.loadComplete.bind(this));
-         this.loader.loadBytes(new AgiClass());
+         this.initializeAgiModule();
          this.objGameObjectLibrary = class_2.getInstance();
          class_2.method_592(this);
          this.method_574();
@@ -330,9 +331,12 @@ export class class_79 extends MovieClip{
          this.mainmenu.profile.blnOverwriteMode = false;
       }
       
-      private loadComplete(param1: Event): void
+      private loadComplete(param1: Event | null = null): void
       {
-         this.method_715(param1.currentTarget.content);
+         if(param1 != null && param1.currentTarget != null && param1.currentTarget.content != null)
+         {
+            this.method_715(param1.currentTarget.content);
+         }
          this.addChild(this.agi);
          this["agi"].init(this.var_526,this.var_510);
          this["agi"].retrieveGameData(this.method_635);
@@ -340,6 +344,12 @@ export class class_79 extends MovieClip{
          _loc2_.naviX = -500;
          _loc2_.naviY = -500;
          this["agi"].initAGUI(_loc2_);
+      }
+
+      private initializeAgiModule(): void
+      {
+         this.method_715(new AGI());
+         this.loadComplete();
       }
       
       private LoadStartUpTank(param1: string): void
