@@ -19,7 +19,16 @@ function mapType(asType) {
     ['void', 'void'],
     ['*', 'any'],
     ['Class', 'any'],
-    ['Function', 'Function']
+    ['Function', 'Function'],
+    ['Event', 'any'],
+    ['MouseEvent', 'any'],
+    ['KeyboardEvent', 'any'],
+    ['FocusEvent', 'any'],
+    ['TimerEvent', 'any'],
+    ['TextEvent', 'any'],
+    ['IOErrorEvent', 'any'],
+    ['SecurityErrorEvent', 'any'],
+    ['HTTPStatusEvent', 'any']
   ]);
 
   if (simpleMap.has(raw)) return simpleMap.get(raw);
@@ -76,7 +85,7 @@ function convertClassMembers(source, className) {
       const vis = visibility !== 'internal' ? `${visibility} ` : 'public ';
       const staticPart = isStatic ? 'static ' : '';
       const readonly = kind === 'const' ? 'readonly ' : '';
-      const bang = init ? '' : '!';
+      const bang = init || readonly ? '' : '!';
       const mappedTypeBase = mapType(type);
       const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
@@ -169,6 +178,20 @@ function convertAs3ToTs(source) {
   const className = classMatch ? classMatch[4] : null;
   const hasExtends = Boolean(classMatch && classMatch[5]);
   let converted = stripped.source;
+
+  // Превращаем константы событий в строковые литералы (как это принято в JS/CreateJS)
+  converted = converted.replace(/\bMouseEvent\.CLICK\b/g, '"click"');
+  converted = converted.replace(/\bMouseEvent\.MOUSE_DOWN\b/g, '"mouseDown"');
+  converted = converted.replace(/\bMouseEvent\.MOUSE_UP\b/g, '"mouseUp"');
+  converted = converted.replace(/\bMouseEvent\.MOUSE_MOVE\b/g, '"mouseMove"');
+  converted = converted.replace(/\bMouseEvent\.MOUSE_OVER\b/g, '"mouseOver"');
+  converted = converted.replace(/\bMouseEvent\.MOUSE_OUT\b/g, '"mouseOut"');
+  converted = converted.replace(/\bMouseEvent\.ROLL_OVER\b/g, '"rollOver"');
+  converted = converted.replace(/\bMouseEvent\.ROLL_OUT\b/g, '"rollOut"');
+  converted = converted.replace(/\bEvent\.ENTER_FRAME\b/g, '"enterFrame"');
+  converted = converted.replace(/\bEvent\.COMPLETE\b/g, '"complete"');
+  converted = converted.replace(/\bEvent\.ADDED_TO_STAGE\b/g, '"addedToStage"');
+  converted = converted.replace(/\bEvent\.REMOVED_FROM_STAGE\b/g, '"removedFromStage"');
 
   converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
   converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*$/gm, '');
@@ -352,6 +375,10 @@ function convertAs3ToTs(source) {
     }
   );
   converted = converted.replace(/\b(let|const)\s+this\./g, '$1 ');
+
+  if (classMatch && className && !hasExtends) {
+    converted = converted.replace(/^\s*super\s*\([^)]*\)\s*;/gm, '');
+  }
 
   if (classMatch && className && hasExtends) {
     const constructorRegex = /(constructor\s*\([^)]*\)\s*\{)(?!\s*super\s*\()/g;
