@@ -256,13 +256,11 @@ function convertAs3ToTs(source) {
     }
   );
 
-  const classCastIgnoreList = new Set(['Array', 'Vector', 'Math', 'String', 'Number', 'Boolean']);
-  converted = converted.replace(/\b([A-Z][a-zA-Z0-9_]*)\(([^)]+)\)/g, (match, asClassName, inner, offset, whole) => {
-    if (classCastIgnoreList.has(asClassName)) return match;
-    const before = whole.slice(0, offset);
-    if (before.endsWith('.')) return match;
-    if (/\b(function|new)\s*$/.test(before)) return match;
-    return `(${inner} as unknown as ${asClassName})`;
+  // Keep casting rewrites narrow: broad `ClassName(x)` rewrites break legitimate
+  // crypto/math calls such as `F(xl)` or `MontgomeryReduction(...)`.
+  converted = converted.replace(/\b(String|Number|Boolean|Array)\(([^)]+)\)/g, (match, type, inner) => {
+    if (type === 'Array') return `(${inner} as unknown as any[])`;
+    return `${type}(${inner})`;
   });
 
   converted = converted.replace(/\b(?:int|uint)\(([^)]+)\)/g, 'Math.floor($1)');

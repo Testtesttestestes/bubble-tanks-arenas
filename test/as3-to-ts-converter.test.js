@@ -4,6 +4,8 @@ const assert = require('node:assert/strict');
 const { convertAs3ToTs, mapType, convertParams } = require('../tools/as3-to-ts/convert-as3-to-ts');
 const { extractClassScopePropertyNames, addThisToPropertyUsage } = require('../tools/as3-to-ts/fix-implicit-this');
 
+const { healFunctionParamThisPrefixes } = require('../tools/as3-to-ts/heal-signature-params');
+
 test('mapType maps primitive and special ActionScript types', () => {
   assert.equal(mapType('Number'), 'number');
   assert.equal(mapType('int'), 'number');
@@ -90,12 +92,16 @@ test('convertAs3ToTs prefixes frequent Flash API calls with this', () => {
 });
 
 test('convertAs3ToTs rewrites AS3 casts and int/uint casts', () => {
-  const input = `package\n{\n   public class Hud extends MovieClip\n   {\n      public function Hud()\n      {\n         var x:Number = int(scaleX);\n         var y:Number = uint(scaleY);\n         var p:MovieClip = MovieClip(parent);\n      }\n   }\n}`;
+  const input = `package\n{\n   public class Hud extends MovieClip\n   {\n      public function Hud()\n      {\n         var x:Number = int(scaleX);\n         var y:Number = uint(scaleY);\n         var p:MovieClip = MovieClip(parent);
+         var a:Array = Array(buffer);
+         var n:Number = Number(scaleX);\n      }\n   }\n}`;
 
   const output = convertAs3ToTs(input);
   assert.match(output, /let x: number = Math\.floor\(scaleX\);/);
   assert.match(output, /let y: number = Math\.floor\(scaleY\);/);
-  assert.match(output, /let p: MovieClip = \(parent as unknown as MovieClip\);/);
+  assert.match(output, /let p: MovieClip = MovieClip\(parent\);/);
+  assert.match(output, /let a: any\[] = \([^)]*as unknown as any\[]\);/);
+  assert.match(output, /let n: number = Number\(scaleX\);/);
 });
 
 
@@ -224,4 +230,41 @@ test('fix-implicit-this extracts class properties and prefixes usages', () => {
   const fixed = addThisToPropertyUsage(input, props);
   assert.match(fixed, /this\.x \+= 10;/);
   assert.match(fixed, /this\.alpha = 0\.5;/);
+});
+
+
+test('convertAs3ToTs does not rewrite uppercase method calls as class casts', () => {
+  const input = `package
+{
+   public class BlowFishKey
+   {
+      public function x() : void
+      {
+         var xr:Number = 0;
+         var xl:Number = 0;
+         xr ^= F(xl);
+      }
+
+      public function F(v:Number) : Number
+      {
+         return v;
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /F\(xl\)/);
+  assert.doesNotMatch(output, /as unknown as F/);
+});
+
+test('healFunctionParamThisPrefixes removes this. from function signatures only', () => {
+  const input = `export class HMAC {
+  constructor(this.hash: IHash, this.bits: number = 0) {
+    this.hash = this.hash;
+  }
+}`;
+
+  const output = healFunctionParamThisPrefixes(input);
+  assert.match(output, /constructor\(hash: IHash, bits: number = 0\)/);
+  assert.match(output, /this\.hash = this\.hash;/);
 });
