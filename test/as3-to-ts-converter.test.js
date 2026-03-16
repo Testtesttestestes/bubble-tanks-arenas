@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const ts = require('typescript');
 
 const { convertAs3ToTs, mapType, convertParams } = require('../tools/as3-to-ts/convert-as3-to-ts');
 const { extractClassScopePropertyNames, addThisToPropertyUsage, processFile } = require('../tools/as3-to-ts/fix-implicit-this');
@@ -379,6 +380,56 @@ test('convertAs3ToTs rewrites JSON package edge cases and primitive casts', () =
   assert.match(output, /value\s+as string/);
   assert.match(output, /value\s+as number/);
   assert.match(output, /value\s+as boolean/);
+});
+
+test('convertAs3ToTs keeps JSONTokenizer string switch syntactically valid', () => {
+  const tokenizerAsPath = path.join(
+    __dirname,
+    '..',
+    'binaryData',
+    'AGI decomp',
+    'scripts',
+    'com',
+    'adobe',
+    'serialization',
+    'json',
+    'JSONTokenizer.as'
+  );
+  const input = fs.readFileSync(tokenizerAsPath, 'utf8');
+  const output = convertAs3ToTs(input);
+
+  assert.match(output, /switch\(String\(this\.ch\)\)\s*\{/);
+  assert.match(output, /\n\s*default:\s*\n\s*_loc2_ \+= "\\\\" \+ this\.ch;/);
+
+  const source = ts.createSourceFile('JSONTokenizer.ts', output, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const diagnostics = source.parseDiagnostics;
+  assert.equal(diagnostics.length, 0, `Expected no parse diagnostics, got: ${diagnostics.map((d) => d.code).join(', ')}`);
+});
+
+test('convertAs3ToTs keeps JSONTokenizer readNumber block boundaries intact', () => {
+  const tokenizerAsPath = path.join(
+    __dirname,
+    '..',
+    'binaryData',
+    'AGI decomp',
+    'scripts',
+    'com',
+    'adobe',
+    'serialization',
+    'json',
+    'JSONTokenizer.as'
+  );
+  const input = fs.readFileSync(tokenizerAsPath, 'utf8');
+  const output = convertAs3ToTs(input);
+
+  assert.match(
+    output,
+    /if\(String\(this\.ch\) == "0"\)\s*\{[\s\S]*?this\.parseError\("A digit cannot immediately follow 0"\);[\s\S]*?\}\s*else\s*\{\s*while\(this\.isDigit\(this\.ch\)\)\s*\{/m
+  );
+  assert.match(
+    output,
+    /private readNumber\(\): JSONToken[\s\S]*?while\(this\.isDigit\(this\.ch\)\)\s*\{\s*_loc2_ \+= this\.ch;\s*this\.nextChar\(\);\s*\}/m
+  );
 });
 
 test('healFunctionParamThisPrefixes removes this. from function signatures only', () => {
