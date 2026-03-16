@@ -179,19 +179,32 @@ function convertAs3ToTs(source) {
   const hasExtends = Boolean(classMatch && classMatch[5]);
   let converted = stripped.source;
 
-  // Превращаем константы событий в строковые литералы (как это принято в JS/CreateJS)
-  converted = converted.replace(/\bMouseEvent\.CLICK\b/g, '"click"');
-  converted = converted.replace(/\bMouseEvent\.MOUSE_DOWN\b/g, '"mouseDown"');
-  converted = converted.replace(/\bMouseEvent\.MOUSE_UP\b/g, '"mouseUp"');
-  converted = converted.replace(/\bMouseEvent\.MOUSE_MOVE\b/g, '"mouseMove"');
-  converted = converted.replace(/\bMouseEvent\.MOUSE_OVER\b/g, '"mouseOver"');
-  converted = converted.replace(/\bMouseEvent\.MOUSE_OUT\b/g, '"mouseOut"');
-  converted = converted.replace(/\bMouseEvent\.ROLL_OVER\b/g, '"rollOver"');
-  converted = converted.replace(/\bMouseEvent\.ROLL_OUT\b/g, '"rollOut"');
-  converted = converted.replace(/\bEvent\.ENTER_FRAME\b/g, '"enterFrame"');
-  converted = converted.replace(/\bEvent\.COMPLETE\b/g, '"complete"');
-  converted = converted.replace(/\bEvent\.ADDED_TO_STAGE\b/g, '"addedToStage"');
-  converted = converted.replace(/\bEvent\.REMOVED_FROM_STAGE\b/g, '"removedFromStage"');
+  // Превращаем константы событий в строковые литералы
+  const eventMap = {
+    'MouseEvent.CLICK': '"click"',
+    'MouseEvent.DOUBLE_CLICK': '"dblclick"',
+    'MouseEvent.MOUSE_DOWN': '"mousedown"',
+    'MouseEvent.MOUSE_UP': '"mouseup"',
+    'MouseEvent.MOUSE_MOVE': '"mousemove"',
+    'MouseEvent.MOUSE_OVER': '"mouseover"',
+    'MouseEvent.MOUSE_OUT': '"mouseout"',
+    'MouseEvent.ROLL_OVER': '"mouseover"',
+    'MouseEvent.ROLL_OUT': '"mouseout"',
+    'FocusEvent.FOCUS_IN': '"focusin"',
+    'FocusEvent.FOCUS_OUT': '"focusout"',
+    'Event.ENTER_FRAME': '"enterframe"',
+    'Event.COMPLETE': '"complete"',
+    'Event.ADDED_TO_STAGE': '"addedtostage"',
+    'Event.REMOVED_FROM_STAGE': '"removedfromstage"',
+    'Event.CHANGE': '"change"',
+    'KeyboardEvent.KEY_DOWN': '"keydown"',
+    'KeyboardEvent.KEY_UP': '"keyup"'
+  };
+
+  for (const [as3Event, tsEvent] of Object.entries(eventMap)) {
+    const regex = new RegExp(`\\b${as3Event.replace(/\\./g, '\\\\.')}\\b`, 'g');
+    converted = converted.replace(regex, tsEvent);
+  }
 
   converted = converted.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
   converted = converted.replace(/^\s*use\s+namespace\s+[^;]+;\s*$/gm, '');

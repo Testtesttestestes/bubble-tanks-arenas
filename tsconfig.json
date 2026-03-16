@@ -13,6 +13,7 @@
   "include": [
     "migrated-ts/**/*.ts",
     "migrated-ts/**/*.d.ts",
-    "flash-shims.d.ts"
+    "flash-shims.d.ts",
+    "flash-globals.d.ts"
   ]
 }

@@ -152,7 +152,7 @@ function applyImports(file, symbolMap) {
   const hasHeader = source.startsWith('// AUTO-GENERATED AS3 TO TS CONVERSION');
   let updated;
   if (hasHeader) {
-    const m = source.match(/^(\/\/ AUTO-GENERATED AS3 TO TS CONVERSION\n\/\/[^\n]*\n\n)/);
+    const m = source.match(/^(\/\/ AUTO-GENERATED AS3 TO TS CONVERSION\r?\n\/\/[^\r\n]*\r?\n\r?\n)/);
     if (m) {
       updated = `${m[1]}${importLines}\n\n${source.slice(m[1].length)}`;
     } else {
