@@ -38,7 +38,7 @@ test('convertAs3ToTs converts EnemyAI-style class shape', () => {
   assert.match(output, /public var_435: number;/);
   assert.match(output, /constructor\(param1: TankData\)/);
   assert.match(output, /public Move\(\): void/);
-  assert.match(output, /let _loc1_: number = 10;/);
+  assert.match(output, /var _loc1_: number = 10;/);
 });
 
 test('convertAs3ToTs writes package header', () => {
@@ -97,11 +97,11 @@ test('convertAs3ToTs rewrites AS3 casts and int/uint casts', () => {
          var n:Number = Number(scaleX);\n      }\n   }\n}`;
 
   const output = convertAs3ToTs(input);
-  assert.match(output, /let x: number = Math\.floor\(scaleX\);/);
-  assert.match(output, /let y: number = Math\.floor\(scaleY\);/);
-  assert.match(output, /let p: MovieClip = MovieClip\(parent\);/);
-  assert.match(output, /let a: any\[] = \([^)]*as unknown as any\[]\);/);
-  assert.match(output, /let n: number = Number\(scaleX\);/);
+  assert.match(output, /var x: number = Math\.floor\(scaleX\);/);
+  assert.match(output, /var y: number = Math\.floor\(scaleY\);/);
+  assert.match(output, /var p: MovieClip = \(parent as unknown as MovieClip\);/);
+  assert.match(output, /var a: any\[] = \([^)]*as unknown as any\[]\);/);
+  assert.match(output, /var n: number = Number\(scaleX\);/);
 });
 
 
@@ -129,8 +129,8 @@ test('convertAs3ToTs applies parser-stabilization rewrites for E4X and vector ar
   assert.match(output, /xml\._attr_id/);
   assert.match(output, /xml\._descendants_node/);
   assert.match(output, /for \(let item of list\)/);
-  assert.match(output, /let nums: any\[] = \[1, 2, 3\];/);
-  assert.match(output, /let data: Record<string, any> = \(buffer[\s\S]*as any\[]\);/);
+  assert.match(output, /var nums: any\[] = \[1, 2, 3\];/);
+  assert.match(output, /var data: Record<string, any> = \(buffer[\s\S]*as any\[]\);/);
 });
 
 test('convertAs3ToTs rewrites typed for-each, bi_internal, catch typing, and include directives', () => {
