@@ -32,7 +32,7 @@ function extractClassScopeMembers(source) {
   }
 
   const className = classMatch[1];
-  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z0-9_$]+)/gm;
+  const memberRegex = /^[ \t]*(?:(public|private|protected)\s+)?(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)/gm;
   let match;
   while ((match = memberRegex.exec(source)) !== null) {
     const isStatic = !!match[2];
@@ -55,7 +55,12 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
     const prev = whole[offset - 1];
     if (prev === '.') return token;
     const left = whole.slice(Math.max(0, offset - 80), offset);
+    const lineStart = whole.lastIndexOf('\n', offset - 1) + 1;
+    const lineLeft = whole.slice(lineStart, offset);
+    const right = whole.slice(offset + token.length, Math.min(whole.length, offset + token.length + 20));
     if (blockedPrefix.test(left)) return token;
+    const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
+    if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;
     return `${prefixTarget}.${name}`;
   });
 }
