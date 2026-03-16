@@ -28,11 +28,11 @@ test('injects Flash built-in stubs into each converted file', () => {
   ].join('\n');
 
   const output = convertAs3ToTs(input);
-  assert.match(output, /type ByteArray = any;/);
-  assert.match(output, /type Sprite = any;/);
+  assert.match(output, /declare const ByteArray: any;/);
+  assert.match(output, /declare const Sprite: any;/);
   assert.match(output, /declare const flash: any;/);
-  assert.match(output, /type DebugUtil = any;/);
-  assert.match(output, /type Client = any;/);
+  assert.match(output, /declare const DebugUtil: any;/);
+  assert.match(output, /declare const Client: any;/);
 });
 
 test('maps AS3 Array types to any to support dynamic property access patterns', () => {
