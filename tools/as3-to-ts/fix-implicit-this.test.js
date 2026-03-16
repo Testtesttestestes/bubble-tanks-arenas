@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { parseTscLog, processFile } = require('./fix-implicit-this');
+const { parseTscLog, processFile, extractClassScopeMembers } = require('./fix-implicit-this');
 
 function lineColAt(source, needle) {
   const index = source.indexOf(needle);
@@ -48,3 +48,60 @@ test('second pass applies this. for TS2304 identifiers from migrated Parts sampl
   assert.equal(rerun, updated);
 });
 
+test('member extraction ignores local variables without visibility modifiers', () => {
+  const source = [
+    'export class Sample {',
+    '  public var_3: any;',
+    '  public tick(): void {',
+    '    var localThing = 0;',
+    '    for (let i = 0; i < 3; i++) {',
+    '      localThing += i;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const { instanceMembers, staticMembers } = extractClassScopeMembers(source);
+  assert.equal(instanceMembers.has('var_3'), true);
+  assert.equal(instanceMembers.has('tick'), true);
+  assert.equal(instanceMembers.has('localThing'), false);
+  assert.equal(instanceMembers.has('i'), false);
+  assert.equal(staticMembers.size, 0);
+});
+
+test('parseTscLog captures TS2662/TS2663 suggestions and applies forced prefixes', () => {
+  const source = [
+    'export class BigInteger {',
+    '  public static DB: number = 0;',
+    '  public test(): void {',
+    '    DB = 28;',
+    '    data = 1;',
+    '  }',
+    '  public data: number = 0;',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'BigInteger.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const staticPos = lineColAt(source, 'DB = 28;');
+  const instancePos = lineColAt(source, 'data = 1;');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    [
+      `${samplePath}(${staticPos.line},${staticPos.col}): error TS2662: Cannot find name 'DB'. Did you mean the static member 'BigInteger.DB'?`,
+      `${samplePath}(${instancePos.line},${instancePos.col}): error TS2663: Cannot find name 'data'. Did you mean the instance member 'BigInteger.data'?`
+    ].join('\n'),
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const first = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(first.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /BigInteger\.DB = 28;/);
+  assert.match(updated, /this\.data = 1;/);
+});
