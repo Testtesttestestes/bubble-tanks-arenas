@@ -422,6 +422,33 @@ function convertAs3ToTs(source) {
   // Убиваем TS2322: жесткое приведение ВСЕХ null-инициализаций
   converted = converted.replace(/=\s*null\s*([,;])/g, '= null as any$1');
 
+  // Раскрываем внутренние неймспейсы (актуально для BigInteger/bi_internal)
+  converted = converted.replace(/^(?:override\s+)?(?:public\s+|private\s+|protected\s+)?\w+_internal\s+(var|const|function|get|set)\b/gm, 'public $1');
+
+  // Принудительно задаем тип для массива 'a' в BigInteger, чтобы TS понимал индексацию
+  converted = converted.replace(/public\s+a\s*:\s*any(?:\[\])?;/g, 'public a: number[];');
+
+  // Лечим switch-касты в JSONTokenizer
+  converted = converted.replace(/switch\s*\(([^)]+)\)\s*\{/g, 'switch(String($1)) {');
+
+  // --- ТЕРМИНАТОР СИНТАКСИСА ---
+  // Лечим дикие подстановки 'this.' к зарезервированным словам, которые могли проскочить
+  converted = converted.replace(/\bthis\.if\b/g, 'if');
+  converted = converted.replace(/\bthis\.while\b/g, 'while');
+  converted = converted.replace(/\bthis\.switch\b/g, 'switch');
+  converted = converted.replace(/\bthis\.for\b/g, 'for');
+  converted = converted.replace(/\bthis\.catch\b/g, 'catch');
+  converted = converted.replace(/\bthis\.return\b/g, 'return');
+  converted = converted.replace(/\bthis\.super\b/g, 'super');
+
+  // Лечим баг декомпилятора с пустыми/мусорными стейтментами
+  converted = converted.replace(/^\s*undefined\s*;\s*$/gm, '');
+  converted = converted.replace(/^\s*null\s*;\s*$/gm, '');
+  converted = converted.replace(/^\s*NaN\s*;\s*$/gm, '');
+
+  // Защита от Error.name (TS2588)
+  converted = converted.replace(/^\s*name\s*=\s*(["'].*?["']);/gm, 'this.name = $1;');
+
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
     packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
