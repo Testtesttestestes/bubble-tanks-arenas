@@ -524,3 +524,68 @@ test('resolve-imports diagnostics include unresolved and provider candidates', (
   assert.ok(neededClient);
   assert.equal(neededClient.providers.length, 2);
 });
+
+test('resolve-imports treats class accessors as declared names', () => {
+  const declared = getDeclaredNames(`export class JSONToken {\n  private _value!: any;\n  public get value(): any { return this._value; }\n  public set value(param1: any) { this._value = param1; }\n}`);
+  assert.equal(declared.has('value'), true);
+});
+
+test('resolve-imports does not inject value import for JSONToken accessor usage', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'resolve-imports-json-token-'));
+  const encoder = path.join(tmp, 'JSONEncoder.ts');
+  const token = path.join(tmp, 'JSONToken.ts');
+
+  fs.writeFileSync(encoder, 'export class JSONEncoder {}\n', 'utf8');
+  fs.writeFileSync(token, `export class JSONToken {\n  private _value!: any;\n  public get value(): any {\n    return this._value;\n  }\n  public set value(param1: any) {\n    this._value = param1;\n  }\n}\n`, 'utf8');
+
+  const symbolMap = buildSymbolMap([encoder, token]);
+  const changed = applyImports(token, symbolMap);
+  const updated = fs.readFileSync(token, 'utf8');
+
+  assert.equal(changed, false);
+  assert.doesNotMatch(updated, /import \{ value \} from '\.\/JSONEncoder';/);
+});
+
+test('resolve-imports prefers nearest provider for conflicting Base64 symbols', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'resolve-imports-base64-'));
+  const hurlantBase64 = path.join(tmp, 'com', 'hurlant', 'util', 'Base64.ts');
+  const agBase64 = path.join(tmp, 'com', 'armorgames', 'services', 'compression', 'Base64.ts');
+  const agi = path.join(tmp, 'com', 'armorgames', 'AGI.ts');
+
+  fs.mkdirSync(path.dirname(hurlantBase64), { recursive: true });
+  fs.mkdirSync(path.dirname(agBase64), { recursive: true });
+
+  fs.writeFileSync(hurlantBase64, 'export class Base64 {\n  public static encode(_v: any): string { return ""; }\n}\n', 'utf8');
+  fs.writeFileSync(agBase64, 'export class Base64 {\n  public static Encode(_v: any): string { return ""; }\n}\n', 'utf8');
+  fs.writeFileSync(agi, 'export class AGI {\n  public login(v: any): string {\n    return Base64.Encode(v);\n  }\n}\n', 'utf8');
+
+  const symbolMap = buildSymbolMap([hurlantBase64, agBase64, agi]);
+  const changed = applyImports(agi, symbolMap);
+  const updated = fs.readFileSync(agi, 'utf8');
+
+  assert.equal(changed, true);
+  assert.match(updated, /import \{ Base64 \} from '\.\/services\/compression\/Base64';/);
+});
+
+test('resolve-imports does not auto-import int pseudo-type from external modules', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'resolve-imports-int-'));
+  const intProvider = path.join(tmp, 'types', 'int.ts');
+  const agi = path.join(tmp, 'AGI.ts');
+
+  fs.mkdirSync(path.dirname(intProvider), { recursive: true });
+  fs.writeFileSync(intProvider, 'export const int = { MAX_VALUE: 2147483647 };\n', 'utf8');
+  fs.writeFileSync(agi, 'export class AGI {\n  public submit(score: number): string {\n    return score > int.MAX_VALUE ? "too high" : "ok";\n  }\n}\n', 'utf8');
+
+  const symbolMap = buildSymbolMap([intProvider, agi]);
+  const analysis = analyzeFile(agi, symbolMap);
+
+  const unresolvedInt = analysis.unresolved.find((item) => item.id === 'int');
+  const neededInt = analysis.needed.find((item) => item.id === 'int');
+  assert.equal(unresolvedInt, undefined);
+  assert.equal(neededInt, undefined);
+  const changed = applyImports(agi, symbolMap);
+  const updated = fs.readFileSync(agi, 'utf8');
+
+  assert.equal(changed, false);
+  assert.doesNotMatch(updated, /import \{ int \} from/);
+});
