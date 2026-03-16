@@ -246,9 +246,9 @@ test('convertAs3ToTs repairs accidental this.default switch labels', () => {
 });
 
 test('convertAs3ToTs injects dynamic index signature for converted classes', () => {
-  const input = `package
+  const dynamicInput = `package
 {
-   public class DynamicLike extends MovieClip
+   public dynamic class DynamicLike extends MovieClip
    {
       public function DynamicLike()
       {
@@ -257,8 +257,22 @@ test('convertAs3ToTs injects dynamic index signature for converted classes', () 
    }
 }`;
 
-  const output = convertAs3ToTs(input);
-  assert.match(output, /export class DynamicLike extends MovieClip[\s\S]*\{\n  \[key: string\]: any;/);
+  const regularInput = `package
+{
+   public class RegularLike extends MovieClip
+   {
+      public function RegularLike()
+      {
+         this.var_3 = 1;
+      }
+   }
+}`;
+
+  const dynamicOutput = convertAs3ToTs(dynamicInput);
+  assert.match(dynamicOutput, /export class DynamicLike extends MovieClip[\s\S]*\{\n  \[key: string\]: any;/);
+
+  const regularOutput = convertAs3ToTs(regularInput);
+  assert.doesNotMatch(regularOutput, /\[key: string\]: any;/);
 });
 
 test('convertAs3ToTs strips this. from reserved visibility keywords', () => {
