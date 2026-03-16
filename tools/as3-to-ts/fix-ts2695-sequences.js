@@ -201,18 +201,36 @@ function hasAssignmentLikeExpression(expression) {
 }
 
 function transformBase64CommaAssignments(source) {
-  const pattern = /\(([A-Za-z0-9_$.]+\s*=[^,]+),\s*([^)]+)\)/g;
-  let output = source;
+  let cursor = 0;
+  let output = '';
   let replacements = 0;
-  let changed = true;
 
-  while (changed) {
-    changed = false;
-    output = output.replace(pattern, (match, assignment, result) => {
+  while (cursor < source.length) {
+    const openParen = source.indexOf('(', cursor);
+    if (openParen === -1) {
+      output += source.slice(cursor);
+      break;
+    }
+
+    const closeParen = findMatchingParen(source, openParen);
+    if (closeParen === -1) {
+      output += source.slice(cursor);
+      break;
+    }
+
+    const inner = source.slice(openParen + 1, closeParen);
+    const expressions = splitTopLevelComma(inner);
+
+    if (expressions.length === 2 && hasAssignmentLikeExpression(expressions[0])) {
+      output += source.slice(cursor, openParen);
+      output += `(() => { ${expressions[0]}; return ${expressions[1]}; })()`;
+      cursor = closeParen + 1;
       replacements += 1;
-      changed = true;
-      return `(() => { ${assignment}; return ${result}; })()`;
-    });
+      continue;
+    }
+
+    output += source.slice(cursor, closeParen + 1);
+    cursor = closeParen + 1;
   }
 
   return { content: output, replacements };

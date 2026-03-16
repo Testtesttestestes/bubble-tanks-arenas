@@ -197,3 +197,34 @@ test('does not prefix type keyword in type alias declarations but prefixes membe
   assert.match(updated, /this\.type = 1;/);
   assert.doesNotMatch(updated, /this\.type Example = string;/);
 });
+
+
+test('diagnostic column targeting fixes the intended token in dense expressions', () => {
+  const source = [
+    'export class MontgomeryReduction {',
+    '  public mp: number = 0;',
+    '  public run(v: number): number {',
+    '    return ((mp = (v + 1)), mp);',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'MontgomeryReduction.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const firstMp = lineColAt(source, 'mp = (v + 1)');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    `${samplePath}(${firstMp.line},${firstMp.col}): error TS2663: Cannot find name 'mp'. Did you mean the instance member 'MontgomeryReduction.mp'?`,
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const result = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /\(\(this\.mp = \(v \+ 1\)\), this\.mp\)/);
+});

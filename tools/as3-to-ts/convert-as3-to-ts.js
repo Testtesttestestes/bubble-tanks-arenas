@@ -34,7 +34,10 @@ const FLASH_STUB_CLASSES = [
   'ApplicationDomain',
   'ContextMenu',
   'ContextMenuItem',
-  'Dictionary'
+  'Dictionary',
+  'Security',
+  'ExternalInterface',
+  'System'
 ];
 
 const FLASH_STUB_HEADER = [
@@ -191,7 +194,7 @@ function convertClassMembers(source, className, isDynamicClass = false) {
   // Keep migrated classes "dynamic"-friendly: timeline/decompiler code often writes
   // undeclared fields directly on `this` (e.g. `this.var_3`, `this.btnX_mc`).
   // Inject a permissive index signature once per class body to avoid TS2339 floods.
-  const classHeaderMatch = out.match(/^\s*export\s+class\s+\w+[^\{]*\{/m);
+  const classHeaderMatch = out.match(/^\s*(?:export\s+)?class\s+\w+[^\{]*\{/m);
   if (classHeaderMatch && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
     out = out.replace(classHeaderMatch[0], `${classHeaderMatch[0]}\n  [key: string]: any;`);
   }
@@ -462,14 +465,14 @@ function convertAs3ToTs(source) {
 
   // Inject undeclared local variables produced by AS3 decompilers (_loc1_, _loc2_, ...).
   converted = converted.replace(
-    /^(\s*)(?:(?:override|public|private|protected|static|internal)\s+)*function\s+\w+\s*\([^)]*\)\s*(?::\s*[^\{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
+    /^(\s*)(?:(?:override|public|private|protected|static|internal|readonly|async)\s+)*(?:function\s+)?\w+\s*\([^)]*\)\s*(?::\s*[^\{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
     (match, fnIndent, body) => {
-      const locMatches = [...body.matchAll(/\b(_loc\d+_)\b/g)];
+      const locMatches = [...body.matchAll(/\b(_loc\d+_?|var_\d+)\b/g)];
       if (locMatches.length === 0) return match;
 
       const uniqueLocs = [...new Set(locMatches.map((m) => m[1]))];
       const declaredLocs = new Set(
-        [...body.matchAll(/\b(?:let|var|const)\s+(_loc\d+_)\b/g)].map((m) => m[1])
+        [...body.matchAll(/\b(?:let|var|const)\s+(_loc\d+_?|var_\d+)\b/g)].map((m) => m[1])
       );
       const undeclaredLocs = uniqueLocs.filter((loc) => !declaredLocs.has(loc));
       if (undeclaredLocs.length === 0) return match;

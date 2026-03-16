@@ -187,6 +187,41 @@ function isTypeLikeContext(source, index) {
   return false;
 }
 
+
+function isIdentifierChar(ch) {
+  return /[A-Za-z0-9_$]/.test(ch || '');
+}
+
+function findDiagnosticTokenIndex(source, diagnostic, lineStarts) {
+  const lineStartIndex = lineStarts[diagnostic.line - 1];
+  const lineEndIndex = lineStarts[diagnostic.line] || source.length;
+  const lineText = source.slice(lineStartIndex, lineEndIndex);
+
+  const columnIndex = Math.max(0, diagnostic.col - 1);
+  const fromColumn = lineText.slice(columnIndex);
+  const nameRegex = new RegExp(`\b${escapeRegExp(diagnostic.name)}\b`);
+  const direct = fromColumn.match(nameRegex);
+  if (direct && direct.index !== undefined) {
+    const index = lineStartIndex + columnIndex + direct.index;
+    const prev = source[index - 1] || '';
+    const next = source[index + diagnostic.name.length] || '';
+    if (!isIdentifierChar(prev) && !isIdentifierChar(next)) {
+      return index;
+    }
+  }
+
+  const fallbackRegex = new RegExp(`\b${escapeRegExp(diagnostic.name)}\b`, 'g');
+  let match;
+  while ((match = fallbackRegex.exec(lineText)) !== null) {
+    const index = lineStartIndex + match.index;
+    const prev = source[index - 1] || '';
+    if (prev === '.') continue;
+    return index;
+  }
+
+  return -1;
+}
+
 function applyDiagnosticThisFixes(source, diagnostics) {
   if (!diagnostics || diagnostics.length === 0) return source;
   const importedNames = parseImportNames(source);
@@ -359,6 +394,7 @@ module.exports = {
   extractClassScopePropertyNames,
   addThisToPropertyUsage,
   applyDiagnosticThisFixes,
+  findDiagnosticTokenIndex,
   parseTscLog,
   processFile,
   collectTsFiles
