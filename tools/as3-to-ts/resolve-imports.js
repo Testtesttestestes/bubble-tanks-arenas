@@ -22,6 +22,8 @@ const FLASH_TYPES = new Set([
   'URLRequest', 'Loader', 'ByteArray', 'Dictionary', 'XML', 'XMLList'
 ]);
 
+const PSEUDO_TYPES = new Set(['int', 'uint']);
+
 function collectTsFiles(inputPath) {
   const stat = fs.statSync(inputPath);
   if (stat.isFile()) return [inputPath];
@@ -76,6 +78,7 @@ function getDeclaredNames(source) {
     /^\s*(?:class|interface|type|enum)\s+([A-Za-z_$][\w$]*)\b/gm,
     /\b(?:const|let|var|function)\s+([A-Za-z_$][\w$]*)\b/gm,
     /\b(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*!?\s*:/gm,
+    /^\s*(?:public|private|protected)?\s*(?:static\s+)?(?:get|set)\s+([A-Za-z_$][\w$]*)\b/gm,
     /^\s*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*(?::\s*[^\s{]+)?\s*\{/gm,
     /\b(?:constructor)\s*\(([^)]*)\)/gm
   ];
@@ -156,9 +159,21 @@ function chooseProvider(file, id, providers, existingImports) {
   const nonSelfProviders = providers.filter((p) => p !== file);
   if (nonSelfProviders.length === 0) return null;
 
+  const fileSegments = path.dirname(file).split(path.sep);
+  const commonPrefixLen = (providerPath) => {
+    const providerSegments = path.dirname(providerPath).split(path.sep);
+    let i = 0;
+    while (i < fileSegments.length && i < providerSegments.length && fileSegments[i] === providerSegments[i]) i += 1;
+    return i;
+  };
+
   return nonSelfProviders
     .slice()
     .sort((a, b) => {
+      const commonA = commonPrefixLen(a);
+      const commonB = commonPrefixLen(b);
+      if (commonA !== commonB) return commonB - commonA;
+
       const relA = relativeImport(file, a);
       const relB = relativeImport(file, b);
       const depthA = relA.split('/').length;
@@ -197,6 +212,7 @@ function analyzeFile(file, symbolMap) {
   const seen = new Set();
 
   for (const id of used) {
+    if (PSEUDO_TYPES.has(id)) continue;
     if (declared.has(id) || knownMembers.has(id)) continue;
     const providers = symbolMap.get(id) || [];
     const target = chooseProvider(file, id, providers, existingImports);
