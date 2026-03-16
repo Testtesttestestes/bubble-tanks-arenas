@@ -105,3 +105,40 @@ test('parseTscLog captures TS2662/TS2663 suggestions and applies forced prefixes
   assert.match(updated, /BigInteger\.DB = 28;/);
   assert.match(updated, /this\.data = 1;/);
 });
+
+test('TS2662/TS2663 forced prefixes are applied outside methods (e.g. static blocks)', () => {
+  const source = [
+    'export class BigInteger {',
+    '  public static DB: number = 0;',
+    '  public static t: number = 0;',
+    '  static {',
+    '    DB = 28;',
+    '    t = 52;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'BigInteger.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const dbPos = lineColAt(source, 'DB = 28;');
+  const tPos = lineColAt(source, 't = 52;');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    [
+      `${samplePath}(${dbPos.line},${dbPos.col}): error TS2662: Cannot find name 'DB'. Did you mean the static member 'BigInteger.DB'?`,
+      `${samplePath}(${tPos.line},${tPos.col}): error TS2662: Cannot find name 't'. Did you mean the static member 'BigInteger.t'?`
+    ].join('\n'),
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const result = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /BigInteger\.DB = 28;/);
+  assert.match(updated, /BigInteger\.t = 52;/);
+});

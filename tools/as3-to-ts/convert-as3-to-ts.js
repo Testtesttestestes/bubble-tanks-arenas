@@ -3,6 +3,44 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+const FLASH_STUB_HEADER = [
+  '// Flash built-ins compatibility stubs (AUTO-INJECTED)',
+  'type ByteArray = any;',
+  'type Endian = any;',
+  'type Matrix = any;',
+  'type Point = any;',
+  'type Rectangle = any;',
+  'type DisplayObject = any;',
+  'type DisplayObjectContainer = any;',
+  'type InteractiveObject = any;',
+  'type MovieClip = any;',
+  'type Sprite = any;',
+  'type Shape = any;',
+  'type Bitmap = any;',
+  'type BitmapData = any;',
+  'type Loader = any;',
+  'type URLRequest = any;',
+  'type Event = any;',
+  'type MouseEvent = any;',
+  'type KeyboardEvent = any;',
+  'type FocusEvent = any;',
+  'type TimerEvent = any;',
+  'type TextField = any;',
+  'type TextFormat = any;',
+  'type Graphics = any;',
+  'type Sound = any;',
+  'type SoundChannel = any;',
+  'type SoundTransform = any;',
+  'type Stage = any;',
+  'type ApplicationDomain = any;',
+  'type ContextMenu = any;',
+  'type ContextMenuItem = any;',
+  'type Dictionary = any;',
+  'declare const flash: any;',
+  'declare const getDefinitionByName: any;',
+  'declare const describeType: any;'
+].join('\n');
+
 function mapType(asType) {
   const raw = (asType || '').trim();
   if (!raw || raw === '*') return 'any';
@@ -535,7 +573,7 @@ function convertAs3ToTs(source) {
     packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
   ].join('\n');
 
-  return `${header}\n\n${converted.trim()}\n`;
+  return `${header}\n\n${FLASH_STUB_HEADER}\n\n${converted.trim()}\n`;
 }
 
 function collectAsFiles(inputPath) {
