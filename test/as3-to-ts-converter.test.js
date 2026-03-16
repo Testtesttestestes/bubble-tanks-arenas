@@ -23,6 +23,11 @@ test('convertParams strips decompiler this. prefixes from parameter names', () =
   assert.equal(converted, 'hash: IHash, bits: number = 0');
 });
 
+test('convertParams coerces null defaults for number/boolean params', () => {
+  const converted = convertParams('this.n:int = null, this.flag:Boolean = null');
+  assert.equal(converted, 'n: number = 0 /* null */, flag: boolean = 0 /* null */');
+});
+
 test('convertAs3ToTs converts EnemyAI-style class shape', () => {
   const input = `package\n{\n   public class EnemyAI extends class_113\n   {\n      internal var var_435:Number;\n\n      public function EnemyAI(param1:TankData)\n      {\n         super(param1);\n      }\n\n      override public function Move() : void\n      {\n         var _loc1_:Number = 10;\n      }\n   }\n}`;
 

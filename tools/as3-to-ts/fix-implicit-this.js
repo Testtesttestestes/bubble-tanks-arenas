@@ -13,6 +13,7 @@ function escapeRegExp(value) {
 
 function extractClassScopePropertyNames(source) {
   const props = new Set();
+  const forbiddenNames = new Set(['public', 'private', 'protected', 'static', 'readonly', 'constructor']);
   const classBodyMatch = source.match(/\bclass\s+\w+[^{]*\{([\s\S]*)\}\s*$/m);
   if (!classBodyMatch) return props;
 
@@ -20,7 +21,7 @@ function extractClassScopePropertyNames(source) {
     const match = line.match(/^\s*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*:/);
     if (!match) continue;
     const propName = match[1];
-    if (!isIdentifier(propName)) continue;
+    if (!isIdentifier(propName) || forbiddenNames.has(propName)) continue;
     props.add(propName);
   }
 
@@ -33,10 +34,15 @@ function addThisToPropertyUsage(source, propertyNames) {
     const re = new RegExp(`(^|[^.\\w$])(${escapeRegExp(propertyName)})\\b`, 'gm');
     fixed = fixed.replace(re, (match, prefix, token, offset, whole) => {
       const before = whole.slice(Math.max(0, offset - 40), offset + prefix.length);
+      const lineStart = whole.lastIndexOf('\n', offset) + 1;
+      const linePrefix = whole.slice(lineStart, offset + prefix.length);
       if (/\b(?:const|let|var|function|class|interface|type|new|import|export|extends|implements)\s*$/.test(before)) {
         return match;
       }
       if (/\b(?:public|private|protected|readonly|static)\s*$/.test(before)) {
+        return match;
+      }
+      if (/\b(?:constructor|function|get|set)\b[^\n{]*$/.test(linePrefix)) {
         return match;
       }
       return `${prefix}this.${token}`;

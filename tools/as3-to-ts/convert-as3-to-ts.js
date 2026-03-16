@@ -34,8 +34,8 @@ function convertParams(paramString) {
     .map((part) => part.trim())
     .filter(Boolean)
     .map((param) => {
-      // Safely consume leading 'this.' from variables that were mangled by decompilers or downstream scripts
-      const match = param.match(/^(\.{3})?(?:this\.)?(\w+)(?:\s*:\s*([^=]+?))?(?:\s*=\s*(.+))?$/);
+      // Aggressively consume `this.` prefixes from decompiled AS3 parameter names.
+      const match = param.match(/^(\.{3})?(?:this\.)?([a-zA-Z0-9_]+)\s*(?::\s*([^=]+))?(?:\s*=\s*(.+))?$/);
       if (!match) return param;
       const [, rest, name, type, defaultValue] = match;
       const mapped = type ? mapType(type) : 'any';
@@ -43,7 +43,9 @@ function convertParams(paramString) {
       let suffix = '';
       if (defaultValue) {
         let dv = defaultValue.trim();
-        if (dv === 'null' && mapped !== 'any') {
+        if (dv === 'null' && (mapped === 'number' || mapped === 'boolean')) {
+          dv = '0 /* null */';
+        } else if (dv === 'null' && mapped !== 'any') {
           dv = 'null as any';
         }
         suffix = ` = ${dv}`;
@@ -208,6 +210,14 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bas\s+([A-Za-z_][\w\.]*)/g, ' as unknown as $1');
 
   converted = converted.replace(/\btrace\(/g, 'console.log(');
+  converted = converted.replace(/\b(?:public|private|protected|internal)::([a-zA-Z0-9_]+)/g, 'this.$1');
+
+  // BigInteger/decompiler artifacts: normalize malformed this.-prefixed locals/accessors.
+  converted = converted.replace(/var\s+this\.([a-zA-Z0-9_]+)/g, 'let $1');
+  converted = converted.replace(/function\s+(get|set)\s+this\.([a-zA-Z0-9_]+)/g, '$1 $2');
+  converted = converted.replace(/^\s*(true|false);\s*$/gm, '');
+  converted = converted.replace(/\(\s*this\s*:\s*[^,)]+\s*,\s*/g, '(');
+  converted = converted.replace(/\(\s*this\s*:\s*[^,)]+\s*\)/g, '()');
 
   // Some decompiled casts arrive as empty constructor/call args: `foo( as T)`.
   // Normalize them after cast expansion so TS parser remains valid.
