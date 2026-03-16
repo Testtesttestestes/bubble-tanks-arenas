@@ -9,7 +9,10 @@ function healFunctionParamThisPrefixes(source) {
   // 1. Remove accidental this.default: in switch statements.
   content = content.replace(/\bthis\.default\s*:/g, 'default:');
 
-  // 2. Heal parameters in standard TS class methods.
+  // 2. Remove accidental this. prefixes from TS access modifiers.
+  content = content.replace(/\bthis\.(public|private|protected|static|readonly|override)\b/g, '$1');
+
+  // 3. Heal parameters in standard TS class methods.
   content = content.replace(
     /^(\s*(?:(?:public|private|protected|static|abstract|get|set|override|async)\s+)*)([a-zA-Z0-9_$]+)\s*\(([^)]*)\)/gm,
     (match, modifiers, name, params) => {
@@ -17,21 +20,23 @@ function healFunctionParamThisPrefixes(source) {
         return match;
       }
 
-      const healedParams = params.replace(/\bthis\.([a-zA-Z0-9_]+)/g, '$1');
+      let healedParams = params.replace(/\bthis\.([a-zA-Z0-9_]+)/g, '$1');
+      healedParams = healedParams.replace(/\s+as\s+(?:unknown\s+as\s+)?[a-zA-Z0-9_.]+/g, '');
       return `${modifiers}${name}(${healedParams})`;
     }
   );
 
-  // 3. Heal constructor params separately.
+  // 4. Heal constructor params separately.
   content = content.replace(
     /^(\s*)constructor\s*\(([^)]*)\)/gm,
     (match, indent, params) => {
-      const healedParams = params.replace(/\bthis\.([a-zA-Z0-9_]+)/g, '$1');
+      let healedParams = params.replace(/\bthis\.([a-zA-Z0-9_]+)/g, '$1');
+      healedParams = healedParams.replace(/\s+as\s+(?:unknown\s+as\s+)?[a-zA-Z0-9_.]+/g, '');
       return `${indent}constructor(${healedParams})`;
     }
   );
 
-  // 4. Heal inline function declarations.
+  // 5. Heal inline function declarations.
   content = content.replace(
     /\bfunction\s*(?:[a-zA-Z0-9_$]+)?\s*\(([^)]*)\)/g,
     (match, params) => {
