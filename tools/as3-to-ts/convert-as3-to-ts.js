@@ -390,6 +390,7 @@ function parseArgs(argv) {
 function runCli() {
   const args = parseArgs(process.argv);
   const files = collectAsFiles(args.input);
+  let convertedFiles = 0;
 
   if (files.length === 0) {
     console.log('No .as files found.');
@@ -405,8 +406,10 @@ function runCli() {
     const target = path.join(args.output, rel).replace(/\.as$/i, '.ts');
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, converted, 'utf8');
-    console.log(`Converted: ${file} -> ${target}`);
+    convertedFiles += 1;
   }
+
+  console.log(`converted ${convertedFiles}/${files.length}`);
 }
 
 module.exports = {
