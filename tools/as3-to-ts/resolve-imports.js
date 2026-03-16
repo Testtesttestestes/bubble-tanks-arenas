@@ -44,7 +44,7 @@ function buildSymbolMap(files) {
   const map = new Map();
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
-    const matches = source.matchAll(/^\s*export\s+(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/gm);
+    const matches = source.matchAll(/^\s*(?:export\s+)?(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/gm);
     for (const match of matches) {
       const name = match[1];
       if (!map.has(name)) map.set(name, []);

@@ -36,6 +36,8 @@ const FLASH_STUB_HEADER = [
   'type ContextMenu = any;',
   'type ContextMenuItem = any;',
   'type Dictionary = any;',
+  'type DebugUtil = any;',
+  'type Client = any;',
   'declare const flash: any;',
   'declare const getDefinitionByName: any;',
   'declare const describeType: any;'
@@ -52,7 +54,7 @@ function mapType(asType) {
     ['uint', 'number'],
     ['Boolean', 'boolean'],
     ['String', 'string'],
-    ['Array', 'any[]'],
+    ['Array', 'any'],
     ['Object', 'Record<string, any>'],
     ['void', 'void'],
     ['*', 'any'],
@@ -104,6 +106,7 @@ function convertParams(paramString) {
 
 function convertClassMembers(source, className, isDynamicClass = false) {
   let out = source;
+  const FLASH_DISPLAY_ACCESSORS = new Set(['x', 'y', 'width', 'height', 'scaleX', 'scaleY', 'rotation', 'alpha', 'visible']);
 
   const normalizeModifiers = (modifiers) => {
     const allowed = new Set(['public', 'private', 'protected', 'static', 'readonly']);
@@ -172,10 +175,11 @@ function convertClassMembers(source, className, isDynamicClass = false) {
       const normalizedMods = normalizeModifiers(modifiers);
       const paramList = convertParams(params);
       const mappedReturn = returnType ? mapType(returnType) : 'any';
+      const tsIgnore = FLASH_DISPLAY_ACCESSORS.has(name) ? `${indent}// @ts-ignore - AS3 override of Flash display property accessor\n` : '';
       if (accessorKind === 'get') {
-        return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}get ${name}(): ${mappedReturn}`;
+        return `${tsIgnore}${indent}${normalizedMods ? `${normalizedMods} ` : ''}get ${name}(): ${mappedReturn}`;
       }
-      return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}set ${name}(${paramList})`;
+      return `${tsIgnore}${indent}${normalizedMods ? `${normalizedMods} ` : ''}set ${name}(${paramList})`;
     }
   );
 
