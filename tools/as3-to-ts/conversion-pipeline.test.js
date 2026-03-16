@@ -45,6 +45,24 @@ test('conversion pipeline runs end-to-end and collect-tsc-stats analyzes generat
   runNode('fix-implicit-this.js', ['--input', outputDir]);
   runNode('heal-signature-params.js', ['--input', outputDir]);
   runNode('fix-class-signatures.js', ['--input', outputDir, '--scope', 'agi']);
+
+  const malformedTsPath = path.join(outputDir, 'ManualMalformed.ts');
+  fs.writeFileSync(
+    malformedTsPath,
+    [
+      'export class ManualMalformed {',
+      '  public {',
+      '    return 1;',
+      '  }',
+      '}'
+    ].join('\n'),
+    'utf8'
+  );
+
+  runNode('fix-class-signatures.js', ['--input', outputDir, '--scope', 'agi']);
+  const fixedManualMalformed = fs.readFileSync(malformedTsPath, 'utf8');
+  assert.match(fixedManualMalformed, /public __fixedSignature\(\): any \{/);
+
   runNode('fix-ts2695-sequences.js', ['--input', outputDir]);
   runNode('resolve-imports.js', ['--input', outputDir]);
 

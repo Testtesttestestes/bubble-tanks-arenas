@@ -27,13 +27,14 @@ function fixClassSignatures(source) {
 
 function collectTsFiles(inputPath, scope) {
   const targetPath = scope ? path.join(inputPath, scope) : inputPath;
-  if (!fs.existsSync(targetPath)) return [];
+  const effectivePath = (!scope || fs.existsSync(targetPath)) ? targetPath : inputPath;
+  if (!fs.existsSync(effectivePath)) return [];
 
-  const stat = fs.statSync(targetPath);
-  if (stat.isFile()) return [targetPath];
+  const stat = fs.statSync(effectivePath);
+  if (stat.isFile()) return [effectivePath];
 
   const files = [];
-  const stack = [targetPath];
+  const stack = [effectivePath];
 
   while (stack.length > 0) {
     const current = stack.pop();
