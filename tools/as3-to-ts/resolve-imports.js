@@ -114,6 +114,21 @@ function getUsedIdentifiers(source) {
   return used;
 }
 
+function normalizeLineEndings(source) {
+  return {
+    hasCrlf: source.includes('\r\n'),
+    text: source.replace(/\r\n/g, '\n')
+  };
+}
+
+function collectKnownMembers(source) {
+  const known = new Set();
+  for (const m of source.matchAll(/\b(?:this|[A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\b/g)) {
+    known.add(m[1]);
+  }
+  return known;
+}
+
 function relativeImport(fromFile, toFile) {
   let rel = path.relative(path.dirname(fromFile), toFile).replace(/\\/g, '/');
   rel = rel.replace(/\.ts$/i, '');
@@ -122,25 +137,46 @@ function relativeImport(fromFile, toFile) {
 }
 
 function applyImports(file, symbolMap) {
-  const source = fs.readFileSync(file, 'utf8');
+  const originalSource = fs.readFileSync(file, 'utf8');
+  const normalized = normalizeLineEndings(originalSource);
+  const source = normalized.text;
+
   const declared = getDeclaredNames(source);
   const used = getUsedIdentifiers(source);
+  const knownMembers = collectKnownMembers(source);
+
+  const existingImports = new Map();
+  for (const m of source.matchAll(/^\s*import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"];?\s*$/gm)) {
+    const names = m[1].split(',').map((v) => v.trim()).filter(Boolean);
+    const from = m[2];
+    if (!existingImports.has(from)) existingImports.set(from, new Set());
+    for (const n of names) existingImports.get(from).add(n);
+  }
+
   const needed = [];
+  const seen = new Set();
 
   for (const id of used) {
-    if (declared.has(id)) continue;
+    if (declared.has(id) || knownMembers.has(id)) continue;
     const providers = symbolMap.get(id);
     if (!providers || providers.length === 0) continue;
-    const target = providers.find((p) => p !== file);
-    if (!target) continue;
-    needed.push({ id, from: relativeImport(file, target) });
+    const target = providers.find((p) => p !== file) || providers[0];
+    if (!target || target === file) continue;
+
+    const from = relativeImport(file, target);
+    if (existingImports.get(from)?.has(id)) continue;
+
+    const key = `${from}::${id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    needed.push({ id, from });
   }
 
   if (needed.length === 0) return false;
 
   const grouped = new Map();
   for (const item of needed) {
-    if (!grouped.has(item.from)) grouped.set(item.from, new Set());
+    if (!grouped.has(item.from)) grouped.set(item.from, new Set(existingImports.get(item.from) || []));
     grouped.get(item.from).add(item.id);
   }
 
@@ -152,7 +188,7 @@ function applyImports(file, symbolMap) {
   const hasHeader = source.startsWith('// AUTO-GENERATED AS3 TO TS CONVERSION');
   let updated;
   if (hasHeader) {
-    const m = source.match(/^(\/\/ AUTO-GENERATED AS3 TO TS CONVERSION\r?\n\/\/[^\r\n]*\r?\n\r?\n)/);
+    const m = source.match(/^(\/\/ AUTO-GENERATED AS3 TO TS CONVERSION\n\/\/[^\n]*\n\n)/);
     if (m) {
       updated = `${m[1]}${importLines}\n\n${source.slice(m[1].length)}`;
     } else {
@@ -162,7 +198,8 @@ function applyImports(file, symbolMap) {
     updated = `${importLines}\n\n${source}`;
   }
 
-  fs.writeFileSync(file, updated, 'utf8');
+  const finalText = normalized.hasCrlf ? updated.replace(/\n/g, '\r\n') : updated;
+  fs.writeFileSync(file, finalText, 'utf8');
   return true;
 }
 
