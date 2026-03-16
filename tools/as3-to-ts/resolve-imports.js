@@ -44,7 +44,7 @@ function buildSymbolMap(files) {
   const map = new Map();
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
-    const matches = source.matchAll(/^\s*export\s+(?:class|interface|type|enum)\s+([A-Za-z_$][\w$]*)\b/gm);
+    const matches = source.matchAll(/^\s*export\s+(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/gm);
     for (const match of matches) {
       const name = match[1];
       if (!map.has(name)) map.set(name, []);
@@ -69,7 +69,7 @@ function getDeclaredNames(source) {
     /^\s*(?:class|interface|type|enum)\s+([A-Za-z_$][\w$]*)\b/gm,
     /\b(?:const|let|var|function)\s+([A-Za-z_$][\w$]*)\b/gm,
     /\b(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*:/gm,
-    /\b(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\(/gm,
+    /^\s*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*(?::\s*[^\s{]+)?\s*\{/gm,
     /\b(?:constructor)\s*\(([^)]*)\)/gm
   ];
 

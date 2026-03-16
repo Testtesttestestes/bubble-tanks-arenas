@@ -35,9 +35,9 @@ cat > "$OUTPUT_DIR/tsconfig.json" <<'JSON'
     "strict": false,
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "lib": ["DOM", "ES2022"]
+    "lib": ["ES2022"]
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "**/*.d.ts"]
 }
 JSON
 

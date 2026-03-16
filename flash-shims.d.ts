@@ -43,6 +43,7 @@ declare class Sprite extends DisplayObjectContainer {
 }
 
 declare class MovieClip extends Sprite {
+  [key: string]: any;
   gotoAndPlay(frame: number | string): void;
   gotoAndStop(frame: number | string): void;
   play(): void; stop(): void;
@@ -54,6 +55,9 @@ declare class TextField extends InteractiveObject {
   text: string; htmlText: string; textColor: number;
   autoSize: string; wordWrap: boolean; multiline: boolean;
   defaultTextFormat: TextFormat; type: string;
+  caretIndex: number;
+  replaceText(beginIndex: number, endIndex: number, newText: string): void;
+  setSelection(beginIndex: number, endIndex: number): void;
 }
 
 declare class SimpleButton extends InteractiveObject {
@@ -91,6 +95,7 @@ declare class Event {
   static CHANGE: string; static COMPLETE: string; static CLOSE: string;
   type: string; target: any; currentTarget: any;
   constructor(type: string, bubbles?: boolean, cancelable?: boolean);
+  preventDefault(): void;
 }
 
 declare class MouseEvent extends Event {
