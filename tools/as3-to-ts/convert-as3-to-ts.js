@@ -64,7 +64,7 @@ function convertParams(paramString) {
     .join(', ');
 }
 
-function convertClassMembers(source, className) {
+function convertClassMembers(source, className, isDynamicClass = false) {
   let out = source;
 
   const normalizeModifiers = (modifiers) => {
@@ -143,9 +143,12 @@ function convertClassMembers(source, className) {
   // Keep migrated classes "dynamic"-friendly: timeline/decompiler code often writes
   // undeclared fields directly on `this` (e.g. `this.var_3`, `this.btnX_mc`).
   // Inject a permissive index signature once per class body to avoid TS2339 floods.
-  const classBodyMatch = out.match(/export\s+class\s+\w+[^\{]*\{/);
-  if (classBodyMatch && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
-    out = out.replace(classBodyMatch[0], `${classBodyMatch[0]}\n  [key: string]: any;`);
+  const classHeaderMatch = out.match(/export\s+class\s+\w+[^\{]*\{/);
+  const hasParsedClassMembers = /(^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?\w+[!?]?\s*:\s*[^;]+;\s*$)|(^\s*(?:(?:public|private|protected|static|readonly)\s+)*(?:constructor|\w+)\s*\([^)]*\)\s*(?::\s*[^\s{]+)?\s*\{)/m.test(
+    out
+  );
+  if (isDynamicClass && classHeaderMatch && hasParsedClassMembers && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
+    out = out.replace(classHeaderMatch[0], `${classHeaderMatch[0]}\n  [key: string]: any;`);
   }
 
   return out;
@@ -184,6 +187,7 @@ function convertAs3ToTs(source) {
   const interfaceMatch = stripped.source.match(/(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/);
 
   const className = classMatch ? classMatch[4] : null;
+  const isDynamicClass = Boolean(classMatch && classMatch[2]);
   const hasExtends = Boolean(classMatch && classMatch[5]);
   let converted = stripped.source;
 
@@ -339,7 +343,7 @@ function convertAs3ToTs(source) {
       }
     );
 
-    converted = convertClassMembers(converted, className);
+    converted = convertClassMembers(converted, className, isDynamicClass);
 
     // Provide robust handling for generic class-level static initialization loops (found in AESKey)
     converted = converted.replace(
