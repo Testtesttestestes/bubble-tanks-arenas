@@ -30,10 +30,10 @@ function extractClassScopeMembers(source) {
   }
 
   const className = classMatch[1];
-  const memberRegex = /^\s*(public|private|protected|static)\s+(static\s+)?(?:readonly\s+)?(?:var\s+|let\s+|const\s+|function\s+|get\s+|set\s+)?([a-zA-Z0-9_$]+)/gm;
+  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:var|let|const|function|get|set)\s+([a-zA-Z0-9_$]+)/gm;
   let match;
   while ((match = memberRegex.exec(source)) !== null) {
-    const isStatic = (match[1] === 'static' || !!match[2]);
+    const isStatic = !!match[2];
     const name = match[3];
     if (name === className || RESERVED_WORDS.has(name)) continue;
     if (isStatic) staticMembers.add(name);
@@ -65,14 +65,24 @@ function processFile(filePath) {
     return { changed: false, replacements: 0 };
   }
 
-  let updated = addClassPrefixToMemberUsage(source, instanceMembers, 'this');
-  updated = addClassPrefixToMemberUsage(updated, staticMembers, className);
-  if (updated === source) {
+  let converted = source;
+  converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this');
+  converted = addClassPrefixToMemberUsage(converted, staticMembers, className);
+
+  staticMembers.forEach((name) => {
+    const staticMistakeRegex = new RegExp(`\\bthis\\.${escapeRegExp(name)}\\b`, 'g');
+    converted = converted.replace(staticMistakeRegex, `${className}.${name}`);
+  });
+
+  // Лечим наследуемые обфусцированные переменные и методы
+  converted = converted.replace(/(?<!\.|[a-zA-Z0-9_$]|function\s+|class\s+|var\s+|let\s+|const\s+|:\s*)(var_\d+|method_\d+)\b(?!\s*:)/g, 'this.$1');
+
+  if (converted === source) {
     return { changed: false, replacements: 0 };
   }
 
-  const replacementCount = (updated.match(/\bthis\./g) || []).length - (source.match(/\bthis\./g) || []).length;
-  fs.writeFileSync(filePath, updated, 'utf8');
+  const replacementCount = (converted.match(/\bthis\./g) || []).length - (source.match(/\bthis\./g) || []).length;
+  fs.writeFileSync(filePath, converted, 'utf8');
   return { changed: true, replacements: replacementCount };
 }
 

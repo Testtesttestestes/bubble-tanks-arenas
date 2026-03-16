@@ -412,6 +412,16 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bnull\.([a-zA-Z0-9_]+)/g, '(null as any).$1');
   converted = converted.replace(/\bundefined\.([a-zA-Z0-9_]+)/g, '(undefined as any).$1');
 
+  // Чиним null.property и undefined.property (Ошибки декомпилятора)
+  converted = converted.replace(/\bnull\s*\.\s*([a-zA-Z0-9_$]+)/g, '(null as any).$1');
+  converted = converted.replace(/\bundefined\s*\.\s*([a-zA-Z0-9_$]+)/g, '(undefined as any).$1');
+
+  // Убиваем TS2314: Array без типов
+  converted = converted.replace(/:\s*Array\b(?!\s*<)/g, ': any[]');
+
+  // Убиваем TS2322: жесткое приведение ВСЕХ null-инициализаций
+  converted = converted.replace(/=\s*null\s*([,;])/g, '= null as any$1');
+
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
     packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
