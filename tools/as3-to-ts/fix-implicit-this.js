@@ -7,6 +7,20 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const RESERVED_WORDS = new Set([
+  'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default',
+  'break', 'continue', 'return', 'try', 'catch', 'finally',
+  'throw', 'function', 'var', 'let', 'const', 'class', 'extends',
+  'implements', 'interface', 'import', 'export', 'new', 'this',
+  'super', 'typeof', 'instanceof', 'in', 'delete', 'void', 'yield',
+  'await', 'async', 'true', 'false', 'null', 'undefined', 'NaN', 'Infinity',
+  'constructor',
+  // Built-in globals/types that often appear in casts and should never be prefixed.
+  'String', 'Number', 'Boolean', 'Object', 'Array', 'Function', 'Promise', 'RegExp',
+  'Date', 'Math', 'JSON', 'Error', 'TypeError', 'Map', 'Set', 'WeakMap', 'WeakSet',
+  'Symbol', 'BigInt', 'Uint8Array', 'Int8Array', 'Float32Array', 'Float64Array'
+]);
+
 function extractClassScopeMembers(source) {
   const classMatch = source.match(/class\s+(\w+)/);
   const instanceMembers = new Set();
@@ -21,7 +35,7 @@ function extractClassScopeMembers(source) {
   while ((match = memberRegex.exec(source)) !== null) {
     const isStatic = Boolean(match[2]);
     const name = match[3];
-    if (name === className || name === 'constructor') continue;
+    if (name === className || RESERVED_WORDS.has(name)) continue;
     if (isStatic) staticMembers.add(name);
     else instanceMembers.add(name);
   }
@@ -33,7 +47,7 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
   if (memberNames.size === 0) return source;
   const names = Array.from(memberNames).map(escapeRegExp).join('|');
   const regex = new RegExp(`\\b(${names})\\b(?!\\s*:)`, 'g');
-  const blockedPrefix = /(?:function|var|let|const|get|set|public|private|protected|static|readonly)\s+$/;
+  const blockedPrefix = /(?:function|var|let|const|get|set|public|private|protected|static|readonly|catch|as|instanceof)\s+$/;
 
   return source.replace(regex, (token, name, offset, whole) => {
     const prev = whole[offset - 1];

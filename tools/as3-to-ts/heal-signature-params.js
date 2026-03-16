@@ -45,6 +45,9 @@ function healFunctionParamThisPrefixes(source) {
     }
   );
 
+  // 6. Remove invalid this.-prefixed casts from type assertions.
+  content = content.replace(/as\s+(?:unknown\s+as\s+)?this\.([A-Z]\w*)/g, 'as unknown as $1');
+
   return content;
 }
 

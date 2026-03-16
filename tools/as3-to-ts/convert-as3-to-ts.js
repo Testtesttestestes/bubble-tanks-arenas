@@ -342,7 +342,14 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(
     /^(\s*)var\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
-    (_, indent, name, type, init) => `${indent}var ${name}: ${mapType(type)}${init || ''};`
+    (_, indent, name, type, init) => {
+      const mappedType = mapType(type);
+      let initializer = init || '';
+      if (/=\s*null\b/.test(initializer)) {
+        initializer = ' = null as any';
+      }
+      return `${indent}var ${name}: ${mappedType}${initializer};`;
+    }
   );
   converted = converted.replace(/\b(let|const)\s+this\./g, '$1 ');
 
