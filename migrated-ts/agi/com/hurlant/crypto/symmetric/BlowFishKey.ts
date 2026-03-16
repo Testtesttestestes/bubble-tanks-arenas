@@ -27,20 +27,20 @@ export class BlowFishKey implements ISymmetricKey
       private key: ByteArray = null as any;
       private S0: any[];
       private S1: any[];
-      constructor(this.key: ByteArray){
+      constructor(key: ByteArray){
          super();
          this.key = this.key;
-         setKey(this.key);
+         setKey(key);
       }
       
       private F(x: number): number
       {
-         return (this.S0[x >>> 24] + this.S1[x >>> 16 & 0xFF] ^ this.S2[x >>> 8 & 0xFF]) + this.S3[x & 0xFF];
+         return(S0[x >>> 24] + S1[x >>> 16 & 0xFF] ^ S2[x >>> 8 & 0xFF]) + this.S3[x & 0xFF];
       }
       
       private BytesTo32bits(b: ByteArray, i: number): number
       {
-         return (b[i] & 0xFF) << 24 | (b[i + 1] & 0xFF) << 16 | (b[i + 2] & 0xFF) << 8 | b[i + 3] & 0xFF;
+         return(b[i] & 0xFF) << 24 | (b[i + 1] & 0xFF) << 16 | (b[i + 2] & 0xFF) << 8 | b[i + 3] & 0xFF;
       }
       
       public decrypt(block: ByteArray, index: number = 0): void
@@ -66,7 +66,7 @@ export class BlowFishKey implements ISymmetricKey
          (xl,dst,dstIndex + 4 as unknown as Bits32ToBytes);
       }
       
-      private setKey(this.key: ByteArray): void
+      private setKey(key: ByteArray): void
       {
          let keyLength: number = 0;
          let keyIndex: number = 0;
@@ -93,11 +93,11 @@ export class BlowFishKey implements ISymmetricKey
             }
             this.P[i] ^= data;
          }
-         processTable(0,0,this.P);
-         processTable(this.P[this.P_SZ - 2],this.P[this.P_SZ - 1],this.S0);
-         processTable(this.S0[this.SBOX_SK - 2],this.S0[this.SBOX_SK - 1],this.S1);
-         processTable(this.S1[this.SBOX_SK - 2],this.S1[this.SBOX_SK - 1],this.S2);
-         processTable(this.S2[this.SBOX_SK - 2],this.S2[this.SBOX_SK - 1],this.S3);
+         processTable(0,0,P);
+         processTable(P[P_SZ - 2],P[P_SZ - 1],S0);
+         processTable(S0[SBOX_SK - 2],S0[SBOX_SK - 1],S1);
+         processTable(S1[SBOX_SK - 2],S1[SBOX_SK - 1],S2);
+         processTable(S2[SBOX_SK - 2],S2[SBOX_SK - 1],S3);
       }
       
       public dispose(): void

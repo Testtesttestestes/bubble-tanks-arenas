@@ -6,7 +6,7 @@ export class ECBMode implements IMode, ICipher
       
       private key: ISymmetricKey;
       private padding: IPad;
-      constructor(this.key: ISymmetricKey, this.padding: IPad = null as any){
+      constructor(key: ISymmetricKey, padding: IPad = null as any){
          super();
          this.key = this.key;
          if(this.padding == null)

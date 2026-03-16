@@ -5,7 +5,7 @@ export class HMAC{
       
       private bits: number;
       private hash: IHash;
-      constructor(this.hash: IHash, this.bits: number = 0){
+      constructor(hash: IHash, bits: number = 0){
          super();
          this.hash = this.hash;
          this.bits = this.bits;

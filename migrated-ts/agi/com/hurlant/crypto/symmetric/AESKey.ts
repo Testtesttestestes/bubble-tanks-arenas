@@ -56,7 +56,7 @@ export class AESKey implements ISymmetricKey
       private Nr: number;
       private keyLength: number;
       private key: ByteArray;
-      constructor(this.key: ByteArray){
+      constructor(key: ByteArray){
          super();
          this.tmp = new ByteArray();
          this.state = new ByteArray();
@@ -76,11 +76,11 @@ export class AESKey implements ISymmetricKey
          let round: number = 0;
          this.state.position = 0;
          this.state.writeBytes(block,index,this.Nb * 4);
-         addRoundKey(this.key,this.Nr * this.Nb * 4);
+         addRoundKey(key,Nr * Nb * 4);
          invShiftRows();
          for(round = this.Nr; Boolean(round--); )
          {
-            addRoundKey(this.key,round * this.Nb * 4);
+            addRoundKey(key,round * Nb * 4);
             if(Boolean(round))
             {
                invMixSubColumns();
@@ -209,7 +209,7 @@ export class AESKey implements ISymmetricKey
          }
       }
       
-      protected addRoundKey(this.key: ByteArray, offset: number): void
+      protected addRoundKey(key: ByteArray, offset: number): void
       {
          let idx: number = 0;
          for(idx = 0; idx < 16; idx++)
@@ -223,7 +223,7 @@ export class AESKey implements ISymmetricKey
          let round: number = 0;
          this.state.position = 0;
          this.state.writeBytes(block,index,this.Nb * 4);
-         addRoundKey(this.key,0);
+         addRoundKey(key,0);
          for(round = 1; round < this.Nr + 1; round++)
          {
             if(round < this.Nr)
@@ -234,7 +234,7 @@ export class AESKey implements ISymmetricKey
             {
                shiftRows();
             }
-            addRoundKey(this.key,round * this.Nb * 4);
+            addRoundKey(key,round * Nb * 4);
          }
          block.position = index;
          block.writeBytes(this.state);

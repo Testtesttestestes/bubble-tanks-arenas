@@ -182,7 +182,7 @@ public retrieveUserScores(param1: Function, param2: string = null as any, param3
             {
                param1({
                   "success":false,
-                  "this.error":"User must be logged in before calling retrieveUserScores()."
+                  "error":"User must be logged in before calling retrieveUserScores()."
                });
             }
             return;
@@ -197,7 +197,7 @@ public retrieveFriendScores(param1: Function, param2: string = null as any, para
             {
                param1({
                   "success":false,
-                  "this.error":"User must be logged in before calling retrieveFriendScores()."
+                  "error":"User must be logged in before calling retrieveFriendScores()."
                });
             }
             return;
@@ -228,7 +228,7 @@ public isComingFromShareURL(param1: Function): void
             {
                param1({
                   "success":false,
-                  "this.error":_loc3_
+                  "error":_loc3_
                });
             }
             return;
@@ -242,7 +242,7 @@ public isComingFromShareURL(param1: Function): void
             {
                param1({
                   "success":false,
-                  "this.error":_loc4_
+                  "error":_loc4_
                });
             }
             return;
@@ -274,7 +274,7 @@ public retrieveUserGameShares(param1: Function, param2: string = "shares", param
             {
                param1({
                   "success":false,
-                  "this.error":"User must be logged in before calling retrieveUserGameShares()."
+                  "error":"User must be logged in before calling retrieveUserGameShares()."
                });
             }
             return;
@@ -289,7 +289,7 @@ public retrieveFriendGameShares(param1: Function, param2: string = "shares", par
             {
                param1({
                   "success":false,
-                  "this.error":"User must be logged in before calling retrieveFriendGameShares()."
+                  "error":"User must be logged in before calling retrieveFriendGameShares()."
                });
             }
             return;
@@ -325,7 +325,7 @@ public submitPublicData(param1: string, param2: any, param3: Function = null as 
             {
                param3({
                   "success":false,
-                  "this.error":"Data type not supported by submitPublicData()"
+                  "error":"Data type not supported by submitPublicData()"
                });
             }
             return;
@@ -380,7 +380,7 @@ public submitUserData(param1: string, param2: any, param3: Function = null as an
             {
                param3({
                   "success":false,
-                  "this.error":"User must be logged in before calling submitUserData()."
+                  "error":"User must be logged in before calling submitUserData()."
                });
             }
             return;
@@ -392,7 +392,7 @@ public submitUserData(param1: string, param2: any, param3: Function = null as an
             {
                param3({
                   "success":false,
-                  "this.error":"Data type not supported by submitUserData()."
+                  "error":"Data type not supported by submitUserData()."
                });
             }
             return;
@@ -408,7 +408,7 @@ public submitUserDataObject(param1: Record<string, any>, param2: Function = null
             {
                param2({
                   "success":false,
-                  "this.error":"User must be logged in before calling submitUserDataObject()."
+                  "error":"User must be logged in before calling submitUserDataObject()."
                });
             }
             return;
@@ -428,7 +428,7 @@ public retrieveUserData(param1: Function, param2: string = null as any): void
             {
                param1({
                   "success":false,
-                  "this.error":"User must be logged in before calling retrieveUserData()."
+                  "error":"User must be logged in before calling retrieveUserData()."
                });
             }
             return;
@@ -450,7 +450,7 @@ public deleteUserData(param1: string = null as any, param2: Function = null as a
             {
                param2({
                   "success":false,
-                  "this.error":"User must be logged in before calling deleteUserData()."
+                  "error":"User must be logged in before calling deleteUserData()."
                });
             }
             return;
@@ -472,7 +472,7 @@ public incUserData(param1: string, param2: number = 1, param3: Function = null a
             {
                param3({
                   "success":false,
-                  "this.error":"User must be logged in before calling incUserData()."
+                  "error":"User must be logged in before calling incUserData()."
                });
             }
             return;
@@ -487,7 +487,7 @@ public decUserData(param1: string, param2: number = 1, param3: Function = null a
             {
                param3({
                   "success":false,
-                  "this.error":"User must be logged in before calling decUserData()."
+                  "error":"User must be logged in before calling decUserData()."
                });
             }
             return;

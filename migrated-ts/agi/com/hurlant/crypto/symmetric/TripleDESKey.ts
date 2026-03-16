@@ -25,16 +25,16 @@ export class TripleDESKey extends DESKey{
       
       public decrypt(block: ByteArray, index: number = 0): void
       {
-         desFunc(this.decKey3,block,index,block,index);
-         desFunc(this.decKey2,block,index,block,index);
+         desFunc(decKey3,block,index,block,index);
+         desFunc(decKey2,block,index,block,index);
          desFunc(decKey,block,index,block,index);
       }
       
       public encrypt(block: ByteArray, index: number = 0): void
       {
          desFunc(encKey,block,index,block,index);
-         desFunc(this.encKey2,block,index,block,index);
-         desFunc(this.encKey3,block,index,block,index);
+         desFunc(encKey2,block,index,block,index);
+         desFunc(encKey3,block,index,block,index);
       }
       
       public dispose(): void

@@ -60,7 +60,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         bitwiseTo(this.a,op_andnot,r);
+         bitwiseTo(a,op_andnot,r);
          return r;
       }
       
@@ -265,7 +265,7 @@ export class BigInteger{
          return r;
       }
       
-      protected addTo(this.a: BigInteger, r: BigInteger): void
+      protected addTo(a: BigInteger, r: BigInteger): void
       {
          let i: number = 0;
          let c: number = 0;
@@ -314,7 +314,7 @@ export class BigInteger{
          r.clamp();
       }
       
-      protected bitwiseTo(this.a: BigInteger, op: Function, r: BigInteger): void
+      protected bitwiseTo(a: BigInteger, op: Function, r: BigInteger): void
       {
          let i: number = 0;
          let f: number = 0;
@@ -446,7 +446,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         subTo(this.a,r);
+         subTo(a,r);
          return r;
       }
       
@@ -546,7 +546,7 @@ export class BigInteger{
          }
          for(j = Math.min(this.a.t,n); i < j; i++)
          {
-            am(0,this.a.a[i],r,i,0,n - i);
+            am(0,a.a[i],r,i,0,n - i);
          }
          r.clamp();
       }
@@ -578,7 +578,7 @@ export class BigInteger{
          {
             return this.s != 0;
          }
-         return (this.a[j] & 1 << n % this.DB) != 0;
+         return(a[j] & 1 << n % DB) != 0;
       }
       
       this.public exp(e: number, z: IReduction): BigInteger
@@ -834,7 +834,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         divRemTo(this.a,null,r);
+         divRemTo(a,null,r);
          return r;
       }
       
@@ -842,7 +842,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         divRemTo(this.a,r,null);
+         divRemTo(a,r,null);
          return r;
       }
       
@@ -852,7 +852,7 @@ export class BigInteger{
          let r: BigInteger = null;
          q = new BigInteger();
          r = new BigInteger();
-         divRemTo(this.a,q,r);
+         divRemTo(a,q,r);
          return [q,r];
       }
       
@@ -890,7 +890,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         multiplyTo(this.a,r);
+         multiplyTo(a,r);
          return r;
       }
       
@@ -930,7 +930,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         addTo(this.a,r);
+         addTo(a,r);
          return r;
       }
       
@@ -957,7 +957,7 @@ export class BigInteger{
          return new BigInteger();
       }
       
-      protected millerRabin(this.t: number): boolean
+      protected millerRabin(t: number): boolean
       {
          let n1: BigInteger = null;
          let k: number = 0;
@@ -1357,7 +1357,7 @@ export class BigInteger{
                return 0;
             }
          }
-         return (this.a[1] & (1 << 32 - this.DB) - 1) << this.DB | this.a[0];
+         return(a[1] & (1 << 32 - DB) - 1) << this.DB | this.a[0];
       }
       
       this.public min(this.a: BigInteger): BigInteger
@@ -1383,7 +1383,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         bitwiseTo(this.a,op_and,r);
+         bitwiseTo(a,op_and,r);
          return r;
       }
       
@@ -1499,7 +1499,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         bitwiseTo(this.a,op_xor,r);
+         bitwiseTo(a,op_xor,r);
          return r;
       }
       
@@ -1507,7 +1507,7 @@ export class BigInteger{
       {
          let r: BigInteger = null;
          r = new BigInteger();
-         bitwiseTo(this.a,op_or,r);
+         bitwiseTo(a,op_or,r);
          return r;
       }
       
@@ -1536,7 +1536,7 @@ export class BigInteger{
       
       this.public isEven(): boolean
       {
-         return (this.t > 0 ? this.a[0] & 1 : this.s) == 0;
+         return(t > 0 ? a[0] & 1 : s) == 0;
       }
       
       this.public toString(radix: number = 16): string
@@ -1755,7 +1755,7 @@ export class BigInteger{
          return x & y;
       }
       
-      protected fromRadix(this.s: string, b: number = 10): void
+      protected fromRadix(s: string, b: number = 10): void
       {
          let cs: number = 0;
          let d: number = NaN;

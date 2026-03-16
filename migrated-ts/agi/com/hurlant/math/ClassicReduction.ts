@@ -5,7 +5,7 @@ export class ClassicReduction implements IReduction
    {
       
       private m: BigInteger;
-      constructor(this.m: BigInteger){
+      constructor(m: BigInteger){
          super();
          this.m = this.m;
       }

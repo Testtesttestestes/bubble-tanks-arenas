@@ -5,7 +5,7 @@ export class PKCS5 implements IPad
    {
       
       private blockSize: number;
-      constructor(this.blockSize: number = 0){
+      constructor(blockSize: number = 0){
          super();
          this.blockSize = this.blockSize;
       }

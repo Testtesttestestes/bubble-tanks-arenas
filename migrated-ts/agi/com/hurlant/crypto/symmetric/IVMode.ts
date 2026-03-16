@@ -9,7 +9,7 @@ export class IVMode{
       protected padding: IPad;
       protected prng: Random;
       protected key: ISymmetricKey;
-      constructor(this.key: ISymmetricKey, this.padding: IPad = null as any){
+      constructor(key: ISymmetricKey, padding: IPad = null as any){
          super();
          this.key = this.key;
          this.blockSize = this.key.getBlockSize();

@@ -8,7 +8,7 @@ export class BarrettReduction implements IReduction
       private q3: BigInteger;
       private mu: BigInteger;
       private m: BigInteger;
-      constructor(this.m: BigInteger){
+      constructor(m: BigInteger){
          super();
          this.r2 = new BigInteger();
          this.q3 = new BigInteger();
