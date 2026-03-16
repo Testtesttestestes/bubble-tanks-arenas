@@ -22,6 +22,7 @@ fi
 
 node tools/as3-to-ts/fix-implicit-this.js --input "$OUTPUT_DIR"
 node tools/as3-to-ts/heal-signature-params.js --input "$OUTPUT_DIR"
+node tools/as3-to-ts/fix-ts2695-sequences.js --input "$OUTPUT_DIR"
 node tools/as3-to-ts/resolve-imports.js --input "$OUTPUT_DIR"
 # Restore `default:` switch labels that can be mistakenly prefixed by implicit-this fixer.
 find "$OUTPUT_DIR" -type f -name "*.ts" -exec sed -i 's/\bthis\.default\s*:/default:/g' {} +
