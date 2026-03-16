@@ -3,6 +3,7 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
@@ -13,7 +14,6 @@
   "include": [
     "migrated-ts/**/*.ts",
     "migrated-ts/**/*.d.ts",
-    "flash-shims.d.ts",
-    "flash-globals.d.ts"
+    "flash-shims.d.ts"
   ]
 }

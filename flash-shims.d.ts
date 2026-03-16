@@ -64,10 +64,21 @@ declare class Event {
   static COMPLETE: string;
   static ADDED_TO_STAGE: string;
   static REMOVED_FROM_STAGE: string;
+  static ADDED: string;
+  static REMOVED: string;
   static SOUND_COMPLETE: string;
   static CHANGE: string;
   static RESIZE: string;
   static CLOSE: string;
+  static OPEN: string;
+  static SCROLL: string;
+  static RENDER: string;
+  static ACTIVATE: string;
+  static DEACTIVATE: string;
+  static UNLOAD: string;
+  static TAB_CHILDREN_CHANGE: string;
+  static TAB_ENABLED_CHANGE: string;
+  static TAB_INDEX_CHANGE: string;
   type: string;
   target: any;
   currentTarget: any;
@@ -85,11 +96,12 @@ declare class MouseEvent extends Event {
   static ROLL_OVER: string;
   static ROLL_OUT: string;
   static DOUBLE_CLICK: string;
+  static MOUSE_WHEEL: string;
 }
 declare class KeyboardEvent extends Event { static KEY_DOWN: string; static KEY_UP: string; }
-declare class FocusEvent extends Event { static FOCUS_IN: string; static FOCUS_OUT: string; }
+declare class FocusEvent extends Event { static FOCUS_IN: string; static FOCUS_OUT: string; static KEY_FOCUS_CHANGE: string; static MOUSE_FOCUS_CHANGE: string; }
 declare class TimerEvent extends Event {}
-declare class TextEvent extends Event {}
+declare class TextEvent extends Event { static TEXT_INPUT: string; }
 
 declare class ByteArray {
   [key: number]: number;
