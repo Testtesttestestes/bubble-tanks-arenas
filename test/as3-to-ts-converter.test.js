@@ -257,6 +257,42 @@ test('convertAs3ToTs does not rewrite uppercase method calls as class casts', ()
   assert.doesNotMatch(output, /as unknown as F/);
 });
 
+
+test('convertAs3ToTs rewrites JSON package edge cases and primitive casts', () => {
+  const input = `package com.adobe.serialization.json
+{
+   public class Helper
+   {
+      public function read(value:*) : void
+      {
+         var arr:Array = value as Array;
+         if (this.ch == "e" || this.ch != "+")
+         {
+         }
+         if (value instanceof String)
+         {
+         }
+         var s:String = value as String;
+         var n:Number = value as Number;
+         var b:Boolean = value as Boolean;
+         var t:JSONToken;
+         var d:JSONDecoder;
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /import \{ JSONToken \} from "\.\/JSONToken";/);
+  assert.match(output, /import \{ JSONDecoder \} from "\.\/JSONDecoder";/);
+  assert.match(output, /var arr: any\[] = value\s+as any\[];/);
+  assert.match(output, /String\(this\.ch\) == "e"/);
+  assert.match(output, /String\(this\.ch\) != "\+"/);
+  assert.match(output, /typeof value === "string"/);
+  assert.match(output, /value\s+as string/);
+  assert.match(output, /value\s+as number/);
+  assert.match(output, /value\s+as boolean/);
+});
+
 test('healFunctionParamThisPrefixes removes this. from function signatures only', () => {
   const input = `export class HMAC {
   constructor(this.hash: IHash, this.bits: number = 0) {
