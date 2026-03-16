@@ -1,8 +1,11 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 const { convertAs3ToTs, mapType, convertParams } = require('../tools/as3-to-ts/convert-as3-to-ts');
-const { extractClassScopePropertyNames, addThisToPropertyUsage } = require('../tools/as3-to-ts/fix-implicit-this');
+const { extractClassScopePropertyNames, addThisToPropertyUsage, processFile } = require('../tools/as3-to-ts/fix-implicit-this');
 
 const { healFunctionParamThisPrefixes } = require('../tools/as3-to-ts/heal-signature-params');
 
@@ -35,7 +38,7 @@ test('convertAs3ToTs converts EnemyAI-style class shape', () => {
 
   const output = convertAs3ToTs(input);
   assert.match(output, /export class EnemyAI extends class_113/);
-  assert.match(output, /public var_435: number;/);
+  assert.match(output, /public var_435!?\: number;/);
   assert.match(output, /constructor\(param1: TankData\)/);
   assert.match(output, /public Move\(\): void/);
   assert.match(output, /var _loc1_: number = 10;/);
@@ -303,4 +306,25 @@ test('healFunctionParamThisPrefixes removes this. from function signatures only'
   const output = healFunctionParamThisPrefixes(input);
   assert.match(output, /constructor\(hash: IHash, bits: number = 0\)/);
   assert.match(output, /this\.hash = this\.hash;/);
+});
+
+
+test('fix-implicit-this does not prefix obfuscated class field declarations with this', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const file = path.join(dir, 'Sample.ts');
+  fs.writeFileSync(file, `export class Sample {
+  var_388!: number;
+
+  public tick(): void {
+    var_388 = 1;
+  }
+}
+`);
+
+  processFile(file);
+  const fixed = fs.readFileSync(file, 'utf8');
+
+  assert.match(fixed, /var_388!: number;/);
+  assert.match(fixed, /this\.var_388 = 1;/);
+  assert.doesNotMatch(fixed, /this\.var_388!: number;/);
 });
