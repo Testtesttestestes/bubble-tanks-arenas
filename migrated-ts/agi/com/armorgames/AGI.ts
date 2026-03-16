@@ -1,6 +1,10 @@
 // AUTO-GENERATED AS3 TO TS CONVERSION
 // Original Package: com.armorgames
 
+import { AGUser } from './common/AGUser';
+import { LoginStatus } from './display/LoginStatus';
+import { Client } from './services/Client';
+
 export class AGI extends Sprite{
       
       private readonly VERSION: string = "1.9.29";
