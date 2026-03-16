@@ -3,6 +3,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+const OBFUSCATED_MEMBER_WHITELIST = /^(var_\d+|int[A-Z]\w*|obj[A-Z]?\w*|bln\w*|str\w*)$/;
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -73,8 +75,161 @@ function addThisToPropertyUsage(source, propertyNames) {
   return addClassPrefixToMemberUsage(source, propertyNames, 'this');
 }
 
-function processFile(filePath) {
+function parseImportNames(source) {
+  const imports = new Set();
+  const importRegex = /^\s*import\s+([^;]+?)\s+from\s+['"][^'"]+['"];?/gm;
+  let match;
+  while ((match = importRegex.exec(source)) !== null) {
+    const clause = match[1].trim();
+    const named = clause.match(/\{([^}]+)\}/);
+    if (named) {
+      named[1].split(',').forEach((entry) => {
+        const token = entry.trim();
+        if (!token) return;
+        const alias = token.match(/\bas\s+([A-Za-z_$][\w$]*)$/);
+        imports.add(alias ? alias[1] : token);
+      });
+    }
+    const defaultOrNamespace = clause.replace(/\{[^}]+\}/, '').split(',').map((part) => part.trim()).filter(Boolean);
+    defaultOrNamespace.forEach((entry) => {
+      const nsMatch = entry.match(/^\*\s+as\s+([A-Za-z_$][\w$]*)$/);
+      if (nsMatch) imports.add(nsMatch[1]);
+      else if (/^[A-Za-z_$][\w$]*$/.test(entry)) imports.add(entry);
+    });
+  }
+  return imports;
+}
+
+function computeLineStarts(source) {
+  const starts = [0];
+  for (let i = 0; i < source.length; i += 1) {
+    if (source[i] === '\n') starts.push(i + 1);
+  }
+  return starts;
+}
+
+function lineColToIndex(lineStarts, line, col) {
+  if (line <= 0 || line > lineStarts.length) return -1;
+  return lineStarts[line - 1] + Math.max(0, col - 1);
+}
+
+function findMatchingBrace(source, openIndex) {
+  let depth = 0;
+  for (let i = openIndex; i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1;
+    else if (source[i] === '}') {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function extractClassAndMethodRanges(source) {
+  const classMatch = /class\s+\w+[^\{]*\{/.exec(source);
+  if (!classMatch) return { classRange: null, methods: [] };
+
+  const classOpen = classMatch.index + classMatch[0].length - 1;
+  const classClose = findMatchingBrace(source, classOpen);
+  if (classClose === -1) return { classRange: null, methods: [] };
+
+  const classRange = { start: classOpen + 1, end: classClose };
+  const methods = [];
+  const methodRegex = /^[ \t]*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*[:\w<>, \[\]\|?]*\{/gm;
+  let match;
+  while ((match = methodRegex.exec(source)) !== null) {
+    const open = methodRegex.lastIndex - 1;
+    if (open < classRange.start || open > classRange.end) continue;
+    const close = findMatchingBrace(source, open);
+    if (close === -1 || close > classRange.end) continue;
+    const params = new Set();
+    match[2].split(',').forEach((param) => {
+      const m = param.trim().match(/^([A-Za-z_$][\w$]*)/);
+      if (m) params.add(m[1]);
+    });
+    methods.push({ start: open + 1, end: close, params });
+  }
+  return { classRange, methods };
+}
+
+function collectLocalsInRange(source, range) {
+  const locals = new Set();
+  const snippet = source.slice(range.start, range.end);
+  const localRegex = /\b(?:let|const|var|function|catch)\s+([A-Za-z_$][\w$]*)/g;
+  let match;
+  while ((match = localRegex.exec(snippet)) !== null) {
+    locals.add(match[1]);
+  }
+  return locals;
+}
+
+function isTypeLikeContext(source, index) {
+  const left = source.slice(Math.max(0, index - 40), index);
+  const right = source.slice(index, Math.min(source.length, index + 40));
+  if (/\b(?:class|interface|type|extends|implements|import|export|new)\s*$/.test(left)) return true;
+  if (/:\s*$/.test(left)) return true;
+  if (/^\s*<[^>]*>/.test(right)) return true;
+  return false;
+}
+
+function applyDiagnosticThisFixes(source, diagnostics) {
+  if (!diagnostics || diagnostics.length === 0) return source;
+  const importedNames = parseImportNames(source);
+  const { classRange, methods } = extractClassAndMethodRanges(source);
+  if (!classRange || methods.length === 0) return source;
+
+  const lineStarts = computeLineStarts(source);
+  const edits = [];
+  for (const diagnostic of diagnostics) {
+    if (!OBFUSCATED_MEMBER_WHITELIST.test(diagnostic.name)) continue;
+    const index = lineColToIndex(lineStarts, diagnostic.line, diagnostic.col);
+    if (index < classRange.start || index >= classRange.end) continue;
+    const method = methods.find((entry) => index >= entry.start && index < entry.end);
+    if (!method) continue;
+    if (importedNames.has(diagnostic.name)) continue;
+    const locals = collectLocalsInRange(source, method);
+    method.params.forEach((name) => locals.add(name));
+    if (locals.has(diagnostic.name)) continue;
+    if (source.slice(Math.max(0, index - 5), index) === 'this.') continue;
+    if (source[index - 1] === '.') continue;
+    if (!new RegExp(`^${escapeRegExp(diagnostic.name)}\\b`).test(source.slice(index))) continue;
+    if (isTypeLikeContext(source, index)) continue;
+    edits.push(index);
+  }
+
+  if (edits.length === 0) return source;
+  const uniqueEdits = Array.from(new Set(edits)).sort((a, b) => b - a);
+  let converted = source;
+  for (const index of uniqueEdits) {
+    converted = `${converted.slice(0, index)}this.${converted.slice(index)}`;
+  }
+  return converted;
+}
+
+function parseTscLog(logPath) {
+  if (!logPath || !fs.existsSync(logPath)) return new Map();
+  const result = new Map();
+  const content = fs.readFileSync(logPath, 'utf8');
+  const lineRegex = /^(.*)\((\d+),(\d+)\):\s*error\s*TS(2304|2663):\s*(?:Cannot find name|Cannot find name\s*'[^']+'\.\s*Did you mean the instance member)\s*'([^']+)'/gm;
+  let match;
+  while ((match = lineRegex.exec(content)) !== null) {
+    const filePath = path.resolve(match[1].trim());
+    const diagnostic = {
+      code: Number(match[4]),
+      name: match[5],
+      line: Number(match[2]),
+      col: Number(match[3])
+    };
+    if (!result.has(filePath)) result.set(filePath, []);
+    result.get(filePath).push(diagnostic);
+  }
+  return result;
+}
+
+function processFile(filePath, options = {}) {
   const source = fs.readFileSync(filePath, 'utf8');
+  const resolvedFilePath = path.resolve(filePath);
+  const { diagnosticsByFile = new Map() } = options;
   const { className, instanceMembers, staticMembers } = extractClassScopeMembers(source);
   if (!className || (instanceMembers.size === 0 && staticMembers.size === 0)) {
     return { changed: false, replacements: 0 };
@@ -89,8 +244,9 @@ function processFile(filePath) {
     converted = converted.replace(staticMistakeRegex, `${className}.${name}`);
   });
 
-  // Лечим наследуемые обфусцированные переменные и методы
-  converted = converted.replace(/(?<!\.|[a-zA-Z0-9_$]|function\s+|class\s+|var\s+|let\s+|const\s+|:\s*)(var_\d+|method_\d+)\b(?!\s*!?\s*:)/g, 'this.$1');
+  // Лечим наследуемые обфусцированные переменные на основе tsc-диагностик (2-й проход).
+  const diagnostics = diagnosticsByFile.get(resolvedFilePath) || [];
+  converted = applyDiagnosticThisFixes(converted, diagnostics);
 
   if (converted === source) {
     return { changed: false, replacements: 0 };
@@ -124,11 +280,13 @@ function collectTsFiles(inputPath) {
 }
 
 function parseArgs(argv) {
-  const args = { input: null };
+  const args = { input: null, tscLog: null };
   for (let i = 2; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--input' || token === '-i') {
       args.input = argv[++i];
+    } else if (token === '--tsc-log') {
+      args.tscLog = argv[++i];
     }
   }
 
@@ -142,10 +300,11 @@ function parseArgs(argv) {
 function runCli() {
   const args = parseArgs(process.argv);
   const files = collectTsFiles(args.input);
+  const diagnosticsByFile = parseTscLog(args.tscLog);
   let changedFiles = 0;
 
   for (const file of files) {
-    const result = processFile(file);
+    const result = processFile(file, { diagnosticsByFile });
     if (!result.changed) continue;
     changedFiles += 1;
   }
@@ -158,6 +317,8 @@ module.exports = {
   addClassPrefixToMemberUsage,
   extractClassScopePropertyNames,
   addThisToPropertyUsage,
+  applyDiagnosticThisFixes,
+  parseTscLog,
   processFile,
   collectTsFiles
 };
