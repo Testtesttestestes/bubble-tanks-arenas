@@ -34,7 +34,8 @@ function convertParams(paramString) {
     .map((part) => part.trim())
     .filter(Boolean)
     .map((param) => {
-      const match = param.match(/^(\.{3})?(\w+)(?:\s*:\s*([^=]+?))?(?:\s*=\s*(.+))?$/);
+      // Safely consume leading 'this.' from variables that were mangled by decompilers or downstream scripts
+      const match = param.match(/^(\.{3})?(?:this\.)?(\w+)(?:\s*:\s*([^=]+?))?(?:\s*=\s*(.+))?$/);
       if (!match) return param;
       const [, rest, name, type, defaultValue] = match;
       const mapped = type ? mapType(type) : 'any';
@@ -67,7 +68,7 @@ function convertClassMembers(source, className) {
   };
 
   out = out.replace(
-    /^(\s*)(public|private|protected|internal)\s+(static\s+)?(const|var)\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
+    /^(\s*)(public|private|protected|internal)\s+(static\s+)?(const|var)\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, visibility, isStatic, kind, name, type, init) => {
       const vis = visibility !== 'internal' ? `${visibility} ` : 'public ';
       const staticPart = isStatic ? 'static ' : '';
@@ -85,7 +86,7 @@ function convertClassMembers(source, className) {
   const classHead = firstFunctionIndex === -1 ? out : out.slice(0, firstFunctionIndex);
   const classTail = firstFunctionIndex === -1 ? '' : out.slice(firstFunctionIndex);
   const normalizedHead = classHead.replace(
-    /^(\s*)(static\s+)?(?:const|var)\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
+    /^(\s*)(static\s+)?(?:const|var)\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, isStatic, name, type, init) => {
       const staticPart = isStatic ? 'static ' : '';
       const mappedType = mapType(type);
@@ -175,14 +176,18 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*_temp_\d+;\s*$/gm, '');
   converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
 
-  // Parser-stabilization hacks for decompiled AS3/E4X artifacts.
+  // E4X parsing stabilization. Safely transform node selection properties into explicit functions
+  converted = converted.replace(/\.\.\*\.\s*\(/g, '._descendants_star_filter(');
+  converted = converted.replace(/\.\.\*/g, '._descendants_star');
+  converted = converted.replace(/\.\.([a-zA-Z_]\w*)\.\s*\(/g, '._descendants_filter_$1(');
   converted = converted.replace(/\.@([a-zA-Z_]\w*)/g, '._attr_$1');
   converted = converted.replace(/\.\.([a-zA-Z_]\w*)/g, '._descendants_$1');
+
   converted = converted.replace(
-    /\bfor\s+each\s*\(\s*(?:var\s+|let\s+)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g,
+    /\bfor\s+each\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g,
     'for (let $1 of $2)'
   );
-  converted = converted.replace(/\bfor\s*\(\s*(?:var\s+|let\s+)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g, 'for (let $1 in $2)');
+  converted = converted.replace(/\bfor\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)(?:\s*:\s*[a-zA-Z0-9_.*<>]+)?\s+in\s+([^\)]+)\)/g, 'for (let $1 in $2)');
   converted = converted.replace(/\.\*/g, '._star');
   converted = converted.replace(/\*\./g, '_star.');
   converted = converted.replace(/^(\s*)(\d+|"[^"]+"|'[^']+'):\s*$/gm, '$1case $2:');
@@ -191,7 +196,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\b(this|_[a-zA-Z0-9_]+)\.\s*\(/g, '$1._missingMethod(');
   converted = converted.replace(/\.\s*\(/g, '._filter(');
   converted = converted.replace(/(\w+)\.\(([^)]*)\)/g, '$1["$2"]');
-  converted = converted.replace(/\bcatch\s*\(\s*([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
+  converted = converted.replace(/\bcatch\s*\(\s*(?:this\.)?([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
   converted = converted.replace(/^\s*include\s+"[^"]+"\s*;/gm, '// include removed');
   converted = converted.replace(/new\s+<[\w\.]+>\s*\[/g, '[');
   converted = converted.replace(/:\s*Object\b/g, ': Record<string, any>');
@@ -229,7 +234,6 @@ function convertAs3ToTs(source) {
 
   // Remove accidentally-prefixed declarations (e.g. `private function this.foo(...)`).
   converted = converted.replace(/\b(function|get|set|public|private|protected|static|override)\s+this\./g, '$1 ');
-
 
   converted = converted.replace(
     /(\b[\w$.]+\.)?(addEventListener|removeEventListener)\s*\(([^,]+),\s*([a-zA-Z0-9_$.]+)(?:\s*,[^)]*)?\)/g,
@@ -273,16 +277,29 @@ function convertAs3ToTs(source) {
 
     converted = convertClassMembers(converted, className);
 
-    if (className === 'class_32') {
-      converted = converted.replace(
-        /private static i:[^;]+;\s*\n\s*while\(i < 256\)\s*\{([\s\S]*?)\n\s*\}\s*\n\s*private static Rcon:/m,
-        (_, body) => `private static i: number = 0;\n\n  static {\n    while(i < 256) {${body}\n    }\n  }\n\n  private static Rcon:`
-      );
-      converted = converted.replace(
-        /private static Rcon:[^;]+;\s*\n\s*i\s*=\s*0;\s*\n\s*while\(i < _Rcon\.length\)\s*\{([\s\S]*?)\n\s*\}\s*\n\s*private state:/m,
-        (_, body) => `private static Rcon: ByteArray = new ByteArray();\n\n  static {\n    i = 0;\n    while(i < _Rcon.length) {${body}\n    }\n  }\n\n  private state:`
-      );
-    }
+    // Provide robust handling for generic class-level static initialization loops (found in AESKey)
+    converted = converted.replace(
+      /private static i\s*:\s*[^;]+;\s*while\s*\(\s*(?:this\.)?i\s*<\s*256\s*\)\s*\{([\s\S]*?)\}\s*((?:(?:public|private|protected|internal)\s+)?static\s+Rcon\b)/m,
+      (_, body, rconDecl) => `private static i: number = 0;
+
+  static {
+    while(this.i < 256) {${body}}
+  }
+
+  ${rconDecl}`
+    );
+
+    converted = converted.replace(
+      /((?:(?:public|private|protected|internal)\s+)?static\s+Rcon\s*:\s*[^;]+;)\s*(?:this\.)?i\s*=\s*0;\s*while\s*\(\s*(?:this\.)?i\s*<\s*(?:this\.)?_Rcon\.length\s*\)\s*\{([\s\S]*?)\}\s*((?:public|private|protected|internal)?\s*state\b)/m,
+      (_, rconDecl, body, stateDecl) => `${rconDecl}
+
+  static {
+    this.i = 0;
+    while(this.i < this._Rcon.length) {${body}}
+  }
+
+  ${stateDecl}`
+    );
   }
 
   if (interfaceMatch) {
@@ -309,7 +326,7 @@ function convertAs3ToTs(source) {
   }
 
   converted = converted.replace(
-    /^(\s*)var\s+(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
+    /^(\s*)var\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, name, type, init) => `${indent}let ${name}: ${mapType(type)}${init || ''};`
   );
 
@@ -320,7 +337,7 @@ function convertAs3ToTs(source) {
 
   // Inject undeclared local variables produced by AS3 decompilers (_loc1_, _loc2_, ...).
   converted = converted.replace(
-    /^(\s*)(?:(?:override|public|private|protected|static|internal)\s+)*function\s+\w+\s*\([^)]*\)\s*(?::\s*[^{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
+    /^(\s*)(?:(?:override|public|private|protected|static|internal)\s+)*function\s+\w+\s*\([^)]*\)\s*(?::\s*[^\{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
     (match, fnIndent, body) => {
       const locMatches = [...body.matchAll(/\b(_loc\d+_)\b/g)];
       if (locMatches.length === 0) return match;
@@ -390,7 +407,6 @@ function parseArgs(argv) {
 function runCli() {
   const args = parseArgs(process.argv);
   const files = collectAsFiles(args.input);
-  let convertedFiles = 0;
 
   if (files.length === 0) {
     console.log('No .as files found.');
@@ -406,10 +422,8 @@ function runCli() {
     const target = path.join(args.output, rel).replace(/\.as$/i, '.ts');
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, converted, 'utf8');
-    convertedFiles += 1;
+    console.log(`Converted: ${file} -> ${target}`);
   }
-
-  console.log(`converted ${convertedFiles}/${files.length}`);
 }
 
 module.exports = {
