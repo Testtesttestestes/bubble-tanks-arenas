@@ -25,8 +25,9 @@ export class AESKey implements ISymmetricKey
       private static XtimeD: ByteArray = new ByteArray();
       private static XtimeE: ByteArray = new ByteArray();
       private static i: number = 0;
-      while(this.i < 256)
-      {
+
+  static {
+    while(this.i < 256) {
          this.Sbox[this.i] = this._Sbox[this.i];
          this.InvSbox[this.i] = this._InvSbox[this.i];
          this.Xtime2Sbox[this.i] = this._Xtime2Sbox[this.i];
@@ -38,16 +39,19 @@ export class AESKey implements ISymmetricKey
          this.XtimeE[this.i] = this._XtimeE[this.i];
          ++this.i;
       }
-      
-      private static Rcon: ByteArray = new ByteArray();
-      this.i = 0;
-      while(this.i < this._Rcon.length)
-      {
+  }
+
+  private static Rcon: ByteArray = new ByteArray();
+
+  static {
+    this.i = 0;
+    while(this.i < this._Rcon.length) {
          this.Rcon[this.i] = this._Rcon[this.i];
          ++this.i;
       }
-      
-      private state: ByteArray;
+  }
+
+  private state: ByteArray;
       private tmp: ByteArray;
       private Nr: number;
       private keyLength: number;
