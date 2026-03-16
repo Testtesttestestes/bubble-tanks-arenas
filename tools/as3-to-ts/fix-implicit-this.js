@@ -30,10 +30,10 @@ function extractClassScopeMembers(source) {
   }
 
   const className = classMatch[1];
-  const memberRegex = /^\s*(public|private|protected)?\s*(static\s+)?(?:readonly\s+)?(?:var|let|const|function|get|set)?\s*([A-Za-z_$][\w$]*)\s*(?::|\()/gm;
+  const memberRegex = /^\s*(public|private|protected|static)\s+(static\s+)?(?:readonly\s+)?(?:var\s+|let\s+|const\s+|function\s+|get\s+|set\s+)?([a-zA-Z0-9_$]+)/gm;
   let match;
   while ((match = memberRegex.exec(source)) !== null) {
-    const isStatic = Boolean(match[2]);
+    const isStatic = (match[1] === 'static' || !!match[2]);
     const name = match[3];
     if (name === className || RESERVED_WORDS.has(name)) continue;
     if (isStatic) staticMembers.add(name);

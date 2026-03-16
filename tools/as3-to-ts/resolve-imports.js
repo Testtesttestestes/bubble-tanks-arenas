@@ -97,6 +97,16 @@ function getUsedIdentifiers(source) {
     .replace(/(['"`])(?:\\.|(?!\1)[^\\])*\1/g, ' ');
 
   const used = new Set();
+
+  const typeUsages = stripped.match(/:\s*([A-Z]\w*|class_\d+)/g) || [];
+  for (const usage of typeUsages) {
+    const idMatch = usage.match(/([A-Z]\w*|class_\d+)$/);
+    if (!idMatch) continue;
+    const id = idMatch[1];
+    if (TS_KEYWORDS.has(id) || BUILTIN_GLOBALS.has(id) || FLASH_TYPES.has(id)) continue;
+    used.add(id);
+  }
+
   const re = /\b([A-Za-z_$][\w$]*)\b/g;
   for (const m of stripped.matchAll(re)) {
     const id = m[1];
