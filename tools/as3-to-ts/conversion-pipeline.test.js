@@ -5,8 +5,15 @@ const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
+const SCRIPT_INPUT_DIR = path.resolve('scripts');
+const AGI_INPUT_DIR = path.resolve('binaryData/AGI decomp/scripts');
+
+let convertedRootDir;
+let diagnosticsByFile;
+let generatedTsFiles;
+
 function runNode(script, args) {
-  execFileSync('node', [path.resolve('tools/as3-to-ts', script), ...args], { stdio: 'pipe' });
+  execFileSync('node', [path.resolve('tools/as3-to-ts', script), ...args], { stdio: 'inherit' });
 }
 
 function runTsc(projectPath, logPath) {
@@ -15,65 +22,71 @@ function runTsc(projectPath, logPath) {
       stdio: ['ignore', fs.openSync(logPath, 'w'), fs.openSync(logPath, 'a')]
     });
   } catch {
-    // Expected when TypeScript finds diagnostics; logs are still written for stats parsing.
+    // Expected when TypeScript finds diagnostics; logs are still written for parsing.
   }
 }
 
-test('conversion pipeline runs end-to-end and collect-tsc-stats analyzes generated log', () => {
+function getAllTsFiles(rootDir) {
+  const files = [];
+
+  function walk(currentDir) {
+    for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+      const fullPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+        continue;
+      }
+
+      if (entry.isFile() && fullPath.endsWith('.ts')) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  walk(rootDir);
+  return files.sort((a, b) => a.localeCompare(b));
+}
+
+function parseDiagnosticsByFile(tscLogPath) {
+  const byFile = new Map();
+  const lines = fs.readFileSync(tscLogPath, 'utf8').split(/\r?\n/);
+
+  for (const line of lines) {
+    const match = line.match(/^(.*\.tsx?)\((\d+),(\d+)\): error (TS\d+):\s*(.*)$/);
+    if (!match) {
+      continue;
+    }
+
+    const [, filePathRaw, lineNo, colNo, code, message] = match;
+    const normalizedFilePath = path.resolve(filePathRaw);
+    const list = byFile.get(normalizedFilePath) ?? [];
+    list.push(`${code} (${lineNo},${colNo}): ${message}`);
+    byFile.set(normalizedFilePath, list);
+  }
+
+  return byFile;
+}
+
+test.before(() => {
+  assert.equal(fs.existsSync(SCRIPT_INPUT_DIR), true, `Missing scripts input directory: ${SCRIPT_INPUT_DIR}`);
+
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'conversion-pipeline-'));
-  const inputDir = path.join(tempRoot, 'as3-input');
-  const outputDir = path.join(tempRoot, 'migrated-ts');
+  convertedRootDir = path.join(tempRoot, 'migrated-ts');
+  fs.mkdirSync(convertedRootDir, { recursive: true });
 
-  fs.mkdirSync(inputDir, { recursive: true });
+  runNode('convert-as3-to-ts.js', ['--input', SCRIPT_INPUT_DIR, '--output', convertedRootDir]);
 
-  const as3Source = [
-    'package {',
-    '  public class PipelineSample {',
-    '    public var value:int = 0;',
-    '    public function PipelineSample() {',
-    '    }',
-    '    public function tick():void {',
-    '      value = value + 1;',
-    '    }',
-    '  }',
-    '}'
-  ].join('\n');
+  if (fs.existsSync(AGI_INPUT_DIR)) {
+    runNode('convert-as3-to-ts.js', ['--input', AGI_INPUT_DIR, '--output', path.join(convertedRootDir, 'agi')]);
+  }
 
-  fs.writeFileSync(path.join(inputDir, 'PipelineSample.as'), as3Source, 'utf8');
+  runNode('fix-implicit-this.js', ['--input', convertedRootDir]);
+  runNode('heal-signature-params.js', ['--input', convertedRootDir]);
+  runNode('fix-class-signatures.js', ['--input', convertedRootDir, '--scope', 'agi']);
+  runNode('fix-ts2695-sequences.js', ['--input', convertedRootDir]);
+  runNode('resolve-imports.js', ['--input', convertedRootDir]);
 
-  runNode('convert-as3-to-ts.js', ['--input', inputDir, '--output', outputDir]);
-  runNode('fix-implicit-this.js', ['--input', outputDir]);
-  runNode('heal-signature-params.js', ['--input', outputDir]);
-  runNode('fix-class-signatures.js', ['--input', outputDir, '--scope', 'agi']);
-
-  const malformedTsPath = path.join(outputDir, 'ManualMalformed.ts');
-  fs.writeFileSync(
-    malformedTsPath,
-    [
-      'export class ManualMalformed {',
-      '  public {',
-      '    return 1;',
-      '  }',
-      '}'
-    ].join('\n'),
-    'utf8'
-  );
-
-  runNode('fix-class-signatures.js', ['--input', outputDir, '--scope', 'agi']);
-  const fixedManualMalformed = fs.readFileSync(malformedTsPath, 'utf8');
-  assert.match(fixedManualMalformed, /public __fixedSignature\(\): any \{/);
-
-  runNode('fix-ts2695-sequences.js', ['--input', outputDir]);
-  runNode('resolve-imports.js', ['--input', outputDir]);
-
-  const convertedPath = path.join(outputDir, 'PipelineSample.ts');
-  assert.equal(fs.existsSync(convertedPath), true);
-
-  const converted = fs.readFileSync(convertedPath, 'utf8');
-  assert.match(converted, /export class PipelineSample/);
-  assert.match(converted, /(this\.)?value\s*=\s*(this\.)?value\s*\+\s*1/);
-
-  const tsconfigPath = path.join(outputDir, 'tsconfig.json');
+  const tsconfigPath = path.join(convertedRootDir, 'tsconfig.json');
   fs.writeFileSync(
     tsconfigPath,
     JSON.stringify({
@@ -81,38 +94,43 @@ test('conversion pipeline runs end-to-end and collect-tsc-stats analyzes generat
         target: 'ES2022',
         module: 'CommonJS',
         strict: false,
-        skipLibCheck: true
+        noImplicitAny: false,
+        skipLibCheck: true,
+        lib: ['ES2022']
       },
-      include: ['**/*.ts']
+      include: ['**/*.ts', '**/*.d.ts']
     }, null, 2),
     'utf8'
   );
 
-  const tscLogPath = path.join(outputDir, 'tsc_output.log');
+  fs.copyFileSync(path.resolve('flash-shims.d.ts'), path.join(convertedRootDir, 'flash-shims.d.ts'));
+  fs.copyFileSync(path.resolve('flash-globals.d.ts'), path.join(convertedRootDir, 'flash-globals.d.ts'));
+
+  const tscLogPath = path.join(convertedRootDir, 'tsc_output.log');
   runTsc(tsconfigPath, tscLogPath);
 
-  const statsOutput = execFileSync('bash', [path.resolve('tools/as3-to-ts/collect-tsc-stats.sh'), tscLogPath], {
-    env: { ...process.env, TSC_PROJECT: tsconfigPath },
-    encoding: 'utf8'
-  });
+  diagnosticsByFile = parseDiagnosticsByFile(tscLogPath);
+  generatedTsFiles = getAllTsFiles(convertedRootDir);
+});
 
-  assert.match(statsOutput, /Total errors:\s*0/);
-  assert.match(statsOutput, /Top error codes:/);
-  assert.match(statsOutput, /Detailed TS\/AS error contexts/);
+test('conversion pipeline creates narrow tsc result tests per generated ts file', async (t) => {
+  assert.ok(generatedTsFiles.length > 0, 'No generated .ts files found to validate');
 
-  fs.writeFileSync(
-    path.join(outputDir, 'Broken.ts'),
-    'export const broken: number = missingIdentifier;\n',
-    'utf8'
-  );
+  for (const filePath of generatedTsFiles) {
+    const relativePath = path.relative(convertedRootDir, filePath);
+    const diagnostics = diagnosticsByFile.get(filePath) ?? [];
 
-  runTsc(tsconfigPath, tscLogPath);
+    if (diagnostics.length === 0) {
+      await t.test(`${relativePath} :: pass`, () => {
+        assert.equal(diagnostics.length, 0);
+      });
+      continue;
+    }
 
-  const statsOutputWithError = execFileSync('bash', [path.resolve('tools/as3-to-ts/collect-tsc-stats.sh'), tscLogPath], {
-    env: { ...process.env, TSC_PROJECT: tsconfigPath },
-    encoding: 'utf8'
-  });
-
-  assert.match(statsOutputWithError, /Total errors:\s*[1-9][0-9]*/);
-  assert.match(statsOutputWithError, /TS2304/);
+    for (const [index, diagnostic] of diagnostics.entries()) {
+      await t.test(`${relativePath} :: fail ${index + 1}`, () => {
+        assert.fail(`TypeScript diagnostic in ${relativePath}: ${diagnostic}`);
+      });
+    }
+  }
 });
