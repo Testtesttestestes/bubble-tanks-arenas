@@ -17,12 +17,12 @@ export class Button extends LabelButton implements IFocusManagerComponent
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return UIComponent.mergeStyles(LabelButton.getStyleDefinition(),defaultStyles);
+         return UIComponent.mergeStyles(LabelButton.getStyleDefinition(),this.defaultStyles);
       }
       
       public set emphasized(param1: boolean)
       {
-         _emphasized = param1;
+         this._emphasized = param1;
          invalidate(InvalidationType.STYLES);
       }
       
@@ -37,33 +37,33 @@ export class Button extends LabelButton implements IFocusManagerComponent
       protected drawEmphasized(): void
       {
          let _loc2_: number = NaN;
-         if(emphasizedBorder != null)
+         if(this.emphasizedBorder != null)
          {
-            this.removeChild(emphasizedBorder);
+            this.removeChild(this.emphasizedBorder);
          }
-         emphasizedBorder = null;
-         if(!_emphasized)
+         this.emphasizedBorder = null;
+         if(!this._emphasized)
          {
             return;
          }
          let _loc1_: Record<string, any> = getStyleValue("emphasizedSkin");
          if(_loc1_ != null)
          {
-            emphasizedBorder = getDisplayObjectInstance(_loc1_);
+            this.emphasizedBorder = getDisplayObjectInstance(_loc1_);
          }
-         if(emphasizedBorder != null)
+         if(this.emphasizedBorder != null)
          {
-            this.addChildAt(emphasizedBorder,0);
+            this.addChildAt(this.emphasizedBorder,0);
             _loc2_ = Number(getStyleValue("emphasizedPadding"));
-            emphasizedBorder.x = emphasizedBorder.y = -_loc2_;
-            emphasizedBorder.width = width + _loc2_ * 2;
-            emphasizedBorder.height = height + _loc2_ * 2;
+            this.emphasizedBorder.x = this.emphasizedBorder.y = -_loc2_;
+            this.emphasizedBorder.width = width + _loc2_ * 2;
+            this.emphasizedBorder.height = height + _loc2_ * 2;
          }
       }
       
       public get emphasized(): boolean
       {
-         return _emphasized;
+         return this._emphasized;
       }
       
       protected draw(): void
@@ -73,9 +73,9 @@ export class Button extends LabelButton implements IFocusManagerComponent
             drawEmphasized();
          }
          super.draw();
-         if(emphasizedBorder != null)
+         if(this.emphasizedBorder != null)
          {
-            this.setChildIndex(emphasizedBorder,numChildren - 1);
+            this.setChildIndex(this.emphasizedBorder,numChildren - 1);
          }
       }
       
@@ -87,7 +87,7 @@ export class Button extends LabelButton implements IFocusManagerComponent
          if(param1)
          {
             _loc2_ = Number(getStyleValue("emphasizedPadding"));
-            if(_loc2_ < 0 || !_emphasized)
+            if(_loc2_ < 0 || !this._emphasized)
             {
                _loc2_ = 0;
             }

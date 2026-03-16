@@ -132,7 +132,7 @@ export class class_124 extends class_68{
          let _loc3_: Point = null;
          if(this.myMaster == null)
          {
-            this.myMaster = method_354("myMaster");
+            this.myMaster = method_354("this.myMaster");
             this.var_474 = this.myMaster.intTankLife;
          }
          if(!objBFRef.contains(this.myMaster))

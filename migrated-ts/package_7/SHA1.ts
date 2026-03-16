@@ -75,7 +75,7 @@ export class SHA1 extends class_31 implements class_17
       
       public getHashSize(): number
       {
-         return const_8;
+         return this.const_8;
       }
       
       private method_639(param1: number, param2: number, param3: number, param4: number): number

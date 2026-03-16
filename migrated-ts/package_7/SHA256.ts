@@ -76,7 +76,7 @@ export class SHA256 extends class_31 implements class_17
                   _loc3_[_loc21_] = _loc3_[_loc21_ - 16] + _loc24_ + _loc3_[_loc21_ - 7] + _loc25_;
                }
                _loc22_ = (this.method_79(_loc4_,2) ^ this.method_79(_loc4_,13) ^ this.method_79(_loc4_,22)) + (_loc4_ & _loc5_ ^ _loc4_ & _loc6_ ^ _loc5_ & _loc6_);
-               _loc23_ = _loc11_ + (this.method_79(_loc8_,6) ^ this.method_79(_loc8_,11) ^ this.method_79(_loc8_,25)) + (_loc8_ & _loc9_ ^ _loc10_ & ~_loc8_) + k[_loc21_] + _loc3_[_loc21_];
+               _loc23_ = _loc11_ + (this.method_79(_loc8_,6) ^ this.method_79(_loc8_,11) ^ this.method_79(_loc8_,25)) + (_loc8_ & _loc9_ ^ _loc10_ & ~_loc8_) + this.k[_loc21_] + _loc3_[_loc21_];
                _loc11_ = _loc10_;
                _loc10_ = _loc9_;
                _loc9_ = _loc8_;

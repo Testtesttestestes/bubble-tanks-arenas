@@ -121,17 +121,17 @@ export class class_19{
       
       public method_852(): string
       {
-         let _loc1_: string = "N=" + this.n.toString(16) + "\n" + "E=" + this.e.toString(16) + "\n";
+         let _loc1_: string = "N=" + this.n.toString(16) + "\this.n" + "E=" + this.e.toString(16) + "\this.n";
          if(this.var_515)
          {
-            _loc1_ += "D=" + this.d.toString(16) + "\n";
+            _loc1_ += "D=" + this.d.toString(16) + "\this.n";
             if(this.p != null && this.q != null)
             {
-               _loc1_ += "P=" + this.p.toString(16) + "\n";
-               _loc1_ += "Q=" + this.q.toString(16) + "\n";
-               _loc1_ += "DMP1=" + this.dmp1.toString(16) + "\n";
-               _loc1_ += "DMQ1=" + this.dmq1.toString(16) + "\n";
-               _loc1_ += "IQMP=" + this.var_327.toString(16) + "\n";
+               _loc1_ += "P=" + this.p.toString(16) + "\this.n";
+               _loc1_ += "Q=" + this.q.toString(16) + "\this.n";
+               _loc1_ += "DMP1=" + this.dmp1.toString(16) + "\this.n";
+               _loc1_ += "DMQ1=" + this.dmq1.toString(16) + "\this.n";
+               _loc1_ += "IQMP=" + this.var_327.toString(16) + "\this.n";
             }
          }
          return _loc1_;

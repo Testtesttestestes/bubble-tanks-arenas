@@ -40,10 +40,10 @@ export class UIComponent extends Sprite{
       protected _y: number;
       constructor(){
          super();
-         instanceStyles = {};
-         sharedStyles = {};
-         invalidHash = {};
-         callLaterMethods = new Dictionary();
+         this.instanceStyles = {};
+         this.sharedStyles = {};
+         this.invalidHash = {};
+         this.callLaterMethods = new Dictionary();
          StyleManager.registerInstance(this);
          configUI();
          invalidate(InvalidationType.ALL);
@@ -62,7 +62,7 @@ export class UIComponent extends Sprite{
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return defaultStyles;
+         return this.defaultStyles;
       }
       
       public static mergeStyles(... rest): Record<string, any>
@@ -89,7 +89,7 @@ export class UIComponent extends Sprite{
       
       public getStyle(param1: string): Record<string, any>
       {
-         return instanceStyles[param1];
+         return this.instanceStyles[param1];
       }
       
       protected checkLivePreview(): boolean
@@ -125,19 +125,19 @@ export class UIComponent extends Sprite{
             this.addEventListener(Event.ADDED_TO_STAGE, callLaterDispatcher.bind(this));
             return;
          }
-         inCallLaterPhase = true;
-         let _loc2_: Dictionary = callLaterMethods;
+         this.inCallLaterPhase = true;
+         let _loc2_: Dictionary = this.callLaterMethods;
          for (let _loc3_ in _loc2_)
          {
             _loc3_();
             delete _loc2_[_loc3_];
          }
-         inCallLaterPhase = false;
+         this.inCallLaterPhase = false;
       }
       
       protected validate(): void
       {
-         invalidHash = {};
+         this.invalidHash = {};
       }
       
       protected focusOutHandler(param1: FocusEvent): void
@@ -145,13 +145,13 @@ export class UIComponent extends Sprite{
          if(isOurFocus(param1.target  as unknown as DisplayObject))
          {
             drawFocus(false);
-            isFocused = false;
+            this.isFocused = false;
          }
       }
       
       public set mouseFocusEnabled(param1: boolean)
       {
-         _mouseFocusEnabled = param1;
+         this._mouseFocusEnabled = param1;
       }
       
       public getFocus(): InteractiveObject
@@ -165,7 +165,7 @@ export class UIComponent extends Sprite{
       
       public get height(): number
       {
-         return _height;
+         return this._height;
       }
       
       private addedHandler(param1: Event): void
@@ -176,12 +176,12 @@ export class UIComponent extends Sprite{
       
       protected getStyleValue(param1: string): Record<string, any>
       {
-         return instanceStyles[param1] == null ? sharedStyles[param1] : instanceStyles[param1];
+         return this.instanceStyles[param1] == null ? this.sharedStyles[param1] : this.instanceStyles[param1];
       }
       
       public invalidate(param1: string = "all", param2: boolean = true): void
       {
-         invalidHash[param1] = true;
+         this.invalidHash[param1] = true;
          if(param2)
          {
             this.callLater(draw);
@@ -195,7 +195,7 @@ export class UIComponent extends Sprite{
       
       public get enabled(): boolean
       {
-         return _enabled;
+         return this._enabled;
       }
       
       protected getScaleX(): number
@@ -210,7 +210,7 @@ export class UIComponent extends Sprite{
       
       public get focusEnabled(): boolean
       {
-         return _focusEnabled;
+         return this._focusEnabled;
       }
       
       protected afterComponentParameters(): void
@@ -219,37 +219,37 @@ export class UIComponent extends Sprite{
       
       public get scaleY(): number
       {
-         return height / startHeight;
+         return height / this.startHeight;
       }
       
       protected setIMEMode(param1: boolean): any
       {
          let enabled: boolean = param1;
-         if(_imeMode != null)
+         if(this._imeMode != null)
          {
             if(enabled)
             {
                IME.enabled = true;
-               _oldIMEMode = IME.conversionMode;
+               this._oldIMEMode = IME.conversionMode;
                try
                {
-                  if(!errorCaught && IME.conversionMode != IMEConversionMode.UNKNOWN)
+                  if(!this.errorCaught && IME.conversionMode != IMEConversionMode.UNKNOWN)
                   {
-                     IME.conversionMode = _imeMode;
+                     IME.conversionMode = this._imeMode;
                   }
-                  errorCaught = false;
+                  this.errorCaught = false;
                }
                catch (e: any)
                {
-                  errorCaught = true;
-                  throw new Error("IME mode not supported: " + _imeMode);
+                  this.errorCaught = true;
+                  throw new Error("IME mode not supported: " + this._imeMode);
                }
             }
             else
             {
-               if(IME.conversionMode != IMEConversionMode.UNKNOWN && _oldIMEMode != IMEConversionMode.UNKNOWN)
+               if(IME.conversionMode != IMEConversionMode.UNKNOWN && this._oldIMEMode != IMEConversionMode.UNKNOWN)
                {
-                  IME.conversionMode = _oldIMEMode;
+                  IME.conversionMode = this._oldIMEMode;
                }
                IME.enabled = false;
             }
@@ -260,7 +260,7 @@ export class UIComponent extends Sprite{
       {
          if(isInvalid(InvalidationType.SIZE,InvalidationType.STYLES))
          {
-            if(isFocused && focusManager.showFocusIndicator)
+            if(this.isFocused && focusManager.showFocusIndicator)
             {
                drawFocus(true);
             }
@@ -270,7 +270,7 @@ export class UIComponent extends Sprite{
       
       public set height(param1: number)
       {
-         if(_height == param1)
+         if(this._height == param1)
          {
             return;
          }
@@ -279,7 +279,7 @@ export class UIComponent extends Sprite{
       
       protected configUI(): void
       {
-         isLivePreview = checkLivePreview();
+         this.isLivePreview = checkLivePreview();
          let _loc1_: number = rotation;
          rotation = 0;
          let _loc2_: number = super.width;
@@ -293,8 +293,8 @@ export class UIComponent extends Sprite{
          setSize(_loc2_,_loc3_);
          move(super.x,super.y);
          rotation = _loc1_;
-         startWidth = _loc2_;
-         startHeight = _loc3_;
+         this.startWidth = _loc2_;
+         this.startHeight = _loc3_;
          if(numChildren > 0)
          {
             this.removeChildAt(0);
@@ -308,7 +308,7 @@ export class UIComponent extends Sprite{
       
       public get scaleX(): number
       {
-         return width / startWidth;
+         return width / this.startWidth;
       }
       
       protected setScaleX(param1: number): void
@@ -344,13 +344,13 @@ export class UIComponent extends Sprite{
       
       protected isInvalid(param1: string, ... rest): boolean
       {
-         if(Boolean(invalidHash[param1]) || Boolean(invalidHash[InvalidationType.ALL]))
+         if(Boolean(this.invalidHash[param1]) || Boolean(this.invalidHash[InvalidationType.ALL]))
          {
             return true;
          }
          while(rest.length > 0)
          {
-            if(invalidHash[rest.pop()])
+            if(this.invalidHash[rest.pop()])
             {
                return true;
             }
@@ -360,11 +360,11 @@ export class UIComponent extends Sprite{
       
       public setStyle(param1: string, param2: Record<string, any>): void
       {
-         if(instanceStyles[param1] === param2 && !(param2 instanceof TextFormat))
+         if(this.instanceStyles[param1] === param2 && !(param2 instanceof TextFormat))
          {
             return;
          }
-         instanceStyles[param1] = param2;
+         this.instanceStyles[param1] = param2;
          invalidate(InvalidationType.STYLES);
       }
       
@@ -382,40 +382,40 @@ export class UIComponent extends Sprite{
             if(Boolean(_loc2_) && _loc2_.showFocusIndicator)
             {
                drawFocus(true);
-               isFocused = true;
+               this.isFocused = true;
             }
          }
       }
       
       public get componentInspectorSetting(): boolean
       {
-         return _inspector;
+         return this._inspector;
       }
       
       public get x(): number
       {
-         return isNaN(_x) ? super.x : _x;
+         return isNaN(this._x) ? super.x : this._x;
       }
       
       public get y(): number
       {
-         return isNaN(_y) ? super.y : _y;
+         return isNaN(this._y) ? super.y : this._y;
       }
       
       public set enabled(param1: boolean)
       {
-         if(param1 == _enabled)
+         if(param1 == this._enabled)
          {
             return;
          }
-         _enabled = param1;
+         this._enabled = param1;
          invalidate(InvalidationType.STATE);
       }
       
       public setSize(param1: number, param2: number): void
       {
-         _width = param1;
-         _height = param2;
+         this._width = param1;
+         this._height = param2;
          invalidate(InvalidationType.SIZE);
          this.dispatchEvent(new ComponentEvent(ComponentEvent.RESIZE,false));
       }
@@ -426,12 +426,12 @@ export class UIComponent extends Sprite{
       
       public setSharedStyle(param1: string, param2: Record<string, any>): void
       {
-         if(sharedStyles[param1] === param2 && !(param2 instanceof TextFormat))
+         if(this.sharedStyles[param1] === param2 && !(param2 instanceof TextFormat))
          {
             return;
          }
-         sharedStyles[param1] = param2;
-         if(instanceStyles[param1] == null)
+         this.sharedStyles[param1] = param2;
+         if(this.instanceStyles[param1] == null)
          {
             invalidate(InvalidationType.STYLES);
          }
@@ -439,12 +439,12 @@ export class UIComponent extends Sprite{
       
       public set focusEnabled(param1: boolean)
       {
-         _focusEnabled = param1;
+         this._focusEnabled = param1;
       }
       
       public set width(param1: number)
       {
-         if(_width == param1)
+         if(this._width == param1)
          {
             return;
          }
@@ -461,17 +461,17 @@ export class UIComponent extends Sprite{
       
       public set scaleX(param1: number)
       {
-         setSize(startWidth * param1,height);
+         setSize(this.startWidth * param1,height);
       }
       
       public get mouseFocusEnabled(): boolean
       {
-         return _mouseFocusEnabled;
+         return this._mouseFocusEnabled;
       }
       
       public set scaleY(param1: number)
       {
-         setSize(width,startHeight * param1);
+         setSize(width,this.startHeight * param1);
       }
       
       protected getDisplayObjectInstance(param1: Record<string, any>): DisplayObject
@@ -542,7 +542,7 @@ export class UIComponent extends Sprite{
       
       public get width(): number
       {
-         return _width;
+         return this._width;
       }
       
       protected beforeComponentParameters(): void
@@ -551,11 +551,11 @@ export class UIComponent extends Sprite{
       
       protected callLater(param1: Function): void
       {
-         if(inCallLaterPhase)
+         if(this.inCallLaterPhase)
          {
             return;
          }
-         callLaterMethods[param1] = true;
+         this.callLaterMethods[param1] = true;
          if(stage != null)
          {
             stage.addEventListener(Event.RENDER, callLaterDispatcher.bind(this));
@@ -569,8 +569,8 @@ export class UIComponent extends Sprite{
       
       public move(param1: number, param2: number): void
       {
-         _x = param1;
-         _y = param2;
+         this._x = param1;
+         this._y = param2;
          super.x = Math.round(param1);
          super.y = Math.round(param2);
          this.dispatchEvent(new ComponentEvent(ComponentEvent.MOVE));
@@ -595,9 +595,9 @@ export class UIComponent extends Sprite{
       
       protected createFocusManager(): void
       {
-         if(focusManagers[stage] == null)
+         if(this.focusManagers[stage] == null)
          {
-            focusManagers[stage] = new FocusManager(stage);
+            this.focusManagers[stage] = new FocusManager(stage);
          }
       }
       
@@ -609,8 +609,8 @@ export class UIComponent extends Sprite{
       
       public set componentInspectorSetting(param1: boolean)
       {
-         _inspector = param1;
-         if(_inspector)
+         this._inspector = param1;
+         if(this._inspector)
          {
             beforeComponentParameters();
          }
@@ -622,37 +622,37 @@ export class UIComponent extends Sprite{
       
       public set y(param1: number)
       {
-         move(_x,param1);
+         move(this._x,param1);
       }
       
       public drawFocus(param1: boolean): void
       {
          let _loc2_: number = NaN;
-         isFocused = param1;
-         if(uiFocusRect != null && this.contains(uiFocusRect))
+         this.isFocused = param1;
+         if(this.uiFocusRect != null && this.contains(this.uiFocusRect))
          {
-            this.removeChild(uiFocusRect);
-            uiFocusRect = null;
+            this.removeChild(this.uiFocusRect);
+            this.uiFocusRect = null;
          }
          if(param1)
          {
-            uiFocusRect = getDisplayObjectInstance(getStyleValue("focusRectSkin"))  as unknown as Sprite;
-            if(uiFocusRect == null)
+            this.uiFocusRect = getDisplayObjectInstance(getStyleValue("focusRectSkin"))  as unknown as Sprite;
+            if(this.uiFocusRect == null)
             {
                return;
             }
             _loc2_ = Number(getStyleValue("focusRectPadding"));
-            uiFocusRect.x = -_loc2_;
-            uiFocusRect.y = -_loc2_;
-            uiFocusRect.width = width + _loc2_ * 2;
-            uiFocusRect.height = height + _loc2_ * 2;
-            this.addChildAt(uiFocusRect,0);
+            this.uiFocusRect.x = -_loc2_;
+            this.uiFocusRect.y = -_loc2_;
+            this.uiFocusRect.width = width + _loc2_ * 2;
+            this.uiFocusRect.height = height + _loc2_ * 2;
+            this.addChildAt(this.uiFocusRect,0);
          }
       }
       
       public set x(param1: number)
       {
-         move(param1,_y);
+         move(param1,this._y);
       }
       
       public drawNow(): void

@@ -27,27 +27,27 @@ export class class_32 implements class_18
       private static i: number = 0;
 
   static {
-    while(i < 256) {
-         var_17[i] = const_16[i];
-         var_84[i] = const_24[i];
-         Xtime2Sbox[i] = _Xtime2Sbox[i];
-         Xtime3Sbox[i] = _Xtime3Sbox[i];
-         Xtime2[i] = _Xtime2[i];
-         Xtime9[i] = _Xtime9[i];
-         var_89[i] = const_23[i];
-         var_88[i] = const_20[i];
-         var_85[i] = const_17[i];
-         ++i;
+    while(this.i < 256) {
+         this.var_17[this.i] = this.const_16[this.i];
+         this.var_84[this.i] = this.const_24[this.i];
+         this.Xtime2Sbox[this.i] = this._Xtime2Sbox[this.i];
+         this.Xtime3Sbox[this.i] = this._Xtime3Sbox[this.i];
+         this.Xtime2[this.i] = this._Xtime2[this.i];
+         this.Xtime9[this.i] = this._Xtime9[this.i];
+         this.var_89[this.i] = this.const_23[this.i];
+         this.var_88[this.i] = this.const_20[this.i];
+         this.var_85[this.i] = this.const_17[this.i];
+         ++this.i;
     }
   }
 
   private static Rcon: ByteArray = new ByteArray();
 
   static {
-    i = 0;
-    while(i < _Rcon.length) {
-         Rcon[i] = _Rcon[i];
-         ++i;
+    this.i = 0;
+    while(this.i < this._Rcon.length) {
+         this.Rcon[this.i] = this._Rcon[this.i];
+         ++this.i;
     }
   }
 
@@ -75,13 +75,13 @@ export class class_32 implements class_18
       {
          let _loc3_: number = 0;
          this.state.position = 0;
-         this.state.writeBytes(param1,param2,const_10 * 4);
-         this.method_196(this.var_73,this.var_221 * const_10 * 4);
+         this.state.writeBytes(param1,param2,this.const_10 * 4);
+         this.method_196(this.var_73,this.var_221 * this.const_10 * 4);
          this.method_528();
          _loc3_ = this.var_221;
          while(_loc3_--)
          {
-            this.method_196(this.var_73,_loc3_ * const_10 * 4);
+            this.method_196(this.var_73,_loc3_ * this.const_10 * 4);
             if(_loc3_)
             {
                this.method_619();
@@ -95,26 +95,26 @@ export class class_32 implements class_18
       {
          let _loc1_: number = 0;
          this.var_29.length = 0;
-         this.var_29[0] = var_85[this.state[0]] ^ var_89[this.state[1]] ^ var_88[this.state[2]] ^ Xtime9[this.state[3]];
-         this.var_29[5] = Xtime9[this.state[0]] ^ var_85[this.state[1]] ^ var_89[this.state[2]] ^ var_88[this.state[3]];
-         this.var_29[10] = var_88[this.state[0]] ^ Xtime9[this.state[1]] ^ var_85[this.state[2]] ^ var_89[this.state[3]];
-         this.var_29[15] = var_89[this.state[0]] ^ var_88[this.state[1]] ^ Xtime9[this.state[2]] ^ var_85[this.state[3]];
-         this.var_29[4] = var_85[this.state[4]] ^ var_89[this.state[5]] ^ var_88[this.state[6]] ^ Xtime9[this.state[7]];
-         this.var_29[9] = Xtime9[this.state[4]] ^ var_85[this.state[5]] ^ var_89[this.state[6]] ^ var_88[this.state[7]];
-         this.var_29[14] = var_88[this.state[4]] ^ Xtime9[this.state[5]] ^ var_85[this.state[6]] ^ var_89[this.state[7]];
-         this.var_29[3] = var_89[this.state[4]] ^ var_88[this.state[5]] ^ Xtime9[this.state[6]] ^ var_85[this.state[7]];
-         this.var_29[8] = var_85[this.state[8]] ^ var_89[this.state[9]] ^ var_88[this.state[10]] ^ Xtime9[this.state[11]];
-         this.var_29[13] = Xtime9[this.state[8]] ^ var_85[this.state[9]] ^ var_89[this.state[10]] ^ var_88[this.state[11]];
-         this.var_29[2] = var_88[this.state[8]] ^ Xtime9[this.state[9]] ^ var_85[this.state[10]] ^ var_89[this.state[11]];
-         this.var_29[7] = var_89[this.state[8]] ^ var_88[this.state[9]] ^ Xtime9[this.state[10]] ^ var_85[this.state[11]];
-         this.var_29[12] = var_85[this.state[12]] ^ var_89[this.state[13]] ^ var_88[this.state[14]] ^ Xtime9[this.state[15]];
-         this.var_29[1] = Xtime9[this.state[12]] ^ var_85[this.state[13]] ^ var_89[this.state[14]] ^ var_88[this.state[15]];
-         this.var_29[6] = var_88[this.state[12]] ^ Xtime9[this.state[13]] ^ var_85[this.state[14]] ^ var_89[this.state[15]];
-         this.var_29[11] = var_89[this.state[12]] ^ var_88[this.state[13]] ^ Xtime9[this.state[14]] ^ var_85[this.state[15]];
+         this.var_29[0] = this.var_85[this.state[0]] ^ this.var_89[this.state[1]] ^ this.var_88[this.state[2]] ^ this.Xtime9[this.state[3]];
+         this.var_29[5] = this.Xtime9[this.state[0]] ^ this.var_85[this.state[1]] ^ this.var_89[this.state[2]] ^ this.var_88[this.state[3]];
+         this.var_29[10] = this.var_88[this.state[0]] ^ this.Xtime9[this.state[1]] ^ this.var_85[this.state[2]] ^ this.var_89[this.state[3]];
+         this.var_29[15] = this.var_89[this.state[0]] ^ this.var_88[this.state[1]] ^ this.Xtime9[this.state[2]] ^ this.var_85[this.state[3]];
+         this.var_29[4] = this.var_85[this.state[4]] ^ this.var_89[this.state[5]] ^ this.var_88[this.state[6]] ^ this.Xtime9[this.state[7]];
+         this.var_29[9] = this.Xtime9[this.state[4]] ^ this.var_85[this.state[5]] ^ this.var_89[this.state[6]] ^ this.var_88[this.state[7]];
+         this.var_29[14] = this.var_88[this.state[4]] ^ this.Xtime9[this.state[5]] ^ this.var_85[this.state[6]] ^ this.var_89[this.state[7]];
+         this.var_29[3] = this.var_89[this.state[4]] ^ this.var_88[this.state[5]] ^ this.Xtime9[this.state[6]] ^ this.var_85[this.state[7]];
+         this.var_29[8] = this.var_85[this.state[8]] ^ this.var_89[this.state[9]] ^ this.var_88[this.state[10]] ^ this.Xtime9[this.state[11]];
+         this.var_29[13] = this.Xtime9[this.state[8]] ^ this.var_85[this.state[9]] ^ this.var_89[this.state[10]] ^ this.var_88[this.state[11]];
+         this.var_29[2] = this.var_88[this.state[8]] ^ this.Xtime9[this.state[9]] ^ this.var_85[this.state[10]] ^ this.var_89[this.state[11]];
+         this.var_29[7] = this.var_89[this.state[8]] ^ this.var_88[this.state[9]] ^ this.Xtime9[this.state[10]] ^ this.var_85[this.state[11]];
+         this.var_29[12] = this.var_85[this.state[12]] ^ this.var_89[this.state[13]] ^ this.var_88[this.state[14]] ^ this.Xtime9[this.state[15]];
+         this.var_29[1] = this.Xtime9[this.state[12]] ^ this.var_85[this.state[13]] ^ this.var_89[this.state[14]] ^ this.var_88[this.state[15]];
+         this.var_29[6] = this.var_88[this.state[12]] ^ this.Xtime9[this.state[13]] ^ this.var_85[this.state[14]] ^ this.var_89[this.state[15]];
+         this.var_29[11] = this.var_89[this.state[12]] ^ this.var_88[this.state[13]] ^ this.Xtime9[this.state[14]] ^ this.var_85[this.state[15]];
          _loc1_ = 0;
-         while(_loc1_ < 4 * const_10)
+         while(_loc1_ < 4 * this.const_10)
          {
-            this.state[_loc1_] = var_84[this.var_29[_loc1_]];
+            this.state[_loc1_] = this.var_84[this.var_29[_loc1_]];
             _loc1_++;
          }
       }
@@ -122,25 +122,25 @@ export class class_32 implements class_18
       protected method_528(): void
       {
          let _loc1_: number = 0;
-         this.state[0] = var_84[this.state[0]];
-         this.state[4] = var_84[this.state[4]];
-         this.state[8] = var_84[this.state[8]];
-         this.state[12] = var_84[this.state[12]];
-         _loc1_ = Math.floor(var_84[this.state[13]]);
-         this.state[13] = var_84[this.state[9]];
-         this.state[9] = var_84[this.state[5]];
-         this.state[5] = var_84[this.state[1]];
+         this.state[0] = this.var_84[this.state[0]];
+         this.state[4] = this.var_84[this.state[4]];
+         this.state[8] = this.var_84[this.state[8]];
+         this.state[12] = this.var_84[this.state[12]];
+         _loc1_ = Math.floor(this.var_84[this.state[13]]);
+         this.state[13] = this.var_84[this.state[9]];
+         this.state[9] = this.var_84[this.state[5]];
+         this.state[5] = this.var_84[this.state[1]];
          this.state[1] = _loc1_;
-         _loc1_ = Math.floor(var_84[this.state[2]]);
-         this.state[2] = var_84[this.state[10]];
+         _loc1_ = Math.floor(this.var_84[this.state[2]]);
+         this.state[2] = this.var_84[this.state[10]];
          this.state[10] = _loc1_;
-         _loc1_ = Math.floor(var_84[this.state[6]]);
-         this.state[6] = var_84[this.state[14]];
+         _loc1_ = Math.floor(this.var_84[this.state[6]]);
+         this.state[6] = this.var_84[this.state[14]];
          this.state[14] = _loc1_;
-         _loc1_ = Math.floor(var_84[this.state[3]]);
-         this.state[3] = var_84[this.state[7]];
-         this.state[7] = var_84[this.state[11]];
-         this.state[11] = var_84[this.state[15]];
+         _loc1_ = Math.floor(this.var_84[this.state[3]]);
+         this.state[3] = this.var_84[this.state[7]];
+         this.state[7] = this.var_84[this.state[11]];
+         this.state[11] = this.var_84[this.state[15]];
          this.state[15] = _loc1_;
       }
       
@@ -189,7 +189,7 @@ export class class_32 implements class_18
          let _loc7_: number = this.var_73.length / 4;
          this.var_221 = _loc7_ + 6;
          _loc6_ = _loc7_;
-         while(_loc6_ < const_10 * (this.var_221 + 1))
+         while(_loc6_ < this.const_10 * (this.var_221 + 1))
          {
             _loc1_ = Math.floor(this.var_73[4 * _loc6_ - 4]);
             _loc2_ = Math.floor(this.var_73[4 * _loc6_ - 3]);
@@ -198,17 +198,17 @@ export class class_32 implements class_18
             if(!(_loc6_ % _loc7_))
             {
                _loc5_ = _loc4_;
-               _loc4_ = Math.floor(var_17[_loc1_]);
-               _loc1_ = Math.floor(var_17[_loc2_] ^ Rcon[_loc6_ / _loc7_]);
-               _loc2_ = Math.floor(var_17[_loc3_]);
-               _loc3_ = Math.floor(var_17[_loc5_]);
+               _loc4_ = Math.floor(this.var_17[_loc1_]);
+               _loc1_ = Math.floor(this.var_17[_loc2_] ^ this.Rcon[_loc6_ / _loc7_]);
+               _loc2_ = Math.floor(this.var_17[_loc3_]);
+               _loc3_ = Math.floor(this.var_17[_loc5_]);
             }
             else if(_loc7_ > 6 && _loc6_ % _loc7_ == 4)
             {
-               _loc1_ = Math.floor(var_17[_loc1_]);
-               _loc2_ = Math.floor(var_17[_loc2_]);
-               _loc3_ = Math.floor(var_17[_loc3_]);
-               _loc4_ = Math.floor(var_17[_loc4_]);
+               _loc1_ = Math.floor(this.var_17[_loc1_]);
+               _loc2_ = Math.floor(this.var_17[_loc2_]);
+               _loc3_ = Math.floor(this.var_17[_loc3_]);
+               _loc4_ = Math.floor(this.var_17[_loc4_]);
             }
             this.var_73[4 * _loc6_ + 0] = this.var_73[4 * _loc6_ - 4 * _loc7_ + 0] ^ _loc1_;
             this.var_73[4 * _loc6_ + 1] = this.var_73[4 * _loc6_ - 4 * _loc7_ + 1] ^ _loc2_;
@@ -233,7 +233,7 @@ export class class_32 implements class_18
       {
          let _loc3_: number = 0;
          this.state.position = 0;
-         this.state.writeBytes(param1,param2,const_10 * 4);
+         this.state.writeBytes(param1,param2,this.const_10 * 4);
          this.method_196(this.var_73,0);
          _loc3_ = 1;
          while(_loc3_ < this.var_221 + 1)
@@ -246,7 +246,7 @@ export class class_32 implements class_18
             {
                this.method_602();
             }
-            this.method_196(this.var_73,_loc3_ * const_10 * 4);
+            this.method_196(this.var_73,_loc3_ * this.const_10 * 4);
             _loc3_++;
          }
          param1.position = param2;
@@ -256,48 +256,48 @@ export class class_32 implements class_18
       protected method_499(): void
       {
          this.var_29.length = 0;
-         this.var_29[0] = Xtime2Sbox[this.state[0]] ^ Xtime3Sbox[this.state[5]] ^ var_17[this.state[10]] ^ var_17[this.state[15]];
-         this.var_29[1] = var_17[this.state[0]] ^ Xtime2Sbox[this.state[5]] ^ Xtime3Sbox[this.state[10]] ^ var_17[this.state[15]];
-         this.var_29[2] = var_17[this.state[0]] ^ var_17[this.state[5]] ^ Xtime2Sbox[this.state[10]] ^ Xtime3Sbox[this.state[15]];
-         this.var_29[3] = Xtime3Sbox[this.state[0]] ^ var_17[this.state[5]] ^ var_17[this.state[10]] ^ Xtime2Sbox[this.state[15]];
-         this.var_29[4] = Xtime2Sbox[this.state[4]] ^ Xtime3Sbox[this.state[9]] ^ var_17[this.state[14]] ^ var_17[this.state[3]];
-         this.var_29[5] = var_17[this.state[4]] ^ Xtime2Sbox[this.state[9]] ^ Xtime3Sbox[this.state[14]] ^ var_17[this.state[3]];
-         this.var_29[6] = var_17[this.state[4]] ^ var_17[this.state[9]] ^ Xtime2Sbox[this.state[14]] ^ Xtime3Sbox[this.state[3]];
-         this.var_29[7] = Xtime3Sbox[this.state[4]] ^ var_17[this.state[9]] ^ var_17[this.state[14]] ^ Xtime2Sbox[this.state[3]];
-         this.var_29[8] = Xtime2Sbox[this.state[8]] ^ Xtime3Sbox[this.state[13]] ^ var_17[this.state[2]] ^ var_17[this.state[7]];
-         this.var_29[9] = var_17[this.state[8]] ^ Xtime2Sbox[this.state[13]] ^ Xtime3Sbox[this.state[2]] ^ var_17[this.state[7]];
-         this.var_29[10] = var_17[this.state[8]] ^ var_17[this.state[13]] ^ Xtime2Sbox[this.state[2]] ^ Xtime3Sbox[this.state[7]];
-         this.var_29[11] = Xtime3Sbox[this.state[8]] ^ var_17[this.state[13]] ^ var_17[this.state[2]] ^ Xtime2Sbox[this.state[7]];
-         this.var_29[12] = Xtime2Sbox[this.state[12]] ^ Xtime3Sbox[this.state[1]] ^ var_17[this.state[6]] ^ var_17[this.state[11]];
-         this.var_29[13] = var_17[this.state[12]] ^ Xtime2Sbox[this.state[1]] ^ Xtime3Sbox[this.state[6]] ^ var_17[this.state[11]];
-         this.var_29[14] = var_17[this.state[12]] ^ var_17[this.state[1]] ^ Xtime2Sbox[this.state[6]] ^ Xtime3Sbox[this.state[11]];
-         this.var_29[15] = Xtime3Sbox[this.state[12]] ^ var_17[this.state[1]] ^ var_17[this.state[6]] ^ Xtime2Sbox[this.state[11]];
+         this.var_29[0] = this.Xtime2Sbox[this.state[0]] ^ this.Xtime3Sbox[this.state[5]] ^ this.var_17[this.state[10]] ^ this.var_17[this.state[15]];
+         this.var_29[1] = this.var_17[this.state[0]] ^ this.Xtime2Sbox[this.state[5]] ^ this.Xtime3Sbox[this.state[10]] ^ this.var_17[this.state[15]];
+         this.var_29[2] = this.var_17[this.state[0]] ^ this.var_17[this.state[5]] ^ this.Xtime2Sbox[this.state[10]] ^ this.Xtime3Sbox[this.state[15]];
+         this.var_29[3] = this.Xtime3Sbox[this.state[0]] ^ this.var_17[this.state[5]] ^ this.var_17[this.state[10]] ^ this.Xtime2Sbox[this.state[15]];
+         this.var_29[4] = this.Xtime2Sbox[this.state[4]] ^ this.Xtime3Sbox[this.state[9]] ^ this.var_17[this.state[14]] ^ this.var_17[this.state[3]];
+         this.var_29[5] = this.var_17[this.state[4]] ^ this.Xtime2Sbox[this.state[9]] ^ this.Xtime3Sbox[this.state[14]] ^ this.var_17[this.state[3]];
+         this.var_29[6] = this.var_17[this.state[4]] ^ this.var_17[this.state[9]] ^ this.Xtime2Sbox[this.state[14]] ^ this.Xtime3Sbox[this.state[3]];
+         this.var_29[7] = this.Xtime3Sbox[this.state[4]] ^ this.var_17[this.state[9]] ^ this.var_17[this.state[14]] ^ this.Xtime2Sbox[this.state[3]];
+         this.var_29[8] = this.Xtime2Sbox[this.state[8]] ^ this.Xtime3Sbox[this.state[13]] ^ this.var_17[this.state[2]] ^ this.var_17[this.state[7]];
+         this.var_29[9] = this.var_17[this.state[8]] ^ this.Xtime2Sbox[this.state[13]] ^ this.Xtime3Sbox[this.state[2]] ^ this.var_17[this.state[7]];
+         this.var_29[10] = this.var_17[this.state[8]] ^ this.var_17[this.state[13]] ^ this.Xtime2Sbox[this.state[2]] ^ this.Xtime3Sbox[this.state[7]];
+         this.var_29[11] = this.Xtime3Sbox[this.state[8]] ^ this.var_17[this.state[13]] ^ this.var_17[this.state[2]] ^ this.Xtime2Sbox[this.state[7]];
+         this.var_29[12] = this.Xtime2Sbox[this.state[12]] ^ this.Xtime3Sbox[this.state[1]] ^ this.var_17[this.state[6]] ^ this.var_17[this.state[11]];
+         this.var_29[13] = this.var_17[this.state[12]] ^ this.Xtime2Sbox[this.state[1]] ^ this.Xtime3Sbox[this.state[6]] ^ this.var_17[this.state[11]];
+         this.var_29[14] = this.var_17[this.state[12]] ^ this.var_17[this.state[1]] ^ this.Xtime2Sbox[this.state[6]] ^ this.Xtime3Sbox[this.state[11]];
+         this.var_29[15] = this.Xtime3Sbox[this.state[12]] ^ this.var_17[this.state[1]] ^ this.var_17[this.state[6]] ^ this.Xtime2Sbox[this.state[11]];
          this.state.position = 0;
-         this.state.writeBytes(this.var_29,0,const_10 * 4);
+         this.state.writeBytes(this.var_29,0,this.const_10 * 4);
       }
       
       protected method_602(): void
       {
          let _loc1_: number = 0;
-         this.state[0] = var_17[this.state[0]];
-         this.state[4] = var_17[this.state[4]];
-         this.state[8] = var_17[this.state[8]];
-         this.state[12] = var_17[this.state[12]];
-         _loc1_ = Math.floor(var_17[this.state[1]]);
-         this.state[1] = var_17[this.state[5]];
-         this.state[5] = var_17[this.state[9]];
-         this.state[9] = var_17[this.state[13]];
+         this.state[0] = this.var_17[this.state[0]];
+         this.state[4] = this.var_17[this.state[4]];
+         this.state[8] = this.var_17[this.state[8]];
+         this.state[12] = this.var_17[this.state[12]];
+         _loc1_ = Math.floor(this.var_17[this.state[1]]);
+         this.state[1] = this.var_17[this.state[5]];
+         this.state[5] = this.var_17[this.state[9]];
+         this.state[9] = this.var_17[this.state[13]];
          this.state[13] = _loc1_;
-         _loc1_ = Math.floor(var_17[this.state[2]]);
-         this.state[2] = var_17[this.state[10]];
+         _loc1_ = Math.floor(this.var_17[this.state[2]]);
+         this.state[2] = this.var_17[this.state[10]];
          this.state[10] = _loc1_;
-         _loc1_ = Math.floor(var_17[this.state[6]]);
-         this.state[6] = var_17[this.state[14]];
+         _loc1_ = Math.floor(this.var_17[this.state[6]]);
+         this.state[6] = this.var_17[this.state[14]];
          this.state[14] = _loc1_;
-         _loc1_ = Math.floor(var_17[this.state[15]]);
-         this.state[15] = var_17[this.state[11]];
-         this.state[11] = var_17[this.state[7]];
-         this.state[7] = var_17[this.state[3]];
+         _loc1_ = Math.floor(this.var_17[this.state[15]]);
+         this.state[15] = this.var_17[this.state[11]];
+         this.state[11] = this.var_17[this.state[7]];
+         this.state[7] = this.var_17[this.state[3]];
          this.state[3] = _loc1_;
       }
       

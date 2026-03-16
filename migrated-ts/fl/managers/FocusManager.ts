@@ -17,10 +17,10 @@ export class FocusManager implements IFocusManager
       private lastAction: string;
       constructor(param1: DisplayObjectContainer){
          super();
-         focusableObjects = new Dictionary(true);
+         this.focusableObjects = new Dictionary(true);
          if(param1 != null)
          {
-            _form = param1;
+            this._form = param1;
             addFocusables((param1 as unknown as DisplayObject));
             param1.addEventListener(Event.ADDED, addedHandler.bind(this));
             param1.addEventListener(Event.REMOVED, removedHandler.bind(this));
@@ -30,7 +30,7 @@ export class FocusManager implements IFocusManager
       
       public get showFocusIndicator(): boolean
       {
-         return _showFocusIndicator;
+         return this._showFocusIndicator;
       }
       
       private getIndexOfNextObject(param1: number, param2: boolean, param3: boolean, param4: string): number
@@ -39,7 +39,7 @@ export class FocusManager implements IFocusManager
          null;
          null;
          null;
-         let _loc5_: number = Math.floor(focusableCandidates.length);
+         let _loc5_: number = Math.floor(this.focusableCandidates.length);
          let _loc6_: number = param1;
          while(true)
          {
@@ -70,16 +70,16 @@ export class FocusManager implements IFocusManager
                   break;
                }
             }
-            if(isValidFocusCandidate(focusableCandidates[param1],param4))
+            if(isValidFocusCandidate(this.focusableCandidates[param1],param4))
             {
-               let _loc7_: DisplayObject = (findFocusManagerComponent(focusableCandidates[param1] as unknown as DisplayObject));
+               let _loc7_: DisplayObject = (findFocusManagerComponent(this.focusableCandidates[param1] as unknown as DisplayObject));
                if(_loc7_ instanceof IFocusManagerGroup)
                {
                   let _loc8_: IFocusManagerGroup = (null as unknown as IFocusManagerGroup);
                   let _loc9_: number = 0;
-                  while(0 < focusableCandidates.length)
+                  while(0 < this.focusableCandidates.length)
                   {
-                     let _loc10_: DisplayObject = focusableCandidates[0];
+                     let _loc10_: DisplayObject = this.focusableCandidates[0];
                      if(_loc10_ instanceof IFocusManagerGroup)
                      {
                         let _loc11_: IFocusManagerGroup = (null as unknown as IFocusManagerGroup);
@@ -109,7 +109,7 @@ export class FocusManager implements IFocusManager
       
       public set form(param1: DisplayObjectContainer)
       {
-         _form = param1;
+         this._form = param1;
       }
       
       private addFocusables(param1: DisplayObject, param2: boolean = false): void
@@ -130,8 +130,8 @@ export class FocusManager implements IFocusManager
                {
                   if(focusable.tabEnabled && isTabVisible(o))
                   {
-                     focusableObjects[o] = true;
-                     calculateCandidates = true;
+                     this.focusableObjects[o] = true;
+                     this.calculateCandidates = true;
                   }
                   o.addEventListener(Event.TAB_ENABLED_CHANGE, tabEnabledChangeHandler.bind(this));
                   o.addEventListener(Event.TAB_INDEX_CHANGE, tabIndexChangeHandler.bind(this));
@@ -142,8 +142,8 @@ export class FocusManager implements IFocusManager
                io = o  as unknown as InteractiveObject;
                if(Boolean(io) && Boolean(io.tabEnabled) && findFocusManagerComponent(io) == io)
                {
-                  focusableObjects[io] = true;
-                  calculateCandidates = true;
+                  this.focusableObjects[io] = true;
+                  this.calculateCandidates = true;
                }
                io.addEventListener(Event.TAB_ENABLED_CHANGE, tabEnabledChangeHandler.bind(this));
                io.addEventListener(Event.TAB_INDEX_CHANGE, tabIndexChangeHandler.bind(this));
@@ -234,16 +234,16 @@ export class FocusManager implements IFocusManager
       {
          let _loc1_: Record<string, any> = null;
          let _loc2_: InteractiveObject = null;
-         focusableCandidates = [];
-         for (let _loc1_ in focusableObjects)
+         this.focusableCandidates = [];
+         for (let _loc1_ in this.focusableObjects)
          {
             _loc2_ = (_loc1_ as unknown as InteractiveObject);
             if(Boolean(_loc2_.tabIndex) && !isNaN(Number(_loc2_.tabIndex)))
             {
-               focusableCandidates.push(_loc2_);
+               this.focusableCandidates.push(_loc2_);
             }
          }
-         focusableCandidates.sort(sortByTabIndex);
+         this.focusableCandidates.sort(sortByTabIndex);
       }
       
       private removeFocusables(param1: DisplayObject): void
@@ -254,18 +254,18 @@ export class FocusManager implements IFocusManager
          {
             param1.removeEventListener(Event.TAB_CHILDREN_CHANGE, tabChildrenChangeHandler.bind(this));
             param1.removeEventListener(Event.TAB_INDEX_CHANGE, tabIndexChangeHandler.bind(this));
-            for (let _loc2_ in focusableObjects)
+            for (let _loc2_ in this.focusableObjects)
             {
                _loc3_ = (_loc2_ as unknown as DisplayObject);
                if((param1 as unknown as DisplayObjectContainer).contains(_loc3_))
                {
-                  if(_loc3_ == lastFocus)
+                  if(_loc3_ == this.lastFocus)
                   {
-                     lastFocus = null;
+                     this.lastFocus = null;
                   }
                   _loc3_.removeEventListener(Event.TAB_ENABLED_CHANGE, tabEnabledChangeHandler.bind(this));
-                  delete focusableObjects[_loc2_];
-                  calculateCandidates = true;
+                  delete this.focusableObjects[_loc2_];
+                  this.calculateCandidates = true;
                }
             }
          }
@@ -290,7 +290,7 @@ export class FocusManager implements IFocusManager
       
       public sendDefaultButtonEvent(): void
       {
-         defButton.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+         this.defButton.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
       }
       
       private addedHandler(param1: Event): void
@@ -347,7 +347,7 @@ export class FocusManager implements IFocusManager
          {
             return;
          }
-         calculateCandidates = true;
+         this.calculateCandidates = true;
          let _loc2_: DisplayObjectContainer = (param1.target as unknown as DisplayObjectContainer);
          if(_loc2_.tabChildren)
          {
@@ -386,7 +386,7 @@ export class FocusManager implements IFocusManager
       {
          let _loc1_: Record<string, any> = null;
          let _loc2_: number = 0;
-         let _loc3_: any = focusableObjects;
+         let _loc3_: any = this.focusableObjects;
          for (let _loc1_ in _loc3_)
          {
             return true;
@@ -396,24 +396,24 @@ export class FocusManager implements IFocusManager
       
       private tabIndexChangeHandler(param1: Event): void
       {
-         calculateCandidates = true;
+         this.calculateCandidates = true;
       }
       
       public set defaultButton(param1: Button)
       {
          let _loc2_: Button = param1 ? (param1 as unknown as Button) : null;
-         if(_loc2_ != _defaultButton)
+         if(_loc2_ != this._defaultButton)
          {
-            if(_defaultButton)
+            if(this._defaultButton)
             {
-               _defaultButton.emphasized = false;
+               this._defaultButton.emphasized = false;
             }
-            if(defButton)
+            if(this.defButton)
             {
-               defButton.emphasized = false;
+               this.defButton.emphasized = false;
             }
-            _defaultButton = _loc2_;
-            defButton = _loc2_;
+            this._defaultButton = _loc2_;
+            this.defButton = _loc2_;
             if(_loc2_)
             {
                _loc2_.emphasized = true;
@@ -425,8 +425,8 @@ export class FocusManager implements IFocusManager
       {
          let _loc1_: Record<string, any> = null;
          let _loc2_: InteractiveObject = null;
-         focusableCandidates = [];
-         for (let _loc1_ in focusableObjects)
+         this.focusableCandidates = [];
+         for (let _loc1_ in this.focusableObjects)
          {
             _loc2_ = (_loc1_ as unknown as InteractiveObject);
             if(Boolean(_loc2_.tabIndex) && Boolean(!isNaN(Number(_loc2_.tabIndex))) && _loc2_.tabIndex > 0)
@@ -434,9 +434,9 @@ export class FocusManager implements IFocusManager
                sortFocusableObjectsTabIndex();
                return;
             }
-            focusableCandidates.push(_loc2_);
+            this.focusableCandidates.push(_loc2_);
          }
-         focusableCandidates.sort(sortByDepth);
+         this.focusableCandidates.sort(sortByDepth);
       }
       
       private keyFocusChangeHandler(param1: FocusEvent): void
@@ -451,12 +451,12 @@ export class FocusManager implements IFocusManager
       
       private getIndexOfFocusedObject(param1: DisplayObject): number
       {
-         let _loc2_: number = Math.floor(focusableCandidates.length);
+         let _loc2_: number = Math.floor(this.focusableCandidates.length);
          let _loc3_: number = 0;
          _loc3_ = 0;
          while(_loc3_ < _loc2_)
          {
-            if(focusableCandidates[_loc3_] == param1)
+            if(this.focusableCandidates[_loc3_] == param1)
             {
                return _loc3_;
             }
@@ -473,28 +473,28 @@ export class FocusManager implements IFocusManager
       {
          let _loc4_: InteractiveObject = null;
          let _loc3_: DisplayObject = (param1.target as unknown as DisplayObject);
-         if(_loc3_ instanceof IFocusManagerComponent && focusableObjects[_loc3_] == true)
+         if(_loc3_ instanceof IFocusManagerComponent && this.focusableObjects[_loc3_] == true)
          {
-            if(_loc3_ == lastFocus)
+            if(_loc3_ == this.lastFocus)
             {
-               (lastFocus as unknown as IFocusManagerComponent).drawFocus(false);
-               lastFocus = null;
+               (this.lastFocus as unknown as IFocusManagerComponent).drawFocus(false);
+               this.lastFocus = null;
             }
             _loc3_.removeEventListener(Event.TAB_ENABLED_CHANGE, tabEnabledChangeHandler.bind(this));
-            delete focusableObjects[_loc3_];
-            calculateCandidates = true;
+            delete this.focusableObjects[_loc3_];
+            this.calculateCandidates = true;
          }
-         else if(_loc3_ instanceof InteractiveObject && focusableObjects[_loc3_] == true)
+         else if(_loc3_ instanceof InteractiveObject && this.focusableObjects[_loc3_] == true)
          {
             _loc4_ = _loc3_  as unknown as InteractiveObject;
             if(_loc4_)
             {
-               if(_loc4_ == lastFocus)
+               if(_loc4_ == this.lastFocus)
                {
-                  lastFocus = null;
+                  this.lastFocus = null;
                }
-               delete focusableObjects[_loc4_];
-               calculateCandidates = true;
+               delete this.focusableObjects[_loc4_];
+               this.calculateCandidates = true;
             }
             _loc3_.addEventListener(Event.TAB_ENABLED_CHANGE, tabEnabledChangeHandler.bind(this));
          }
@@ -537,24 +537,24 @@ export class FocusManager implements IFocusManager
       
       public get defaultButton(): Button
       {
-         return _defaultButton;
+         return this._defaultButton;
       }
       
       private activateHandler(param1: Event): void
       {
          let _loc2_: InteractiveObject = (param1.target as unknown as InteractiveObject);
-         if(lastFocus)
+         if(this.lastFocus)
          {
-            if(lastFocus instanceof IFocusManagerComponent)
+            if(this.lastFocus instanceof IFocusManagerComponent)
             {
-               (lastFocus as unknown as IFocusManagerComponent).setFocus();
+               (this.lastFocus as unknown as IFocusManagerComponent).setFocus();
             }
             else
             {
-               form.stage.focus = lastFocus;
+               form.stage.focus = this.lastFocus;
             }
          }
-         lastAction = "ACTIVATE";
+         this.lastAction = "ACTIVATE";
       }
       
       public showFocus(): void
@@ -563,7 +563,7 @@ export class FocusManager implements IFocusManager
       
       public set defaultButtonEnabled(param1: boolean)
       {
-         _defaultButtonEnabled = param1;
+         this._defaultButtonEnabled = param1;
       }
       
       public getNextFocusManagerComponent(param1: boolean = false): InteractiveObject
@@ -573,10 +573,10 @@ export class FocusManager implements IFocusManager
          {
             return null;
          }
-         if(calculateCandidates)
+         if(this.calculateCandidates)
          {
             sortFocusableObjects();
-            calculateCandidates = false;
+            this.calculateCandidates = false;
          }
          let _loc2_: DisplayObject = form.stage.focus;
          _loc2_ = (findFocusManagerComponent(InteractiveObject(_loc2_ as unknown as DisplayObject)));
@@ -593,12 +593,12 @@ export class FocusManager implements IFocusManager
          {
             if(param1)
             {
-               _loc4_ = Math.floor(focusableCandidates.length);
+               _loc4_ = Math.floor(this.focusableCandidates.length);
             }
             _loc5_ = true;
          }
          let _loc7_: number = getIndexOfNextObject(_loc4_,param1,_loc5_,_loc3_);
-         return findFocusManagerComponent(focusableCandidates[_loc7_]);
+         return findFocusManagerComponent(this.focusableCandidates[_loc7_]);
       }
       
       private mouseDownHandler(param1: MouseEvent): void
@@ -613,11 +613,11 @@ export class FocusManager implements IFocusManager
             return;
          }
          showFocusIndicator = false;
-         if((_loc2_ != lastFocus || lastAction == "ACTIVATE") && !(_loc2_ instanceof TextField))
+         if((_loc2_ != this.lastFocus || this.lastAction == "ACTIVATE") && !(_loc2_ instanceof TextField))
          {
             setFocus(_loc2_);
          }
-         lastAction = "MOUSEDOWN";
+         this.lastAction = "MOUSEDOWN";
       }
       
       private isTabVisible(param1: DisplayObject): boolean
@@ -643,14 +643,14 @@ export class FocusManager implements IFocusManager
       {
          if(param1.keyCode == Keyboard.TAB)
          {
-            lastAction = "KEY";
-            if(calculateCandidates)
+            this.lastAction = "KEY";
+            if(this.calculateCandidates)
             {
                sortFocusableObjects();
-               calculateCandidates = false;
+               this.calculateCandidates = false;
             }
          }
-         if(Boolean(defaultButtonEnabled && param1.keyCode == Keyboard.ENTER) && Boolean(defaultButton) && defButton.enabled)
+         if(Boolean(defaultButtonEnabled && param1.keyCode == Keyboard.ENTER) && Boolean(defaultButton) && this.defButton.enabled)
          {
             sendDefaultButtonEvent();
          }
@@ -662,31 +662,31 @@ export class FocusManager implements IFocusManager
          let _loc2_: InteractiveObject = (param1.target as unknown as InteractiveObject);
          if(form.contains(_loc2_))
          {
-            lastFocus = findFocusManagerComponent((_loc2_ as unknown as InteractiveObject));
-            if(lastFocus instanceof Button)
+            this.lastFocus = findFocusManagerComponent((_loc2_ as unknown as InteractiveObject));
+            if(this.lastFocus instanceof Button)
             {
-               let _loc3_: Button = (lastFocus as unknown as Button);
-               if(defButton)
+               let _loc3_: Button = (this.lastFocus as unknown as Button);
+               if(this.defButton)
                {
-                  defButton.emphasized = false;
-                  defButton = null;
+                  this.defButton.emphasized = false;
+                  this.defButton = null;
                   null.emphasized = true;
                }
             }
-            else if(Boolean(defButton) && defButton != _defaultButton)
+            else if(Boolean(this.defButton) && this.defButton != this._defaultButton)
             {
-               defButton.emphasized = false;
-               defButton = _defaultButton;
-               _defaultButton.emphasized = true;
+               this.defButton.emphasized = false;
+               this.defButton = this._defaultButton;
+               this._defaultButton.emphasized = true;
             }
          }
       }
       
       private tabEnabledChangeHandler(param1: Event): void
       {
-         calculateCandidates = true;
+         this.calculateCandidates = true;
          let _loc2_: InteractiveObject = (param1.target as unknown as InteractiveObject);
-         let _loc3_: boolean = focusableObjects[_loc2_] == true;
+         let _loc3_: boolean = this.focusableObjects[_loc2_] == true;
          if(_loc2_.tabEnabled)
          {
             if(!_loc3_ && isTabVisible(_loc2_))
@@ -695,23 +695,23 @@ export class FocusManager implements IFocusManager
                {
                   _loc2_.focusRect = false;
                }
-               focusableObjects[_loc2_] = true;
+               this.focusableObjects[_loc2_] = true;
             }
          }
          else if(_loc3_)
          {
-            delete focusableObjects[_loc2_];
+            delete this.focusableObjects[_loc2_];
          }
       }
       
       public set showFocusIndicator(param1: boolean)
       {
-         _showFocusIndicator = param1;
+         this._showFocusIndicator = param1;
       }
       
       public get form(): DisplayObjectContainer
       {
-         return _form;
+         return this._form;
       }
       
       private sortByTabIndex(param1: InteractiveObject, param2: InteractiveObject): number
@@ -721,12 +721,12 @@ export class FocusManager implements IFocusManager
       
       public get defaultButtonEnabled(): boolean
       {
-         return _defaultButtonEnabled;
+         return this._defaultButtonEnabled;
       }
       
       public activate(): void
       {
-         if(activated)
+         if(this.activated)
          {
             return;
          }
@@ -738,10 +738,10 @@ export class FocusManager implements IFocusManager
          form.stage.addEventListener(Event.DEACTIVATE, deactivateHandler.bind(this));
          form.addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler.bind(this));
          form.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler.bind(this));
-         activated = true;
-         if(lastFocus)
+         this.activated = true;
+         if(this.lastFocus)
          {
-            setFocus(lastFocus);
+            setFocus(this.lastFocus);
          }
       }
       
@@ -755,6 +755,6 @@ export class FocusManager implements IFocusManager
          form.stage.removeEventListener(Event.DEACTIVATE, deactivateHandler.bind(this));
          form.removeEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler.bind(this));
          form.removeEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler.bind(this));
-         activated = false;
+         this.activated = false;
       }
    }

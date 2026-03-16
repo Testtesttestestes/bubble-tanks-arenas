@@ -20,7 +20,7 @@ export class class_2{
       public var_551: number;
       constructor(){
          super();
-         if(!var_255)
+         if(!this.var_255)
          {
             throw new Error("Error: Use GameObjectLibrary.getInstance() method!");
          }
@@ -40,31 +40,31 @@ export class class_2{
       
       public static method_592(param1: class_79): any
       {
-         if(!var_230)
+         if(!this.var_230)
          {
-            mRef = param1;
-            var_230 = true;
+            this.mRef = param1;
+            this.var_230 = true;
          }
       }
       
       public static method_64(): class_79
       {
-         if(var_230)
+         if(this.var_230)
          {
-            return mRef;
+            return this.mRef;
          }
          return null;
       }
       
       public static getInstance(): class_2
       {
-         if(!instance)
+         if(!this.instance)
          {
-            var_255 = true;
-            instance = new class_2();
-            var_255 = false;
+            this.var_255 = true;
+            this.instance = new class_2();
+            this.var_255 = false;
          }
-         return instance;
+         return this.instance;
       }
       
       public method_714(): void
@@ -898,9 +898,9 @@ export class class_2{
       
       public method_316(): void
       {
-         if(var_230)
+         if(this.var_230)
          {
-            mRef.method_546();
+            this.mRef.method_546();
          }
       }
       

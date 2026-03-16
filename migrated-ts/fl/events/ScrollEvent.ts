@@ -9,24 +9,24 @@ export class ScrollEvent extends Event{
       private _delta: number;
       constructor(param1: string, param2: number, param3: number){
          super(ScrollEvent.SCROLL,false,false);
-         _direction = param1;
-         _delta = param2;
-         _position = param3;
+         this._direction = param1;
+         this._delta = param2;
+         this._position = param3;
       }
       
       public get position(): number
       {
-         return _position;
+         return this._position;
       }
       
       public get direction(): string
       {
-         return _direction;
+         return this._direction;
       }
       
       public get delta(): number
       {
-         return _delta;
+         return this._delta;
       }
       
       public toString(): string
@@ -36,6 +36,6 @@ export class ScrollEvent extends Event{
       
       public clone(): Event
       {
-         return new ScrollEvent(_direction,_delta,_position);
+         return new ScrollEvent(this._direction,this._delta,this._position);
       }
    }

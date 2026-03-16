@@ -73,7 +73,7 @@ export class JSONEncoder{
                case "\t":
                   _loc2_ += "\\t";
                   break;
-               this.default:
+               default:
                   if(_loc3_ < " ")
                   {
                      _loc6_ = _loc3_.charCodeAt(0).toString(16);

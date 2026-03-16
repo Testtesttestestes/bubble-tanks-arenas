@@ -11,6 +11,6 @@ export class SimpleCollectionItem{
       
       public toString(): string
       {
-         return "[SimpleCollectionItem: " + label + "," + data + "]";
+         return "[SimpleCollectionItem: " + this.label + "," + this.data + "]";
       }
    }

@@ -15,7 +15,7 @@ export class CellRenderer extends LabelButton implements ICellRenderer
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return defaultStyles;
+         return this.defaultStyles;
       }
       
       public set selected(param1: boolean)
@@ -53,7 +53,7 @@ export class CellRenderer extends LabelButton implements ICellRenderer
       
       public get listData(): ListData
       {
-         return _listData;
+         return this._listData;
       }
       
       public setSize(param1: number, param2: number): void
@@ -63,19 +63,19 @@ export class CellRenderer extends LabelButton implements ICellRenderer
       
       public get data(): Record<string, any>
       {
-         return _data;
+         return this._data;
       }
       
       public set data(param1: Record<string, any>)
       {
-         _data = param1;
+         this._data = param1;
       }
       
       public set listData(param1: ListData)
       {
-         _listData = param1;
-         label = _listData.label;
-         setStyle("icon",_listData.icon);
+         this._listData = param1;
+         label = this._listData.label;
+         setStyle("icon",this._listData.icon);
       }
       
       public get selected(): boolean

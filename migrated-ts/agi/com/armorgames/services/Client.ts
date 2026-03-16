@@ -212,7 +212,7 @@ private registerClass(param1: string, param2: any): void
                case "string":
                   _loc3_.push(new String(param2[_loc4_]));
                   break;
-               this.default:
+               default:
                   _loc3_.push("?");
             }
             _loc4_++;

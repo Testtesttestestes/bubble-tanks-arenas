@@ -59,7 +59,7 @@ export class Crypto{
             case "rc4":
                keys.shift();
                return new ARC4(key);
-            this.default:
+            default:
                return null;
          }
          keys.shift();
@@ -81,7 +81,7 @@ export class Crypto{
                return new SHA224();
             case "sha256":
                return new SHA256();
-            this.default:
+            default:
                return null;
          }
       }
@@ -139,7 +139,7 @@ export class Crypto{
                      return 16;
                   case "ede3":
                      return 24;
-                  this.default:
+                  default:
                      return 8;
                }
                break;
@@ -155,7 +155,7 @@ export class Crypto{
                }
                return 16;
                break;
-            this.default:
+            default:
                return 0;
          }
       }

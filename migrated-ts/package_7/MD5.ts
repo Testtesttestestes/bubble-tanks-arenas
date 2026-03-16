@@ -26,7 +26,7 @@ export class MD5 implements class_17
       
       public getHashSize(): number
       {
-         return const_8;
+         return this.const_8;
       }
       
       public name_1(param1: ByteArray): ByteArray

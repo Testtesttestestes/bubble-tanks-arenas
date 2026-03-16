@@ -89,7 +89,7 @@ export class JSONTokenizer{
             case "\"":
                _loc1_ = this.readString();
                break;
-            this.default:
+            default:
                if(this.isDigit(this.ch) || this.ch == "-")
                {
                   _loc1_ = this.readNumber();
@@ -160,7 +160,7 @@ export class JSONTokenizer{
                   }
                   _loc2_ += String.fromCharCode(parseInt(_loc3_,16));
                   break;
-               this.default:
+               default:
                   _loc2_ += "\\" + this.ch;
             }
          }
@@ -302,7 +302,7 @@ export class JSONTokenizer{
                      }
                   }
                   break;
-               this.default:
+               default:
                   this.parseError("Unexpected " + this.ch + " encountered (expecting \'/\' or \'*\' )");
             }
          }

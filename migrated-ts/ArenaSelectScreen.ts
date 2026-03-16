@@ -282,7 +282,7 @@ export class ArenaSelectScreen extends MovieClip{
                   _loc3_++;
                }
             }
-            else if(param1.target.name.substr(0,5) == "aSlot")
+            else if(param1.target.name.substr(0,5) == "this.aSlot")
             {
                _loc6_ = 0;
                while(_loc6_ < this.var_9.length)
@@ -845,7 +845,7 @@ export class ArenaSelectScreen extends MovieClip{
                _loc2_++;
             }
          }
-         else if(param1.target.name.substr(0,5) == "aSlot")
+         else if(param1.target.name.substr(0,5) == "this.aSlot")
          {
             if(param1.target.currentFrame == 41)
             {
@@ -886,7 +886,7 @@ export class ArenaSelectScreen extends MovieClip{
                _loc5_++;
             }
          }
-         else if(param1.target.name != "inner")
+         else if(param1.target.name != "this.inner")
          {
             this.var_363 = null;
             if(param1.target.name != "scrollBar")
@@ -1368,7 +1368,7 @@ export class ArenaSelectScreen extends MovieClip{
                _loc3_++;
             }
          }
-         else if(param1.target.name.substr(0,5) == "aSlot")
+         else if(param1.target.name.substr(0,5) == "this.aSlot")
          {
             if(param1.target.currentFrame == 41)
             {

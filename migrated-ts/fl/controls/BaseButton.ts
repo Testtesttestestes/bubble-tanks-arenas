@@ -18,13 +18,13 @@ export class BaseButton extends UIComponent{
          useHandCursor = false;
          setupMouseEvents();
          setMouseState("up");
-         pressTimer = new Timer(1,0);
-         pressTimer.addEventListener(TimerEvent.TIMER, buttonDown.bind(this));
+         this.pressTimer = new Timer(1,0);
+         this.pressTimer.addEventListener(TimerEvent.TIMER, buttonDown.bind(this));
       }
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return defaultStyles;
+         return this.defaultStyles;
       }
       
       public get enabled(): boolean
@@ -34,10 +34,10 @@ export class BaseButton extends UIComponent{
       
       protected startPress(): void
       {
-         if(_autoRepeat)
+         if(this._autoRepeat)
          {
-            pressTimer.delay = Number(getStyleValue("repeatDelay"));
-            pressTimer.start();
+            this.pressTimer.delay = Number(getStyleValue("repeatDelay"));
+            this.pressTimer.start();
          }
          this.dispatchEvent(new ComponentEvent(ComponentEvent.BUTTON_DOWN,true));
       }
@@ -58,8 +58,8 @@ export class BaseButton extends UIComponent{
       
       protected drawLayout(): void
       {
-         background.width = width;
-         background.height = height;
+         this.background.width = width;
+         this.background.height = height;
       }
       
       public set enabled(param1: boolean)
@@ -70,7 +70,7 @@ export class BaseButton extends UIComponent{
       
       public set autoRepeat(param1: boolean)
       {
-         _autoRepeat = param1;
+         this._autoRepeat = param1;
       }
       
       protected mouseEventHandler(param1: MouseEvent): void
@@ -94,16 +94,16 @@ export class BaseButton extends UIComponent{
       
       protected drawBackground(): void
       {
-         let _loc1_: string = enabled ? mouseState : "disabled";
+         let _loc1_: string = enabled ? this.mouseState : "disabled";
          if(selected)
          {
             _loc1_ = "selected" + _loc1_.substr(0,1).toUpperCase() + _loc1_.substr(1);
          }
          _loc1_ += "Skin";
-         let _loc2_: DisplayObject = background;
-         background = getDisplayObjectInstance(getStyleValue(_loc1_));
-         this.addChildAt(background,0);
-         if(_loc2_ != null && _loc2_ != background)
+         let _loc2_: DisplayObject = this.background;
+         this.background = getDisplayObjectInstance(getStyleValue(_loc1_));
+         this.addChildAt(this.background,0);
+         if(_loc2_ != null && _loc2_ != this.background)
          {
             this.removeChild(_loc2_);
          }
@@ -111,7 +111,7 @@ export class BaseButton extends UIComponent{
       
       public get selected(): boolean
       {
-         return _selected;
+         return this._selected;
       }
       
       protected setupMouseEvents(): void
@@ -124,63 +124,63 @@ export class BaseButton extends UIComponent{
       
       protected endPress(): void
       {
-         pressTimer.reset();
+         this.pressTimer.reset();
       }
       
       public set mouseStateLocked(param1: boolean)
       {
-         _mouseStateLocked = param1;
+         this._mouseStateLocked = param1;
          if(param1 == false)
          {
-            setMouseState(unlockedMouseState);
+            setMouseState(this.unlockedMouseState);
          }
          else
          {
-            unlockedMouseState = mouseState;
+            this.unlockedMouseState = this.mouseState;
          }
       }
       
       public get autoRepeat(): boolean
       {
-         return _autoRepeat;
+         return this._autoRepeat;
       }
       
       public set selected(param1: boolean)
       {
-         if(_selected == param1)
+         if(this._selected == param1)
          {
             return;
          }
-         _selected = param1;
+         this._selected = param1;
          invalidate(InvalidationType.STATE);
       }
       
       protected buttonDown(param1: TimerEvent): void
       {
-         if(!_autoRepeat)
+         if(!this._autoRepeat)
          {
             endPress();
             return;
          }
-         if(pressTimer.currentCount == 1)
+         if(this.pressTimer.currentCount == 1)
          {
-            pressTimer.delay = Number(getStyleValue("repeatInterval"));
+            this.pressTimer.delay = Number(getStyleValue("repeatInterval"));
          }
          this.dispatchEvent(new ComponentEvent(ComponentEvent.BUTTON_DOWN,true));
       }
       
       public setMouseState(param1: string): void
       {
-         if(_mouseStateLocked)
+         if(this._mouseStateLocked)
          {
-            unlockedMouseState = param1;
+            this.unlockedMouseState = param1;
             return;
          }
-         if(mouseState == param1)
+         if(this.mouseState == param1)
          {
             return;
          }
-         mouseState = param1;
+         this.mouseState = param1;
          invalidate(InvalidationType.STATE);
       }
    }

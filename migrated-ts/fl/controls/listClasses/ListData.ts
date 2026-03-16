@@ -11,41 +11,41 @@ export class ListData{
       protected _column: number;
       constructor(param1: string, param2: Record<string, any>, param3: UIComponent, param4: number, param5: number, param6: number = 0){
          super();
-         _label = param1;
-         _icon = param2;
-         _owner = param3;
-         _index = param4;
-         _row = param5;
-         _column = param6;
+         this._label = param1;
+         this._icon = param2;
+         this._owner = param3;
+         this._index = param4;
+         this._row = param5;
+         this._column = param6;
       }
       
       public get row(): number
       {
-         return _row;
+         return this._row;
       }
       
       public get owner(): UIComponent
       {
-         return _owner;
+         return this._owner;
       }
       
       public get label(): string
       {
-         return _label;
+         return this._label;
       }
       
       public get index(): number
       {
-         return _index;
+         return this._index;
       }
       
       public get icon(): Record<string, any>
       {
-         return _icon;
+         return this._icon;
       }
       
       public get column(): number
       {
-         return _column;
+         return this._column;
       }
    }

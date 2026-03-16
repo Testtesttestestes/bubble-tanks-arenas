@@ -17,12 +17,12 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return defaultStyles;
+         return this.defaultStyles;
       }
       
       public set alwaysShowSelection(param1: boolean)
       {
-         textField.alwaysShowSelection = param1;
+         this.textField.alwaysShowSelection = param1;
       }
       
       public set enabled(param1: boolean)
@@ -52,31 +52,31 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
          let _loc1_: Record<string, any> = getStyleValue("embedFonts");
          if(_loc1_ != null)
          {
-            textField.embedFonts = _loc1_;
+            this.textField.embedFonts = _loc1_;
          }
       }
       
       protected drawLayout(): void
       {
          let _loc1_: number = Number(getStyleValue("textPadding"));
-         if(background != null)
+         if(this.background != null)
          {
-            background.width = width;
-            background.height = height;
+            this.background.width = width;
+            this.background.height = height;
          }
-         textField.width = width - 2 * _loc1_;
-         textField.height = height - 2 * _loc1_;
-         textField.x = textField.y = _loc1_;
+         this.textField.width = width - 2 * _loc1_;
+         this.textField.height = height - 2 * _loc1_;
+         this.textField.x = this.textField.y = _loc1_;
       }
       
       public set condenseWhite(param1: boolean)
       {
-         textField.condenseWhite = param1;
+         this.textField.condenseWhite = param1;
       }
       
       public get textWidth(): number
       {
-         return textField.textWidth;
+         return this.textField.textWidth;
       }
       
       protected focusOutHandler(param1: FocusEvent): void
@@ -90,25 +90,25 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       
       public setFocus(): void
       {
-         stage.focus = textField;
+         stage.focus = this.textField;
       }
       
       public set displayAsPassword(param1: boolean)
       {
-         textField.displayAsPassword = param1;
+         this.textField.displayAsPassword = param1;
       }
       
       protected drawBackground(): void
       {
-         let _loc1_: DisplayObject = background;
+         let _loc1_: DisplayObject = this.background;
          let _loc2_: string = enabled ? "upSkin" : "disabledSkin";
-         background = getDisplayObjectInstance(getStyleValue(_loc2_));
-         if(background == null)
+         this.background = getDisplayObjectInstance(getStyleValue(_loc2_));
+         if(this.background == null)
          {
             return;
          }
-         this.addChildAt(background,0);
-         if(_loc1_ != null && _loc1_ != background && this.contains(_loc1_))
+         this.addChildAt(this.background,0);
+         if(_loc1_ != null && _loc1_ != this.background && this.contains(_loc1_))
          {
             this.removeChild(_loc1_);
          }
@@ -116,37 +116,37 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       
       public get text(): string
       {
-         return textField.text;
+         return this.textField.text;
       }
       
       public set maxChars(param1: number)
       {
-         textField.maxChars = param1;
+         this.textField.maxChars = param1;
       }
       
       public set horizontalScrollPosition(param1: number)
       {
-         textField.scrollH = param1;
+         this.textField.scrollH = param1;
       }
       
       protected isOurFocus(param1: DisplayObject): boolean
       {
-         return param1 == textField || Boolean(super.isOurFocus(param1));
+         return param1 == this.textField || Boolean(super.isOurFocus(param1));
       }
       
       public get textHeight(): number
       {
-         return textField.textHeight;
+         return this.textField.textHeight;
       }
       
       public get restrict(): string
       {
-         return textField.restrict;
+         return this.textField.restrict;
       }
       
       public get alwaysShowSelection(): boolean
       {
-         return textField.alwaysShowSelection;
+         return this.textField.alwaysShowSelection;
       }
       
       public get enabled(): boolean
@@ -164,7 +164,7 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
             _loc1_ = getStyleValue("embedFonts");
             if(_loc1_ != null)
             {
-               textField.embedFonts = _loc1_;
+               this.textField.embedFonts = _loc1_;
             }
             invalidate(InvalidationType.SIZE,false);
          }
@@ -177,59 +177,59 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       
       public set editable(param1: boolean)
       {
-         _editable = param1;
+         this._editable = param1;
          updateTextFieldType();
       }
       
       public setSelection(param1: number, param2: number): void
       {
-         textField.setSelection(param1,param2);
+         this.textField.setSelection(param1,param2);
       }
       
       public get condenseWhite(): boolean
       {
-         return textField.condenseWhite;
+         return this.textField.condenseWhite;
       }
       
       public get displayAsPassword(): boolean
       {
-         return textField.displayAsPassword;
+         return this.textField.displayAsPassword;
       }
       
       public get selectionBeginIndex(): number
       {
-         return textField.selectionBeginIndex;
+         return this.textField.selectionBeginIndex;
       }
       
       protected configUI(): void
       {
          super.configUI();
          tabChildren = true;
-         textField = new TextField();
-         this.addChild(textField);
+         this.textField = new TextField();
+         this.addChild(this.textField);
          updateTextFieldType();
-         textField.addEventListener(TextEvent.TEXT_INPUT, handleTextInput.bind(this));
-         textField.addEventListener(Event.CHANGE, handleChange.bind(this));
-         textField.addEventListener(KeyboardEvent.KEY_DOWN, handleKeyDown.bind(this));
+         this.textField.addEventListener(TextEvent.TEXT_INPUT, handleTextInput.bind(this));
+         this.textField.addEventListener(Event.CHANGE, handleChange.bind(this));
+         this.textField.addEventListener(KeyboardEvent.KEY_DOWN, handleKeyDown.bind(this));
       }
       
       public get maxChars(): number
       {
-         return textField.maxChars;
+         return this.textField.maxChars;
       }
       
       public set text(param1: string)
       {
-         textField.text = param1;
-         _html = false;
+         this.textField.text = param1;
+         this._html = false;
          invalidate(InvalidationType.DATA);
          invalidate(InvalidationType.STYLES);
       }
       
       protected updateTextFieldType(): void
       {
-         textField.type = enabled && editable ? TextFieldType.INPUT : TextFieldType.DYNAMIC;
-         textField.selectable = enabled;
+         this.textField.type = enabled && editable ? TextFieldType.INPUT : TextFieldType.DYNAMIC;
+         this.textField.selectable = enabled;
       }
       
       protected handleKeyDown(param1: KeyboardEvent): void
@@ -242,54 +242,54 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       
       public get horizontalScrollPosition(): number
       {
-         return textField.scrollH;
+         return this.textField.scrollH;
       }
       
       public get selectionEndIndex(): number
       {
-         return textField.selectionEndIndex;
+         return this.textField.selectionEndIndex;
       }
       
       public get editable(): boolean
       {
-         return _editable;
+         return this._editable;
       }
       
       public get maxHorizontalScrollPosition(): number
       {
-         return textField.maxScrollH;
+         return this.textField.maxScrollH;
       }
       
       public appendText(param1: string): void
       {
-         textField.appendText(param1);
+         this.textField.appendText(param1);
       }
       
       protected drawTextFormat(): void
       {
          let _loc1_: Record<string, any> = UIComponent.getStyleDefinition();
          let _loc2_: TextFormat = enabled ? _loc1_.defaultTextFormat  as unknown as TextFormat : _loc1_.defaultDisabledTextFormat  as unknown as TextFormat;
-         textField.setTextFormat(_loc2_);
+         this.textField.setTextFormat(_loc2_);
          let _loc3_: TextFormat = getStyleValue(enabled ? "textFormat" : "disabledTextFormat")  as unknown as TextFormat;
          if(_loc3_ != null)
          {
-            textField.setTextFormat(_loc3_);
+            this.textField.setTextFormat(_loc3_);
          }
          else
          {
             _loc3_ = _loc2_;
          }
-         textField.defaultTextFormat = _loc3_;
+         this.textField.defaultTextFormat = _loc3_;
          setEmbedFont();
-         if(_html)
+         if(this._html)
          {
-            textField.htmlText = _savedHTML;
+            this.textField.htmlText = this._savedHTML;
          }
       }
       
       public get length(): number
       {
-         return textField.length;
+         return this.textField.length;
       }
       
       public set htmlText(param1: string)
@@ -299,9 +299,9 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
             text = "";
             return;
          }
-         _html = true;
-         _savedHTML = param1;
-         textField.htmlText = param1;
+         this._html = true;
+         this._savedHTML = param1;
+         this.textField.htmlText = param1;
          invalidate(InvalidationType.DATA);
          invalidate(InvalidationType.STYLES);
       }
@@ -318,12 +318,12 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
          {
             param1 = null;
          }
-         textField.restrict = param1;
+         this.textField.restrict = param1;
       }
       
       public getLineMetrics(param1: number): TextLineMetrics
       {
-         return textField.getLineMetrics(param1);
+         return this.textField.getLineMetrics(param1);
       }
       
       public drawFocus(param1: boolean): void
@@ -340,15 +340,15 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       {
          if(param1.target == this)
          {
-            stage.focus = textField;
+            stage.focus = this.textField;
          }
          let _loc2_: IFocusManager = focusManager;
          if(editable && Boolean(_loc2_))
          {
             _loc2_.showFocusIndicator = true;
-            if(textField.selectable && textField.selectionBeginIndex == textField.selectionBeginIndex)
+            if(this.textField.selectable && this.textField.selectionBeginIndex == this.textField.selectionBeginIndex)
             {
-               setSelection(0,textField.length);
+               setSelection(0,this.textField.length);
             }
          }
          super.focusInHandler(param1);
@@ -360,6 +360,6 @@ export class TextInput extends UIComponent implements IFocusManagerComponent
       
       public get htmlText(): string
       {
-         return textField.htmlText;
+         return this.textField.htmlText;
       }
    }

@@ -268,12 +268,12 @@ export class TankViewerScreen extends MovieClip{
          requestVars.r = strRatingRequest;
          request.data = requestVars;
          request.method = URLRequestMethod.POST;
-         urlLoader = new URLLoader();
-         urlLoader = new URLLoader();
-         urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+         this.urlLoader = new URLLoader();
+         this.urlLoader = new URLLoader();
+         this.urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
          try
          {
-            urlLoader.load(request);
+            this.urlLoader.load(request);
          }
          catch (e: any)
          {

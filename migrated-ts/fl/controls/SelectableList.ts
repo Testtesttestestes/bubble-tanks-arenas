@@ -26,23 +26,23 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       protected _selectable: boolean = true;
       constructor(){
          super();
-         activeCellRenderers = [];
-         availableCellRenderers = [];
-         invalidItems = new Dictionary(true);
-         renderedItems = new Dictionary(true);
-         _selectedIndices = [];
+         this.activeCellRenderers = [];
+         this.availableCellRenderers = [];
+         this.invalidItems = new Dictionary(true);
+         this.renderedItems = new Dictionary(true);
+         this._selectedIndices = [];
          if(dataProvider == null)
          {
             dataProvider = new DataProvider();
          }
          verticalScrollPolicy = ScrollPolicy.AUTO;
-         rendererStyles = {};
-         updatedRendererStyles = {};
+         this.rendererStyles = {};
+         this.updatedRendererStyles = {};
       }
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return mergeStyles(defaultStyles,BaseScrollPane.getStyleDefinition());
+         return mergeStyles(this.defaultStyles,BaseScrollPane.getStyleDefinition());
       }
       
       protected drawList(): void
@@ -55,7 +55,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public get allowMultipleSelection(): boolean
       {
-         return _allowMultipleSelection;
+         return this._allowMultipleSelection;
       }
       
       protected onPreChange(param1: DataChangeEvent): void
@@ -63,17 +63,17 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          switch(param1.changeType)
          {
             default:
-               preChangeItems = selectedItems;
+               this.preChangeItems = selectedItems;
          }
       }
       
       public set selectedIndices(param1: any[])
       {
-         if(!_selectable)
+         if(!this._selectable)
          {
             return;
          }
-         _selectedIndices = param1 == null ? [] : param1.concat();
+         this._selectedIndices = param1 == null ? [] : param1.concat();
          invalidate(InvalidationType.SELECTED);
       }
       
@@ -84,26 +84,26 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public set allowMultipleSelection(param1: boolean)
       {
-         if(param1 == _allowMultipleSelection)
+         if(param1 == this._allowMultipleSelection)
          {
             return;
          }
-         _allowMultipleSelection = param1;
-         if(!param1 && _selectedIndices.length > 1)
+         this._allowMultipleSelection = param1;
+         if(!param1 && this._selectedIndices.length > 1)
          {
-            _selectedIndices = [_selectedIndices.pop()];
+            this._selectedIndices = [this._selectedIndices.pop()];
             invalidate(InvalidationType.DATA);
          }
       }
       
       protected setVerticalScrollPosition(param1: number, param2: boolean = false): void
       {
-         if(param1 == _verticalScrollPosition)
+         if(param1 == this._verticalScrollPosition)
          {
             return;
          }
-         let _loc3_: number = param1 - _verticalScrollPosition;
-         _verticalScrollPosition = param1;
+         let _loc3_: number = param1 - this._verticalScrollPosition;
+         this._verticalScrollPosition = param1;
          if(param2)
          {
             this.dispatchEvent(new ScrollEvent(ScrollBarDirection.VERTICAL,_loc3_,param1));
@@ -112,7 +112,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public sortItemsOn(param1: string, param2: Record<string, any> = null): any
       {
-         return _dataProvider.sortOn(param1,param2);
+         return this._dataProvider.sortOn(param1,param2);
       }
       
       public getNextIndexAtLetter(param1: string, param2: number = -1): number
@@ -159,12 +159,12 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public removeItemAt(param1: number): Record<string, any>
       {
-         return _dataProvider.removeItemAt(param1);
+         return this._dataProvider.removeItemAt(param1);
       }
       
       public get selectedItem(): Record<string, any>
       {
-         return _selectedIndices.length == 0 ? null : _dataProvider.getItemAt(selectedIndex);
+         return this._selectedIndices.length == 0 ? null : this._dataProvider.getItemAt(selectedIndex);
       }
       
       protected handleDataChange(param1: DataChangeEvent): void
@@ -190,11 +190,11 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          else if(_loc4_ == DataChangeType.ADD)
          {
             _loc5_ = 0;
-            while(_loc5_ < _selectedIndices.length)
+            while(_loc5_ < this._selectedIndices.length)
             {
-               if(_selectedIndices[_loc5_] >= _loc2_)
+               if(this._selectedIndices[_loc5_] >= _loc2_)
                {
-                  _selectedIndices[_loc5_] += _loc2_ - _loc3_;
+                  this._selectedIndices[_loc5_] += _loc2_ - _loc3_;
                }
                _loc5_++;
             }
@@ -202,17 +202,17 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          else if(_loc4_ == DataChangeType.REMOVE)
          {
             _loc5_ = 0;
-            while(_loc5_ < _selectedIndices.length)
+            while(_loc5_ < this._selectedIndices.length)
             {
-               if(_selectedIndices[_loc5_] >= _loc2_)
+               if(this._selectedIndices[_loc5_] >= _loc2_)
                {
-                  if(_selectedIndices[_loc5_] <= _loc3_)
+                  if(this._selectedIndices[_loc5_] <= _loc3_)
                   {
-                     delete _selectedIndices[_loc5_];
+                     delete this._selectedIndices[_loc5_];
                   }
                   else
                   {
-                     _selectedIndices[_loc5_] -= _loc2_ - _loc3_ + 1;
+                     this._selectedIndices[_loc5_] -= _loc2_ - _loc3_ + 1;
                   }
                }
                _loc5_++;
@@ -224,8 +224,8 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          }
          else if(_loc4_ != DataChangeType.REPLACE)
          {
-            selectedItems = preChangeItems;
-            preChangeItems = null;
+            selectedItems = this.preChangeItems;
+            this.preChangeItems = null;
          }
          invalidate(InvalidationType.DATA);
       }
@@ -236,9 +236,9 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          let _loc3_: ICellRenderer = null;
          if(param1 != null)
          {
-            for (let _loc2_ in activeCellRenderers)
+            for (let _loc2_ in this.activeCellRenderers)
             {
-               _loc3_ = activeCellRenderers[_loc2_]  as unknown as ICellRenderer;
+               _loc3_ = this.activeCellRenderers[_loc2_]  as unknown as ICellRenderer;
                if(_loc3_.data == param1)
                {
                   return _loc3_;
@@ -250,7 +250,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public addItem(param1: Record<string, any>): void
       {
-         _dataProvider.addItem(param1);
+         this._dataProvider.addItem(param1);
          invalidateList();
       }
       
@@ -262,22 +262,22 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       protected configUI(): void
       {
          super.configUI();
-         listHolder = new Sprite();
-         this.addChild(listHolder);
-         listHolder.scrollRect = contentScrollRect;
-         list = new Sprite();
-         listHolder.addChild(list);
+         this.listHolder = new Sprite();
+         this.addChild(this.listHolder);
+         this.listHolder.scrollRect = contentScrollRect;
+         this.list = new Sprite();
+         this.listHolder.addChild(this.list);
       }
       
       public get selectable(): boolean
       {
-         return _selectable;
+         return this._selectable;
       }
       
       public clearRendererStyle(param1: string, param2: number = -1): void
       {
-         delete rendererStyles[param1];
-         updatedRendererStyles[param1] = null;
+         delete this.rendererStyles[param1];
+         this.updatedRendererStyles[param1] = null;
          invalidate(InvalidationType.RENDERER_STYLES);
       }
       
@@ -302,12 +302,12 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
             case Keyboard.HOME:
             case Keyboard.PAGE_UP:
             case Keyboard.PAGE_DOWN:
-               moveSelectionVertically(param1.keyCode,param1.shiftKey && _allowMultipleSelection,param1.ctrlKey && _allowMultipleSelection);
+               moveSelectionVertically(param1.keyCode,param1.shiftKey && this._allowMultipleSelection,param1.ctrlKey && this._allowMultipleSelection);
                param1.stopPropagation();
                break;
             case Keyboard.LEFT:
             case Keyboard.RIGHT:
-               moveSelectionHorizontally(param1.keyCode,param1.shiftKey && _allowMultipleSelection,param1.ctrlKey && _allowMultipleSelection);
+               moveSelectionHorizontally(param1.keyCode,param1.shiftKey && this._allowMultipleSelection,param1.ctrlKey && this._allowMultipleSelection);
                param1.stopPropagation();
          }
       }
@@ -325,25 +325,25 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public setRendererStyle(param1: string, param2: Record<string, any>, param3: number = 0): void
       {
-         if(rendererStyles[param1] == param2)
+         if(this.rendererStyles[param1] == param2)
          {
             return;
          }
-         updatedRendererStyles[param1] = param2;
-         rendererStyles[param1] = param2;
+         this.updatedRendererStyles[param1] = param2;
+         this.rendererStyles[param1] = param2;
          invalidate(InvalidationType.RENDERER_STYLES);
       }
       
       public set dataProvider(param1: DataProvider)
       {
-         if(_dataProvider != null)
+         if(this._dataProvider != null)
          {
-            _dataProvider.removeEventListener(DataChangeEvent.DATA_CHANGE, handleDataChange.bind(this));
-            _dataProvider.removeEventListener(DataChangeEvent.PRE_DATA_CHANGE, onPreChange.bind(this));
+            this._dataProvider.removeEventListener(DataChangeEvent.DATA_CHANGE, handleDataChange.bind(this));
+            this._dataProvider.removeEventListener(DataChangeEvent.PRE_DATA_CHANGE, onPreChange.bind(this));
          }
-         _dataProvider = param1;
-         _dataProvider.addEventListener(DataChangeEvent.DATA_CHANGE, handleDataChange.bind(this));
-         _dataProvider.addEventListener(DataChangeEvent.PRE_DATA_CHANGE, onPreChange.bind(this));
+         this._dataProvider = param1;
+         this._dataProvider.addEventListener(DataChangeEvent.DATA_CHANGE, handleDataChange.bind(this));
+         this._dataProvider.addEventListener(DataChangeEvent.PRE_DATA_CHANGE, onPreChange.bind(this));
          clearSelection();
          invalidateList();
       }
@@ -356,18 +356,18 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public replaceItemAt(param1: Record<string, any>, param2: number): Record<string, any>
       {
-         return _dataProvider.replaceItemAt(param1,param2);
+         return this._dataProvider.replaceItemAt(param1,param2);
       }
       
       public removeAll(): void
       {
-         _dataProvider.removeAll();
+         this._dataProvider.removeAll();
       }
       
       public set enabled(param1: boolean)
       {
          super.enabled = param1;
-         list.mouseChildren = _enabled;
+         this.list.mouseChildren = _enabled;
       }
       
       public scrollToIndex(param1: number): void
@@ -376,43 +376,43 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public get selectedIndices(): any[]
       {
-         return _selectedIndices.concat();
+         return this._selectedIndices.concat();
       }
       
       protected drawLayout(): void
       {
          super.drawLayout();
-         contentScrollRect = listHolder.scrollRect;
+         contentScrollRect = this.listHolder.scrollRect;
          contentScrollRect.width = availableWidth;
          contentScrollRect.height = availableHeight;
-         listHolder.scrollRect = contentScrollRect;
+         this.listHolder.scrollRect = contentScrollRect;
       }
       
       protected _invalidateList(): void
       {
-         availableCellRenderers = [];
-         while(activeCellRenderers.length > 0)
+         this.availableCellRenderers = [];
+         while(this.activeCellRenderers.length > 0)
          {
-            list.removeChild(activeCellRenderers.pop()  as unknown as DisplayObject);
+            this.list.removeChild(this.activeCellRenderers.pop()  as unknown as DisplayObject);
          }
       }
       
       public set selectedItem(param1: Record<string, any>)
       {
-         let _loc2_: number = _dataProvider.getItemIndex(param1);
+         let _loc2_: number = this._dataProvider.getItemIndex(param1);
          selectedIndex = _loc2_;
       }
       
       public getItemAt(param1: number): Record<string, any>
       {
-         return _dataProvider.getItemAt(param1);
+         return this._dataProvider.getItemAt(param1);
       }
       
       protected handleCellRendererChange(param1: Event): void
       {
          let _loc2_: ICellRenderer = param1.currentTarget  as unknown as ICellRenderer;
          let _loc3_: number = _loc2_.listData.index;
-         _dataProvider.invalidateItemAt(_loc3_);
+         this._dataProvider.invalidateItemAt(_loc3_);
       }
       
       protected moveSelectionVertically(param1: number, param2: boolean, param3: boolean): void
@@ -426,7 +426,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public addItemAt(param1: Record<string, any>, param2: number): void
       {
-         _dataProvider.addItemAt(param1,param2);
+         this._dataProvider.addItemAt(param1,param2);
          invalidateList();
       }
       
@@ -441,27 +441,27 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       protected updateRendererStyles(): void
       {
          let _loc4_: string = null;
-         let _loc1_: any[] = availableCellRenderers.concat(activeCellRenderers);
+         let _loc1_: any[] = this.availableCellRenderers.concat(this.activeCellRenderers);
          let _loc2_: number = _loc1_.length;
          let _loc3_: number = 0;
          while(_loc3_ < _loc2_)
          {
             if(_loc1_[_loc3_].setStyle != null)
             {
-               for (let _loc4_ in updatedRendererStyles)
+               for (let _loc4_ in this.updatedRendererStyles)
                {
-                  _loc1_[_loc3_].setStyle(_loc4_,updatedRendererStyles[_loc4_]);
+                  _loc1_[_loc3_].setStyle(_loc4_,this.updatedRendererStyles[_loc4_]);
                }
                _loc1_[_loc3_].drawNow();
             }
             _loc3_++;
          }
-         updatedRendererStyles = {};
+         this.updatedRendererStyles = {};
       }
       
       public set selectable(param1: boolean)
       {
-         if(param1 == _selectable)
+         if(param1 == this._selectable)
          {
             return;
          }
@@ -469,17 +469,17 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          {
             selectedIndices = [];
          }
-         _selectable = param1;
+         this._selectable = param1;
       }
       
       public removeItem(param1: Record<string, any>): Record<string, any>
       {
-         return _dataProvider.removeItem(param1);
+         return this._dataProvider.removeItem(param1);
       }
       
       public get dataProvider(): DataProvider
       {
-         return _dataProvider;
+         return this._dataProvider;
       }
       
       public set maxHorizontalScrollPosition(param1: number)
@@ -495,7 +495,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public invalidateItemAt(param1: number): void
       {
-         let _loc2_: Record<string, any> = _dataProvider.getItemAt(param1);
+         let _loc2_: Record<string, any> = this._dataProvider.getItemAt(param1);
          if(_loc2_ != null)
          {
             invalidateItem(_loc2_);
@@ -504,7 +504,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public sortItems(... rest): any
       {
-         return _dataProvider.sort.apply(_dataProvider,rest);
+         return this._dataProvider.sort.apply(this._dataProvider,rest);
       }
       
       public set selectedItems(param1: any[])
@@ -519,7 +519,7 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          let _loc3_: number = 0;
          while(_loc3_ < param1.length)
          {
-            _loc4_ = _dataProvider.getItemIndex(param1[_loc3_]);
+            _loc4_ = this._dataProvider.getItemIndex(param1[_loc3_]);
             if(_loc4_ != -1)
             {
                _loc2_.push(_loc4_);
@@ -531,12 +531,12 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       protected setHorizontalScrollPosition(param1: number, param2: boolean = false): void
       {
-         if(param1 == _horizontalScrollPosition)
+         if(param1 == this._horizontalScrollPosition)
          {
             return;
          }
-         let _loc3_: number = param1 - _horizontalScrollPosition;
-         _horizontalScrollPosition = param1;
+         let _loc3_: number = param1 - this._horizontalScrollPosition;
+         this._horizontalScrollPosition = param1;
          if(param2)
          {
             this.dispatchEvent(new ScrollEvent(ScrollBarDirection.HORIZONTAL,_loc3_,param1));
@@ -557,9 +557,9 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       {
          let _loc1_: any[] = [];
          let _loc2_: number = 0;
-         while(_loc2_ < _selectedIndices.length)
+         while(_loc2_ < this._selectedIndices.length)
          {
-            _loc1_.push(_dataProvider.getItemAt(_selectedIndices[_loc2_]));
+            _loc1_.push(this._dataProvider.getItemAt(this._selectedIndices[_loc2_]));
             _loc2_++;
          }
          return _loc1_;
@@ -567,16 +567,16 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public get length(): number
       {
-         return _dataProvider.length;
+         return this._dataProvider.length;
       }
       
       public invalidateItem(param1: Record<string, any>): void
       {
-         if(renderedItems[param1] == null)
+         if(this.renderedItems[param1] == null)
          {
             return;
          }
-         invalidItems[param1] = true;
+         this.invalidItems[param1] = true;
          invalidate(InvalidationType.DATA);
       }
       
@@ -587,12 +587,12 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
       
       public get selectedIndex(): number
       {
-         return _selectedIndices.length == 0 ? -1 : Math.floor(_selectedIndices[_selectedIndices.length - 1]);
+         return this._selectedIndices.length == 0 ? -1 : Math.floor(this._selectedIndices[this._selectedIndices.length - 1]);
       }
       
       public getRendererStyle(param1: string, param2: number = -1): Record<string, any>
       {
-         return rendererStyles[param1];
+         return this.rendererStyles[param1];
       }
       
       protected handleCellRendererClick(param1: MouseEvent): void
@@ -605,31 +605,31 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
          }
          let _loc2_: ICellRenderer = param1.currentTarget  as unknown as ICellRenderer;
          let _loc3_: number = _loc2_.listData.index;
-         if(!this.dispatchEvent(new ListEvent(ListEvent.ITEM_CLICK,false,true,_loc2_.listData.column,_loc2_.listData.row,_loc3_,_loc2_.data)) || !_selectable)
+         if(!this.dispatchEvent(new ListEvent(ListEvent.ITEM_CLICK,false,true,_loc2_.listData.column,_loc2_.listData.row,_loc3_,_loc2_.data)) || !this._selectable)
          {
             return;
          }
          let _loc4_: number = selectedIndices.indexOf(_loc3_);
-         if(!_allowMultipleSelection)
+         if(!this._allowMultipleSelection)
          {
             if(_loc4_ != -1)
             {
                return;
             }
             _loc2_.selected = true;
-            _selectedIndices = [_loc3_];
-            lastCaretIndex = caretIndex = _loc3_;
+            this._selectedIndices = [_loc3_];
+            this.lastCaretIndex = this.caretIndex = _loc3_;
          }
          else if(param1.shiftKey)
          {
-            _loc6_ = _selectedIndices.length > 0 ? Math.floor(_selectedIndices[0]) : _loc3_;
-            _selectedIndices = [];
+            _loc6_ = this._selectedIndices.length > 0 ? Math.floor(this._selectedIndices[0]) : _loc3_;
+            this._selectedIndices = [];
             if(_loc6_ > _loc3_)
             {
                _loc5_ = Math.floor(_loc6_);
                while(_loc5_ >= _loc3_)
                {
-                  _selectedIndices.push(_loc5_);
+                  this._selectedIndices.push(_loc5_);
                   _loc5_--;
                }
             }
@@ -638,30 +638,30 @@ export class SelectableList extends BaseScrollPane implements IFocusManagerCompo
                _loc5_ = Math.floor(_loc6_);
                while(_loc5_ <= _loc3_)
                {
-                  _selectedIndices.push(_loc5_);
+                  this._selectedIndices.push(_loc5_);
                   _loc5_++;
                }
             }
-            caretIndex = _loc3_;
+            this.caretIndex = _loc3_;
          }
          else if(param1.ctrlKey)
          {
             if(_loc4_ != -1)
             {
                _loc2_.selected = false;
-               _selectedIndices.splice(_loc4_,1);
+               this._selectedIndices.splice(_loc4_,1);
             }
             else
             {
                _loc2_.selected = true;
-               _selectedIndices.push(_loc3_);
+               this._selectedIndices.push(_loc3_);
             }
-            caretIndex = _loc3_;
+            this.caretIndex = _loc3_;
          }
          else
          {
-            _selectedIndices = [_loc3_];
-            lastCaretIndex = caretIndex = _loc3_;
+            this._selectedIndices = [_loc3_];
+            this.lastCaretIndex = this.caretIndex = _loc3_;
          }
          this.dispatchEvent(new Event(Event.CHANGE));
          invalidate(InvalidationType.DATA);

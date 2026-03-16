@@ -11,8 +11,8 @@ export class class_16{
       public static method_492(param1: number, param2: number): DisplayObject
       {
          Security.allowDomain("server.cpmstar.com");
-         var_378 = new Loader();
-         var_378.load(new URLRequest("http://server.cpmstar.com/adviewas3.swf" + "?poolid=" + param1 + "&subpoolid=" + param2));
-         return var_378;
+         this.var_378 = new Loader();
+         this.var_378.load(new URLRequest("http://server.cpmstar.com/adviewas3.swf" + "?poolid=" + param1 + "&subpoolid=" + param2));
+         return this.var_378;
       }
    }

@@ -577,7 +577,7 @@ export class class_80 extends MovieClip{
          this.rollover_txt.text = "";
          if(this.var_182 == false)
          {
-            if(param1.target.parent.name == "play_btn")
+            if(param1.target.parent.name == "this.play_btn")
             {
                this.method_94(1);
                this.method_705();
@@ -585,7 +585,7 @@ export class class_80 extends MovieClip{
                this.performActionID = 1;
                this.var_182 = true;
             }
-            else if(param1.target.parent.name == "settings_btn")
+            else if(param1.target.parent.name == "this.settings_btn")
             {
                this.mRef.method_44("mm_settings_screen","section_visits");
                this.method_94(1);
@@ -594,7 +594,7 @@ export class class_80 extends MovieClip{
                this.performActionID = 1;
                this.var_182 = true;
             }
-            else if(param1.target.parent.name == "credits_btn")
+            else if(param1.target.parent.name == "this.credits_btn")
             {
                this.mRef.method_44("credits_screen","section_visits");
                this.method_94(1);
@@ -603,7 +603,7 @@ export class class_80 extends MovieClip{
                this.performActionID = 1;
                this.var_182 = true;
             }
-            else if(param1.target.parent.name == "bubbleopedia_btn")
+            else if(param1.target.parent.name == "this.bubbleopedia_btn")
             {
                if(this.mRef.gData.var_298 == true)
                {
@@ -619,16 +619,16 @@ export class class_80 extends MovieClip{
                   this.mRef.method_56(6);
                }
             }
-            else if(param1.target.parent.name == "ec_btn")
+            else if(param1.target.parent.name == "this.ec_btn")
             {
                this.mRef.method_56(7);
             }
-            else if(param1.target.parent.name == "pmg_btn")
+            else if(param1.target.parent.name == "this.pmg_btn")
             {
                this.mRef.method_44("mm_pmg_link","link_outs");
                this.mRef.method_56(1);
             }
-            else if(param1.target.parent.name == "Cheat_btn")
+            else if(param1.target.parent.name == "this.Cheat_btn")
             {
                this.method_476();
             }
@@ -996,7 +996,7 @@ export class class_80 extends MovieClip{
       private method_48(param1: MouseEvent): void
       {
          param1.target.gotoAndPlay("on");
-         if(param1.target.parent.name == "play_btn")
+         if(param1.target.parent.name == "this.play_btn")
          {
             if(this.mRef.gData.var_384 == true)
             {
@@ -1007,15 +1007,15 @@ export class class_80 extends MovieClip{
                this.rollover_txt.text = "Play";
             }
          }
-         else if(param1.target.parent.name == "settings_btn")
+         else if(param1.target.parent.name == "this.settings_btn")
          {
             this.rollover_txt.text = "Settings";
          }
-         else if(param1.target.parent.name == "credits_btn")
+         else if(param1.target.parent.name == "this.credits_btn")
          {
             this.rollover_txt.text = "Credits";
          }
-         else if(param1.target.parent.name == "bubbleopedia_btn")
+         else if(param1.target.parent.name == "this.bubbleopedia_btn")
          {
             if(this.mRef.gData.var_298 == true)
             {
@@ -1026,15 +1026,15 @@ export class class_80 extends MovieClip{
                this.rollover_txt.text = "Extra Content (Uber Cheats!)";
             }
          }
-         else if(param1.target.parent.name == "ec_btn")
+         else if(param1.target.parent.name == "this.ec_btn")
          {
             this.rollover_txt.text = "Bubble Tanks Tower Defense 1.5";
          }
-         else if(param1.target.parent.name == "pmg_btn")
+         else if(param1.target.parent.name == "this.pmg_btn")
          {
             this.rollover_txt.text = "Play More Games!";
          }
-         else if(param1.target.parent.name == "Cheat_btn")
+         else if(param1.target.parent.name == "this.Cheat_btn")
          {
             this.rollover_txt.text = "Cheats!!!!";
          }

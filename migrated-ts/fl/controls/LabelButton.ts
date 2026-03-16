@@ -19,14 +19,14 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
       
       public static getStyleDefinition(): Record<string, any>
       {
-         return mergeStyles(defaultStyles,BaseButton.getStyleDefinition());
+         return mergeStyles(this.defaultStyles,BaseButton.getStyleDefinition());
       }
       
       protected draw(): void
       {
-         if(textField.text != _label)
+         if(this.textField.text != this._label)
          {
-            label = _label;
+            label = this._label;
          }
          if(isInvalid(InvalidationType.STYLES,InvalidationType.STATE))
          {
@@ -54,22 +54,22 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
          let _loc7_: number = NaN;
          let _loc8_: number = NaN;
          let _loc1_: number = Number(getStyleValue("textPadding"));
-         let _loc2_: string = icon == null && mode == "center" ? ButtonLabelPlacement.TOP : _labelPlacement;
-         textField.height = textField.textHeight + 4;
-         let _loc3_: number = textField.textWidth + 4;
-         let _loc4_: number = textField.textHeight + 4;
-         let _loc5_: number = icon == null ? 0 : icon.width + _loc1_;
-         let _loc6_: number = icon == null ? 0 : icon.height + _loc1_;
-         textField.visible = label.length > 0;
-         if(icon != null)
+         let _loc2_: string = this.icon == null && this.mode == "center" ? ButtonLabelPlacement.TOP : this._labelPlacement;
+         this.textField.height = this.textField.textHeight + 4;
+         let _loc3_: number = this.textField.textWidth + 4;
+         let _loc4_: number = this.textField.textHeight + 4;
+         let _loc5_: number = this.icon == null ? 0 : this.icon.width + _loc1_;
+         let _loc6_: number = this.icon == null ? 0 : this.icon.height + _loc1_;
+         this.textField.visible = label.length > 0;
+         if(this.icon != null)
          {
-            icon.x = Math.round((width - icon.width) / 2);
-            icon.y = Math.round((height - icon.height) / 2);
+            this.icon.x = Math.round((width - this.icon.width) / 2);
+            this.icon.y = Math.round((height - this.icon.height) / 2);
          }
-         if(textField.visible == false)
+         if(this.textField.visible == false)
          {
-            textField.width = 0;
-            textField.height = 0;
+            this.textField.width = 0;
+            this.textField.height = 0;
          }
          else if(_loc2_ == ButtonLabelPlacement.BOTTOM || _loc2_ == ButtonLabelPlacement.TOP)
          {
@@ -82,24 +82,24 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
             {
                _loc8_ = height - 2;
             }
-            textField.width = _loc3_ = _loc7_;
-            textField.height = _loc4_ = _loc8_;
-            textField.x = Math.round((width - _loc3_) / 2);
-            textField.y = Math.round((height - textField.height - _loc6_) / 2 + (_loc2_ == ButtonLabelPlacement.BOTTOM ? _loc6_ : 0));
-            if(icon != null)
+            this.textField.width = _loc3_ = _loc7_;
+            this.textField.height = _loc4_ = _loc8_;
+            this.textField.x = Math.round((width - _loc3_) / 2);
+            this.textField.y = Math.round((height - this.textField.height - _loc6_) / 2 + (_loc2_ == ButtonLabelPlacement.BOTTOM ? _loc6_ : 0));
+            if(this.icon != null)
             {
-               icon.y = Math.round(_loc2_ == ButtonLabelPlacement.BOTTOM ? textField.y - _loc6_ : textField.y + textField.height + _loc1_);
+               this.icon.y = Math.round(_loc2_ == ButtonLabelPlacement.BOTTOM ? this.textField.y - _loc6_ : this.textField.y + this.textField.height + _loc1_);
             }
          }
          else
          {
             _loc7_ = Math.max(0,Math.min(_loc3_,width - _loc5_ - 2 * _loc1_));
-            textField.width = _loc3_ = _loc7_;
-            textField.x = Math.round((width - _loc3_ - _loc5_) / 2 + (_loc2_ != ButtonLabelPlacement.LEFT ? _loc5_ : 0));
-            textField.y = Math.round((height - textField.height) / 2);
-            if(icon != null)
+            this.textField.width = _loc3_ = _loc7_;
+            this.textField.x = Math.round((width - _loc3_ - _loc5_) / 2 + (_loc2_ != ButtonLabelPlacement.LEFT ? _loc5_ : 0));
+            this.textField.y = Math.round((height - this.textField.height) / 2);
+            if(this.icon != null)
             {
-               icon.x = Math.round(_loc2_ != ButtonLabelPlacement.LEFT ? textField.x - _loc5_ : textField.x + _loc3_ + _loc1_);
+               this.icon.x = Math.round(_loc2_ != ButtonLabelPlacement.LEFT ? this.textField.x - _loc5_ : this.textField.x + _loc3_ + _loc1_);
             }
          }
          super.drawLayout();
@@ -119,8 +119,8 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
          }
          if(param1.keyCode == Keyboard.SPACE)
          {
-            setMouseState(oldMouseState);
-            oldMouseState = null;
+            setMouseState(this.oldMouseState);
+            this.oldMouseState = null;
             endPress();
             this.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
          }
@@ -128,12 +128,12 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
       
       public get labelPlacement(): string
       {
-         return _labelPlacement;
+         return this._labelPlacement;
       }
       
       public get toggle(): boolean
       {
-         return _toggle;
+         return this._toggle;
       }
       
       protected setEmbedFont(): any
@@ -141,22 +141,22 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
          let _loc1_: Record<string, any> = getStyleValue("embedFonts");
          if(_loc1_ != null)
          {
-            textField.embedFonts = _loc1_;
+            this.textField.embedFonts = _loc1_;
          }
       }
       
       public get selected(): boolean
       {
-         return _toggle ? _selected : false;
+         return this._toggle ? _selected : false;
       }
       
       protected configUI(): void
       {
          super.configUI();
-         textField = new TextField();
-         textField.type = TextFieldType.DYNAMIC;
-         textField.selectable = false;
-         this.addChild(textField);
+         this.textField = new TextField();
+         this.textField.type = TextFieldType.DYNAMIC;
+         this.textField.selectable = false;
+         this.addChild(this.textField);
       }
       
       protected initializeAccessibility(): void
@@ -169,13 +169,13 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
       
       public set labelPlacement(param1: string)
       {
-         _labelPlacement = param1;
+         this._labelPlacement = param1;
          invalidate(InvalidationType.SIZE);
       }
       
       protected drawIcon(): void
       {
-         let _loc1_: DisplayObject = icon;
+         let _loc1_: DisplayObject = this.icon;
          let _loc2_: string = enabled ? mouseState : "disabled";
          if(selected)
          {
@@ -185,17 +185,17 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
          let _loc3_: Record<string, any> = getStyleValue(_loc2_);
          if(_loc3_ == null)
          {
-            _loc3_ = getStyleValue("icon");
+            _loc3_ = getStyleValue("this.icon");
          }
          if(_loc3_ != null)
          {
-            icon = getDisplayObjectInstance(_loc3_);
+            this.icon = getDisplayObjectInstance(_loc3_);
          }
-         if(icon != null)
+         if(this.icon != null)
          {
-            this.addChildAt(icon,1);
+            this.addChildAt(this.icon,1);
          }
-         if(_loc1_ != null && _loc1_ != icon)
+         if(_loc1_ != null && _loc1_ != this.icon)
          {
             this.removeChild(_loc1_);
          }
@@ -203,10 +203,10 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
       
       public set label(param1: string)
       {
-         _label = param1;
-         if(textField.text != _label)
+         this._label = param1;
+         if(this.textField.text != this._label)
          {
-            textField.text = _label;
+            this.textField.text = this._label;
             this.dispatchEvent(new ComponentEvent(ComponentEvent.LABEL_CHANGE));
          }
          invalidate(InvalidationType.SIZE);
@@ -221,9 +221,9 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
          }
          if(param1.keyCode == Keyboard.SPACE)
          {
-            if(oldMouseState == null)
+            if(this.oldMouseState == null)
             {
-               oldMouseState = mouseState;
+               this.oldMouseState = mouseState;
             }
             setMouseState("down");
             startPress();
@@ -236,8 +236,8 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
          {
             selected = false;
          }
-         _toggle = param1;
-         if(_toggle)
+         this._toggle = param1;
+         if(this._toggle)
          {
             this.addEventListener(MouseEvent.CLICK, toggleSelected.bind(this));
          }
@@ -251,7 +251,7 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
       public set selected(param1: boolean)
       {
          _selected = param1;
-         if(_toggle)
+         if(this._toggle)
          {
             invalidate(InvalidationType.STATE);
          }
@@ -261,22 +261,22 @@ export class LabelButton extends BaseButton implements IFocusManagerComponent
       {
          let _loc1_: Record<string, any> = UIComponent.getStyleDefinition();
          let _loc2_: TextFormat = enabled ? _loc1_.defaultTextFormat  as unknown as TextFormat : _loc1_.defaultDisabledTextFormat  as unknown as TextFormat;
-         textField.setTextFormat(_loc2_);
+         this.textField.setTextFormat(_loc2_);
          let _loc3_: TextFormat = getStyleValue(enabled ? "textFormat" : "disabledTextFormat")  as unknown as TextFormat;
          if(_loc3_ != null)
          {
-            textField.setTextFormat(_loc3_);
+            this.textField.setTextFormat(_loc3_);
          }
          else
          {
             _loc3_ = _loc2_;
          }
-         textField.defaultTextFormat = _loc3_;
+         this.textField.defaultTextFormat = _loc3_;
          setEmbedFont();
       }
       
       public get label(): string
       {
-         return _label;
+         return this._label;
       }
    }
