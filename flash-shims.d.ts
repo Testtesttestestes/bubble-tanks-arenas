@@ -1,5 +1,11 @@
 // flash-shims.d.ts
 
+type int = number;
+type uint = number;
+
+declare function int(value: any): number;
+declare function uint(value: any): number;
+
 declare class EventDispatcher {
   addEventListener(type: string, listener: Function, useCapture?: boolean, priority?: number, useWeakReference?: boolean): void;
   removeEventListener(type: string, listener: Function, useCapture?: boolean): void;
@@ -142,6 +148,12 @@ declare class URLRequest {
   url: string;
   constructor(url?: string);
 }
+declare class URLVariables {
+  [key: string]: any;
+  constructor(source?: string);
+  decode(source: string): void;
+  toString(): string;
+}
 declare class Security {
   static allowDomain(...domains: string[]): void;
   static allowInsecureDomain(...domains: string[]): void;
@@ -162,6 +174,10 @@ declare class Capabilities {
 }
 declare class IOErrorEvent extends Event { static IO_ERROR: string; }
 declare class SecurityErrorEvent extends Event { static SECURITY_ERROR: string; }
+declare class HTTPStatusEvent extends Event {
+  static HTTP_STATUS: string;
+  status: number;
+}
 declare class NetConnection extends EventDispatcher {
   objectEncoding: number;
   addHeader(operation: string, mustUnderstand?: boolean, param?: any): void;
