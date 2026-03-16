@@ -196,6 +196,41 @@ function transformTs2695Sequences(source) {
   return { content: output, replacements };
 }
 
+function hasAssignmentLikeExpression(expression) {
+  return /(^|[^=!<>])=(?!=)/.test(expression) || /\+\+|--/.test(expression);
+}
+
+function transformBase64CommaAssignments(source) {
+  const pattern = /\(([^()]*)\)/g;
+  let output = source;
+  let replacements = 0;
+  let tempCounter = 0;
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    output = output.replace(pattern, (match, inner, offset, fullSource) => {
+      const expressions = splitTopLevelComma(inner);
+      if (expressions.length < 2) return match;
+
+      if (!expressions.some(hasAssignmentLikeExpression)) return match;
+
+      const openParen = offset;
+      const closeParen = offset + match.length - 1;
+      if (isLikelyParameterList(fullSource, openParen, closeParen)) return match;
+
+      const lineStart = fullSource.lastIndexOf('\n', openParen) + 1;
+      const indent = fullSource.slice(lineStart, openParen).match(/^\s*/)?.[0] ?? '';
+      const tempName = `__base64Ts2695Tmp${tempCounter++}`;
+      replacements += 1;
+      changed = true;
+      return buildGenericIifeReplacement(expressions, indent, tempName);
+    });
+  }
+
+  return { content: output, replacements };
+}
+
 function collectTsFiles(inputPath) {
   const stat = fs.statSync(inputPath);
   if (stat.isFile()) return [inputPath];
@@ -217,7 +252,16 @@ function collectTsFiles(inputPath) {
 
 function processFile(filePath) {
   const source = fs.readFileSync(filePath, 'utf8');
-  const { content, replacements } = transformTs2695Sequences(source);
+  const primary = transformTs2695Sequences(source);
+  let content = primary.content;
+  let replacements = primary.replacements;
+
+  if (path.basename(filePath) === 'Base64.ts') {
+    const fallback = transformBase64CommaAssignments(content);
+    content = fallback.content;
+    replacements += fallback.replacements;
+  }
+
   if (content === source) return { changed: false, replacements: 0 };
   fs.writeFileSync(filePath, content, 'utf8');
   return { changed: true, replacements };
@@ -254,6 +298,7 @@ module.exports = {
   splitTopLevelComma,
   splitSequenceAndCast,
   transformTs2695Sequences,
+  transformBase64CommaAssignments,
   collectTsFiles,
   processFile
 };
