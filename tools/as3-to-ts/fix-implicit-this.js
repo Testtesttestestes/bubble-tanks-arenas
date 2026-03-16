@@ -3,70 +3,45 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-function isIdentifier(word) {
-  return /^[A-Za-z_$][\w$]*$/.test(word);
-}
-
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function extractClassScopeMembers(source) {
+  const classMatch = source.match(/class\s+(\w+)/);
   const instanceMembers = new Set();
   const staticMembers = new Set();
-  const forbiddenNames = new Set(['public', 'private', 'protected', 'static', 'readonly', 'constructor']);
-  const classBodyMatch = source.match(/\bclass\s+(\w+)[^{]*\{([\s\S]*)\}\s*$/m);
-  if (!classBodyMatch) {
+  if (!classMatch) {
     return { className: null, instanceMembers, staticMembers };
   }
 
-  const className = classBodyMatch[1];
-  const classBody = classBodyMatch[2];
-
-  const addMember = (name, isStatic) => {
-    if (!isIdentifier(name) || forbiddenNames.has(name)) return;
+  const className = classMatch[1];
+  const memberRegex = /^\s*(public|private|protected)?\s*(static\s+)?(?:readonly\s+)?(?:var|let|const|function|get|set)?\s*([A-Za-z_$][\w$]*)\s*(?::|\()/gm;
+  let match;
+  while ((match = memberRegex.exec(source)) !== null) {
+    const isStatic = Boolean(match[2]);
+    const name = match[3];
+    if (name === className || name === 'constructor') continue;
     if (isStatic) staticMembers.add(name);
     else instanceMembers.add(name);
-  };
-
-  for (const line of classBody.split('\n')) {
-    const fieldMatch = line.match(/^\s*(?:public|private|protected)\s+(static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*:/);
-    if (fieldMatch) {
-      addMember(fieldMatch[2], Boolean(fieldMatch[1]));
-      continue;
-    }
-
-    const methodMatch = line.match(/^\s*(?:public|private|protected)\s+(static\s+)?(?:(?:get|set)\s+)?([A-Za-z_$][\w$]*)\s*\(/);
-    if (methodMatch) {
-      addMember(methodMatch[2], Boolean(methodMatch[1]));
-    }
   }
 
   return { className, instanceMembers, staticMembers };
 }
 
 function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
-  let fixed = source;
-  for (const memberName of memberNames) {
-    const re = new RegExp(`(^|[^.\\w$])(${escapeRegExp(memberName)})\\b`, 'gm');
-    fixed = fixed.replace(re, (match, prefix, token, offset, whole) => {
-      const before = whole.slice(Math.max(0, offset - 40), offset + prefix.length);
-      const lineStart = whole.lastIndexOf('\n', offset) + 1;
-      const linePrefix = whole.slice(lineStart, offset + prefix.length);
-      if (/\b(?:const|let|var|function|class|interface|type|new|import|export|extends|implements)\s*$/.test(before)) {
-        return match;
-      }
-      if (/\b(?:public|private|protected|readonly|static)\s*$/.test(before)) {
-        return match;
-      }
-      if (/\b(?:constructor|function|get|set)\b[^\n{]*$/.test(linePrefix)) {
-        return match;
-      }
-      return `${prefix}${prefixTarget}.${token}`;
-    });
-  }
+  if (memberNames.size === 0) return source;
+  const names = Array.from(memberNames).map(escapeRegExp).join('|');
+  const regex = new RegExp(`\\b(${names})\\b(?!\\s*:)`, 'g');
+  const blockedPrefix = /(?:function|var|let|const|get|set|public|private|protected|static|readonly)\s+$/;
 
-  return fixed;
+  return source.replace(regex, (token, name, offset, whole) => {
+    const prev = whole[offset - 1];
+    if (prev === '.') return token;
+    const left = whole.slice(Math.max(0, offset - 80), offset);
+    if (blockedPrefix.test(left)) return token;
+    return `${prefixTarget}.${name}`;
+  });
 }
 
 function processFile(filePath) {
