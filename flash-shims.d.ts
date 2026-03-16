@@ -83,8 +83,18 @@ declare class ByteArray {
 }
 
 declare class Dictionary { [key: string]: any; }
-declare class XML { constructor(str?: string); }
-declare class XMLList {}
+declare class Keyboard { static [key: string]: any; }
+declare class Mouse { static [key: string]: any; }
+declare class MouseCursor { static [key: string]: any; }
+declare class Matrix3D { [key: string]: any; constructor(...args: any[]); }
+declare class Vector3D { [key: string]: any; constructor(...args: any[]); }
+declare class XMLList { [key: string]: any; }
+declare class XML {
+  [key: string]: any;
+  _attr_name: any;
+  constructor(str?: string);
+  _descendants_star_filter(func: any): any[];
+}
 
 declare class Stage extends DisplayObjectContainer {
   stageWidth: number; stageHeight: number; frameRate: number; quality: string;

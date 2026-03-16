@@ -11,27 +11,44 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function extractClassScopePropertyNames(source) {
-  const props = new Set();
+function extractClassScopeMembers(source) {
+  const instanceMembers = new Set();
+  const staticMembers = new Set();
   const forbiddenNames = new Set(['public', 'private', 'protected', 'static', 'readonly', 'constructor']);
-  const classBodyMatch = source.match(/\bclass\s+\w+[^{]*\{([\s\S]*)\}\s*$/m);
-  if (!classBodyMatch) return props;
-
-  for (const line of classBodyMatch[1].split('\n')) {
-    const match = line.match(/^\s*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*:/);
-    if (!match) continue;
-    const propName = match[1];
-    if (!isIdentifier(propName) || forbiddenNames.has(propName)) continue;
-    props.add(propName);
+  const classBodyMatch = source.match(/\bclass\s+(\w+)[^{]*\{([\s\S]*)\}\s*$/m);
+  if (!classBodyMatch) {
+    return { className: null, instanceMembers, staticMembers };
   }
 
-  return props;
+  const className = classBodyMatch[1];
+  const classBody = classBodyMatch[2];
+
+  const addMember = (name, isStatic) => {
+    if (!isIdentifier(name) || forbiddenNames.has(name)) return;
+    if (isStatic) staticMembers.add(name);
+    else instanceMembers.add(name);
+  };
+
+  for (const line of classBody.split('\n')) {
+    const fieldMatch = line.match(/^\s*(?:public|private|protected)\s+(static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*:/);
+    if (fieldMatch) {
+      addMember(fieldMatch[2], Boolean(fieldMatch[1]));
+      continue;
+    }
+
+    const methodMatch = line.match(/^\s*(?:public|private|protected)\s+(static\s+)?(?:(?:get|set)\s+)?([A-Za-z_$][\w$]*)\s*\(/);
+    if (methodMatch) {
+      addMember(methodMatch[2], Boolean(methodMatch[1]));
+    }
+  }
+
+  return { className, instanceMembers, staticMembers };
 }
 
-function addThisToPropertyUsage(source, propertyNames) {
+function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
   let fixed = source;
-  for (const propertyName of propertyNames) {
-    const re = new RegExp(`(^|[^.\\w$])(${escapeRegExp(propertyName)})\\b`, 'gm');
+  for (const memberName of memberNames) {
+    const re = new RegExp(`(^|[^.\\w$])(${escapeRegExp(memberName)})\\b`, 'gm');
     fixed = fixed.replace(re, (match, prefix, token, offset, whole) => {
       const before = whole.slice(Math.max(0, offset - 40), offset + prefix.length);
       const lineStart = whole.lastIndexOf('\n', offset) + 1;
@@ -45,7 +62,7 @@ function addThisToPropertyUsage(source, propertyNames) {
       if (/\b(?:constructor|function|get|set)\b[^\n{]*$/.test(linePrefix)) {
         return match;
       }
-      return `${prefix}this.${token}`;
+      return `${prefix}${prefixTarget}.${token}`;
     });
   }
 
@@ -54,12 +71,13 @@ function addThisToPropertyUsage(source, propertyNames) {
 
 function processFile(filePath) {
   const source = fs.readFileSync(filePath, 'utf8');
-  const propertyNames = extractClassScopePropertyNames(source);
-  if (propertyNames.size === 0) {
+  const { className, instanceMembers, staticMembers } = extractClassScopeMembers(source);
+  if (!className || (instanceMembers.size === 0 && staticMembers.size === 0)) {
     return { changed: false, replacements: 0 };
   }
 
-  const updated = addThisToPropertyUsage(source, propertyNames);
+  let updated = addClassPrefixToMemberUsage(source, instanceMembers, 'this');
+  updated = addClassPrefixToMemberUsage(updated, staticMembers, className);
   if (updated === source) {
     return { changed: false, replacements: 0 };
   }
@@ -122,8 +140,8 @@ function runCli() {
 }
 
 module.exports = {
-  extractClassScopePropertyNames,
-  addThisToPropertyUsage,
+  extractClassScopeMembers,
+  addClassPrefixToMemberUsage,
   processFile,
   collectTsFiles
 };
