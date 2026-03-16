@@ -108,3 +108,29 @@ test('adds index signature even when class declaration is non-export at transfor
   const output = convertAs3ToTs(input);
   assert.match(output, /\[key: string\]: any;/);
 });
+
+
+test('converts decompiled JSONTokenizer-style labels into case clauses (including escaped strings)', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+
+  const input = fs.readFileSync(
+    path.resolve(__dirname, '../../binaryData/AGI decomp/scripts/com/adobe/serialization/json/JSONTokenizer.as'),
+    'utf8'
+  );
+
+  const decompiledLikeInput = input.replace(
+    /^(\s*)case\s+(\d+|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'):\s*$/gm,
+    '$1$2:'
+  );
+
+  const output = convertAs3ToTs(decompiledLikeInput);
+
+  assert.ok(output.includes('case "\\\\":'));
+  assert.ok(output.includes('case "\\\"":'));
+
+  const bareStringLabels = output
+    .split('\n')
+    .filter((line) => /^\s*".*":\s*$/.test(line) && !/^\s*case\s+/.test(line));
+  assert.equal(bareStringLabels.length, 0);
+});
