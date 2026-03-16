@@ -7,9 +7,14 @@ ERROR_SLICE_RADIUS="${ERROR_SLICE_RADIUS:-10}"
 MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-20}"
 MAX_AGI_ERROR_CONTEXTS="${MAX_AGI_ERROR_CONTEXTS:-10}"
 MAX_ERROR_MESSAGES_PER_CODE="${MAX_ERROR_MESSAGES_PER_CODE:-5}"
+TSC_PROJECT="${TSC_PROJECT:-$ROOT_DIR/tsconfig.json}"
 
 if [[ "$LOG_FILE" != /* && "$LOG_FILE" != [A-Z]:* ]]; then
   LOG_FILE="$ROOT_DIR/$LOG_FILE"
+fi
+
+if [[ "$TSC_PROJECT" != /* ]]; then
+  TSC_PROJECT="$ROOT_DIR/$TSC_PROJECT"
 fi
 
 cd "$ROOT_DIR"
@@ -21,12 +26,18 @@ error_stream() {
 if [[ -f "$LOG_FILE" ]]; then
   printf 'Using existing log: %s\n' "$LOG_FILE"
 else
-  printf 'Generating log via npx tsc: %s\n' "$LOG_FILE"
-  npx tsc --pretty false > "$LOG_FILE" 2>&1 || true
+  printf 'Generating log via npx tsc --project %s: %s\n' "$TSC_PROJECT" "$LOG_FILE"
+  npx tsc --pretty false --project "$TSC_PROJECT" > "$LOG_FILE" 2>&1 || true
 fi
 
 total_errors="$(error_stream | wc -l | tr -d ' ')"
+printf 'TSC project: %s\n' "$TSC_PROJECT"
 printf 'Total errors: %s\n' "$total_errors"
+
+if [[ "$total_errors" == "0" ]]; then
+  ts_file_count="$(find "$ROOT_DIR/migrated-ts" -type f -name '*.ts' 2>/dev/null | wc -l | tr -d ' ')"
+  printf 'TS files under migrated-ts: %s\n' "$ts_file_count"
+fi
 
 printf 'Top-10 files:\n'
 error_stream | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 10 || true
