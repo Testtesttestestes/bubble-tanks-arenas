@@ -19,6 +19,11 @@ fi
 
 cd "$ROOT_DIR"
 
+if [[ ! -x "$ROOT_DIR/node_modules/.bin/tsc" ]]; then
+  printf 'Warning: local TypeScript compiler was not found at %s.\n' "$ROOT_DIR/node_modules/.bin/tsc"
+  printf 'Run `npm install` before `npm run tsc:stats`, otherwise npx may execute a non-TypeScript stub and report 0 parsed errors.\n\n'
+fi
+
 error_stream() {
   grep "error TS" "$LOG_FILE" || true
 }
@@ -33,6 +38,11 @@ fi
 total_errors="$(error_stream | wc -l | tr -d ' ')"
 printf 'TSC project: %s\n' "$TSC_PROJECT"
 printf 'Total errors: %s\n' "$total_errors"
+
+if [[ "$total_errors" == "0" ]] && grep -Eq 'npm ERR!|not found|This is not the tsc command you are looking for' "$LOG_FILE"; then
+  printf 'Warning: tsc output log looks invalid for TypeScript diagnostics.\n'
+  printf 'Inspect %s and ensure dependencies are installed (`npm install`).\n' "$LOG_FILE"
+fi
 
 if [[ "$total_errors" == "0" ]]; then
   ts_file_count="$(find "$ROOT_DIR/migrated-ts" -type f -name '*.ts' 2>/dev/null | wc -l | tr -d ' ')"
