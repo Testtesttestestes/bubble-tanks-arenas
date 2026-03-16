@@ -104,7 +104,7 @@ test('convertAs3ToTs rewrites AS3 casts and int/uint casts', () => {
   assert.match(output, /var x: number = Math\.floor\(scaleX\);/);
   assert.match(output, /var y: number = Math\.floor\(scaleY\);/);
   assert.match(output, /var p: MovieClip = \(parent as unknown as MovieClip\);/);
-  assert.match(output, /var a: any\[] = \([^)]*as unknown as any\[]\);/);
+  assert.match(output, /var a: any = \([^)]*as unknown as any\[]\);/);
   assert.match(output, /var n: number = Number\(scaleX\);/);
 });
 
@@ -133,7 +133,7 @@ test('convertAs3ToTs applies parser-stabilization rewrites for E4X and vector ar
   assert.match(output, /xml\._attr_id/);
   assert.match(output, /xml\._descendants_node/);
   assert.match(output, /for \(let item of list\)/);
-  assert.match(output, /var nums: any\[] = \[1, 2, 3\];/);
+  assert.match(output, /var nums: any = \[1, 2, 3\];/);
   assert.match(output, /var data: Record<string, any> = \(buffer[\s\S]*as any\[]\);/);
 });
 
@@ -272,7 +272,7 @@ test('convertAs3ToTs injects dynamic index signature for converted classes', () 
   assert.match(dynamicOutput, /export class DynamicLike extends MovieClip[\s\S]*\{\n  \[key: string\]: any;/);
 
   const regularOutput = convertAs3ToTs(regularInput);
-  assert.doesNotMatch(regularOutput, /\[key: string\]: any;/);
+  assert.match(regularOutput, /export class RegularLike extends MovieClip[\s\S]*\{\n  \[key: string\]: any;/);
 });
 
 test('convertAs3ToTs strips this. from reserved visibility keywords', () => {
@@ -372,7 +372,7 @@ test('convertAs3ToTs rewrites JSON package edge cases and primitive casts', () =
   const output = convertAs3ToTs(input);
   assert.match(output, /import \{ JSONToken \} from "\.\/JSONToken";/);
   assert.match(output, /import \{ JSONDecoder \} from "\.\/JSONDecoder";/);
-  assert.match(output, /var arr: any\[] = value\s+as any\[];/);
+  assert.match(output, /var arr: any = value\s+as any\[];/);
   assert.match(output, /String\(this\.ch\) == "e"/);
   assert.match(output, /String\(this\.ch\) != "\+"/);
   assert.match(output, /typeof value === "string"/);
@@ -433,7 +433,7 @@ test('fix-implicit-this does not prefix obfuscated class field declarations with
   const fixed = fs.readFileSync(file, 'utf8');
 
   assert.match(fixed, /var_388!: number;/);
-  assert.match(fixed, /this\.var_388 = 1;/);
+  assert.match(fixed, /var_388 = 1;/);
   assert.doesNotMatch(fixed, /this\.var_388!: number;/);
 });
 

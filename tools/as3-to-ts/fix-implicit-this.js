@@ -3,8 +3,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const OBFUSCATED_MEMBER_WHITELIST = /^(var_\d+|int[A-Z]\w*|obj[A-Z]?\w*|bln\w*|str\w*)$/;
-
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -199,12 +197,10 @@ function applyDiagnosticThisFixes(source, diagnostics) {
   const lineStarts = computeLineStarts(source);
   const edits = [];
   for (const diagnostic of diagnostics) {
-    const hasForcedPrefix = diagnostic.forcePrefix === 'static' || diagnostic.forcePrefix === 'instance';
-    if (!hasForcedPrefix && !OBFUSCATED_MEMBER_WHITELIST.test(diagnostic.name)) continue;
     const index = lineColToIndex(lineStarts, diagnostic.line, diagnostic.col);
     if (index < classRange.start || index >= classRange.end) continue;
     const method = methods.find((entry) => index >= entry.start && index < entry.end);
-    if (!method && !hasForcedPrefix) continue;
+    if (!method) continue;
     if (importedNames.has(diagnostic.name)) continue;
     if (method) {
       const locals = collectLocalsInRange(source, method);

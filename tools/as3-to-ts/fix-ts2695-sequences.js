@@ -110,6 +110,35 @@ function buildIifeReplacement(expressions, castSuffix, indent, tempName) {
   return lines.join('\n');
 }
 
+
+function buildGenericIifeReplacement(expressions, indent, tempName) {
+  const lines = [];
+  lines.push('(() => {');
+  lines.push(`${indent}  let ${tempName}: any;`);
+  for (const expression of expressions) {
+    lines.push(`${indent}  ${tempName} = ${expression};`);
+  }
+  lines.push(`${indent}  return ${tempName};`);
+  lines.push(`${indent}})()`);
+  return lines.join('\n');
+}
+
+function isLikelyParameterList(source, openParen, closeParen) {
+  const left = source.slice(0, openParen).trimEnd();
+  const right = source.slice(closeParen + 1).trimStart();
+  if (right.startsWith('=>')) return true;
+
+  const prev = left[left.length - 1] || '';
+  const wordMatch = left.match(/([A-Za-z_$][\w$]*)$/);
+  const prevWord = wordMatch ? wordMatch[1] : '';
+
+  if (/^(if|for|while|switch|catch|function)$/.test(prevWord)) return true;
+  if (prevWord === 'new') return false;
+  if (/[A-Za-z0-9_$\]\)]/.test(prev)) return true;
+
+  return false;
+}
+
 function transformTs2695Sequences(source) {
   let cursor = 0;
   let output = '';
@@ -117,13 +146,12 @@ function transformTs2695Sequences(source) {
   let replacements = 0;
 
   while (cursor < source.length) {
-    const newIndex = source.indexOf('new (', cursor);
-    if (newIndex === -1) {
+    const openParen = source.indexOf('(', cursor);
+    if (openParen === -1) {
       output += source.slice(cursor);
       break;
     }
 
-    const openParen = newIndex + 'new '.length;
     const closeParen = findMatchingParen(source, openParen);
     if (closeParen === -1) {
       output += source.slice(cursor);
@@ -131,54 +159,41 @@ function transformTs2695Sequences(source) {
     }
 
     const inner = source.slice(openParen + 1, closeParen);
-    const { sequence, castSuffix } = splitSequenceAndCast(inner);
-    const expressions = splitTopLevelComma(sequence);
-
-    if (expressions.length < 2) {
+    const expressions = splitTopLevelComma(inner);
+    if (expressions.length < 2 || isLikelyParameterList(source, openParen, closeParen)) {
       output += source.slice(cursor, closeParen + 1);
       cursor = closeParen + 1;
       continue;
     }
 
-    const lineStart = source.lastIndexOf('\n', newIndex) + 1;
-    const indent = source.slice(lineStart, newIndex).match(/^\s*/)?.[0] ?? '';
+    const newCandidate = source.slice(Math.max(0, openParen - 4), openParen);
+    const isNewSequence = /new\s+$/.test(newCandidate);
+    const lineStart = source.lastIndexOf('\n', openParen) + 1;
+    const indent = source.slice(lineStart, openParen).match(/^\s*/)?.[0] ?? '';
     const tempName = `__ts2695Tmp${tempCounter++}`;
-    const replacement = buildIifeReplacement(expressions, castSuffix, indent, tempName);
 
-    output += source.slice(cursor, newIndex);
+    let replacement;
+    if (isNewSequence) {
+      const { sequence, castSuffix } = splitSequenceAndCast(inner);
+      const sequenceExpressions = splitTopLevelComma(sequence);
+      if (sequenceExpressions.length < 2) {
+        output += source.slice(cursor, closeParen + 1);
+        cursor = closeParen + 1;
+        continue;
+      }
+      replacement = buildIifeReplacement(sequenceExpressions, castSuffix, indent, tempName);
+      output += source.slice(cursor, openParen - 'new '.length);
+    } else {
+      replacement = buildGenericIifeReplacement(expressions, indent, tempName);
+      output += source.slice(cursor, openParen);
+    }
+
     output += replacement;
     cursor = closeParen + 1;
     replacements += 1;
   }
 
-  let normalizedOutput = output;
-  normalizedOutput = normalizedOutput.replace(/(=\s*)\(([^;\n]+)\)(\s*;)/g, (match, left, inner, right) => {
-    const expressions = splitTopLevelComma(inner);
-    if (expressions.length < 2) return match;
-    const tempName = `__ts2695Tmp${tempCounter++}`;
-    const lines = ['(() => {', `  let ${tempName}: any;`];
-    for (const expression of expressions) {
-      lines.push(`  ${tempName} = ${expression};`);
-    }
-    lines.push(`  return ${tempName};`, '})()');
-    replacements += 1;
-    return `${left}${lines.join('\n')}${right}`;
-  });
-
-  normalizedOutput = normalizedOutput.replace(/(return\s+)\(([^;\n]+)\)(\s*;)/g, (match, left, inner, right) => {
-    const expressions = splitTopLevelComma(inner);
-    if (expressions.length < 2) return match;
-    const tempName = `__ts2695Tmp${tempCounter++}`;
-    const lines = ['(() => {', `  let ${tempName}: any;`];
-    for (const expression of expressions) {
-      lines.push(`  ${tempName} = ${expression};`);
-    }
-    lines.push(`  return ${tempName};`, '})()');
-    replacements += 1;
-    return `${left}${lines.join('\n')}${right}`;
-  });
-
-  return { content: normalizedOutput, replacements };
+  return { content: output, replacements };
 }
 
 function collectTsFiles(inputPath) {
