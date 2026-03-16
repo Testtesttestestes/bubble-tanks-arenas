@@ -3,15 +3,15 @@
 
 export class Crypto{
       
-      private b64: Base64;
+      private b64!: Base64;
       constructor(){
-         super();
+
       }
       
-      public static getCipher(name: string, key: ByteArray, pad: IPad = null as any): ICipher
+      public static getCipher(name: string, key: ByteArray, pad: IPad = null): ICipher
       {
-         let keys: any[] = null;
-         let cipher: ICipher = null;
+         var keys: any[] = null as any;
+         var cipher: ICipher = null as any;
          keys = name.split("-");
          switch(keys[0])
          {
@@ -91,7 +91,7 @@ export class Crypto{
          return RSAKey.parsePublicKey(M,E);
       }
       
-      private static getMode(name: string, alg: ISymmetricKey, padding: IPad = null as any): IMode
+      private static getMode(name: string, alg: ISymmetricKey, padding: IPad = null): IMode
       {
          switch(name)
          {
@@ -112,7 +112,7 @@ export class Crypto{
       
       public static getKeySize(name: string): number
       {
-         let keys: any[] = null;
+         var keys: any[] = null as any;
          keys = name.split("-");
          switch(keys[0])
          {
@@ -173,8 +173,8 @@ export class Crypto{
       
       public static getHMAC(name: string): HMAC
       {
-         let keys: any[] = null;
-         let bits: number = 0;
+         var keys: any[] = null as any;
+         var bits: number = 0;
          keys = name.split("-");
          if(keys[0] == "hmac")
          {

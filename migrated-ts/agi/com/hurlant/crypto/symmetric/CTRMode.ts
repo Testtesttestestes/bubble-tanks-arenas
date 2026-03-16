@@ -4,7 +4,7 @@
 export class CTRMode extends IVMode implements IMode
    {
       
-      constructor(key: ISymmetricKey, padding: IPad = null as any){
+      constructor(key: ISymmetricKey, padding: IPad = null){
          super(key,padding);
       }
       
@@ -15,10 +15,10 @@ export class CTRMode extends IVMode implements IMode
       
       private core(src: ByteArray, iv: ByteArray): void
       {
-         let X: ByteArray = null;
-         let Xenc: ByteArray = null;
-         let i: number = 0;
-         let j: number = 0;
+         var X: ByteArray = null as any;
+         var Xenc: ByteArray = null as any;
+         var i: number = 0;
+         var j: number = 0;
          X = new ByteArray();
          Xenc = new ByteArray();
          X.writeBytes(iv);
@@ -44,7 +44,7 @@ export class CTRMode extends IVMode implements IMode
       
       public decrypt(src: ByteArray): void
       {
-         let vector: ByteArray = null;
+         var vector: ByteArray = null as any;
          vector = getIV4d();
          core(src,vector);
          padding.unpad(src);
@@ -52,7 +52,7 @@ export class CTRMode extends IVMode implements IMode
       
       public encrypt(src: ByteArray): void
       {
-         let vector: ByteArray = null;
+         var vector: ByteArray = null as any;
          padding.pad(src);
          vector = getIV4e();
          core(src,vector);

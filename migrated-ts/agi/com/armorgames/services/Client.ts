@@ -6,26 +6,26 @@ export class Client{
       private readonly SERVICE_URI: string = "http://services.armorgames.com/services/amf";
       private apikey: string = null as any;
       private gamekey: string = null as any;
-      private authToken: string;
-      private displayRoot: DisplayObject;
-      private netConn: NetConnection;
-      private errorHandler: Function;
-      public clientID: string;
-      private sharedObject: SharedObject;
+      private authToken!: string;
+      private displayRoot!: DisplayObject;
+      private netConn!: NetConnection;
+      private errorHandler!: Function;
+      public clientID!: string;
+      private sharedObject!: SharedObject;
       private isAuthenticated: boolean = false;
       constructor(param1: string, param2: string, param3: DisplayObject, param4: Function){
-         let data: boolean;
-         let prop: string = null;
-         let apikey: string = param1;
-         let gamekey: string = param2;
-         let displayRoot: DisplayObject = param3;
-         let errorCallback: Function = param4;
-         super();
-         this.apikey = this.apikey;
-         this.gamekey = this.gamekey;
-         this.displayRoot = this.displayRoot;
+         var data: boolean;
+         var prop: string = null as any;
+         var apikey: string = param1;
+         var gamekey: string = param2;
+         var displayRoot: DisplayObject = param3;
+         var errorCallback: Function = param4;
+
+         this.apikey = apikey;
+         this.gamekey = gamekey;
+         this.displayRoot = displayRoot;
          this.errorHandler = errorCallback;
-         this.sharedObject = SharedObject.getLocal(this.apikey + this.gamekey);
+         this.sharedObject = SharedObject.getLocal(apikey + gamekey);
          data = false;
          for (let prop in this.sharedObject.data)
          {
@@ -59,24 +59,24 @@ export class Client{
          try
          {
             this.netConn.addHeader("Credentials",false,{
-               "userid":this.apikey,
-               "password":this.gamekey
+               "userid":apikey,
+               "password":gamekey
             });
             this.netConn.connect(this.SERVICE_URI);
          }
          catch (error: any)
          {
             DebugUtil.error("Client: Unable to connect to \'" + this.SERVICE_URI + "\'");
-            if(this.errorHandler != null)
+            if(errorHandler != null)
             {
-               this.errorHandler(new ClientError("Unable to connect to \'" + this.SERVICE_URI + "\'",ClientError.CLIENT_CONNECT_ERROR,error));
+               errorHandler(new ClientError("Unable to connect to \'" + SERVICE_URI + "\'",ClientError.CLIENT_CONNECT_ERROR,error));
             }
          }
       }
 private registerClass(param1: string, param2: any): void
       {
-         let name: string = param1;
-         let classRef: any = param2;
+         var name: string = param1;
+         var classRef: any = param2;
          try
          {
             if(getClassByAlias(name) == null)
@@ -99,11 +99,11 @@ private registerClass(param1: string, param2: any): void
             this.netConn.removeEventListener(AsyncErrorEvent.ASYNC_ERROR, this.asyncErrorHandler.bind(this));
             this.netConn.removeEventListener(IOErrorEvent.IO_ERROR, this.ioErrorHandler.bind(this));
             this.netConn.close();
-            this.netConn = null;
+            this.netConn = null as any;
          }
-         this.displayRoot = null;
-         this.errorHandler = null;
-         this.sharedObject = null;
+         this.displayRoot = null as any;
+         this.errorHandler = null as any;
+         this.sharedObject = null as any;
       }
       
       public getIsAuthenticated(): boolean
@@ -113,10 +113,10 @@ private registerClass(param1: string, param2: any): void
       
       public authenticate(param1: Function, param2: Function): void
       {
-         let bytesTotal: string = null;
-         let sameDomain: string = null;
-         let callback: Function = param1;
-         let errorCallback: Function = param2;
+         var bytesTotal: string = null as any;
+         var sameDomain: string = null as any;
+         var callback: Function = param1;
+         var errorCallback: Function = param2;
          try
          {
             this.netConn.addHeader("authenticate",true,true);
@@ -162,9 +162,9 @@ private registerClass(param1: string, param2: any): void
       
       public call(param1: string, param2: Function, ... rest): void
       {
-         let command: string = param1;
-         let targetHandler: Function = param2;
-         let args: any[] = rest;
+         var command: string = param1;
+         var targetHandler: Function = param2;
+         var args: any[] = rest;
          if(!this.isAuthenticated)
          {
             DebugUtil.error("Client not authenticated (try authenticate() first)");
@@ -190,17 +190,17 @@ private registerClass(param1: string, param2: any): void
          catch (error: any)
          {
             DebugUtil.error("Client: Call Execution Error: " + error.message);
-            if(this.errorHandler != null)
+            if(errorHandler != null)
             {
-               this.errorHandler(new ClientError("Call Error: " + error.message,ClientError.CALL_ERROR,error));
+               errorHandler(new ClientError("Call Error: " + error.message,ClientError.CALL_ERROR,error));
             }
          }
       }
       
       protected calculateSignature(param1: string, param2: any[]): string
       {
-         let _loc3_: any[] = [param1];
-         let _loc4_: number = 0;
+         var _loc3_: any[] = [param1];
+         var _loc4_: number = 0;
          while(_loc4_ < param2.length)
          {
             switch(typeof param2[_loc4_])
@@ -217,7 +217,7 @@ private registerClass(param1: string, param2: any): void
             }
             _loc4_++;
          }
-         let _loc5_: string = MD5.hex_hmac_md5(this.authToken,_loc3_.join(""));
+         var _loc5_: string = MD5.hex_hmac_md5(this.authToken,_loc3_.join(""));
          DebugUtil.info("Client: Sig: " + _loc5_ + ", pieces: " + _loc3_.join(", "));
          return _loc5_;
       }
@@ -248,7 +248,7 @@ private registerClass(param1: string, param2: any): void
       
       private netStatusHandler(param1: NetStatusEvent): void
       {
-         let _loc2_: string = "";
+         var _loc2_: string = "";
          if(Boolean(param1.info))
          {
             _loc2_ = param1.info.hasOwnProperty("code") ? String(param1.info.code) : "";
@@ -260,7 +260,7 @@ private registerClass(param1: string, param2: any): void
          }
       }
       
-      private securityErrorHandler(param1: SecurityErrorEvent): void
+      private securityErrorHandler(param1: any): void
       {
          DebugUtil.error("Client: Security Error");
          if(this.errorHandler != null)
@@ -278,7 +278,7 @@ private registerClass(param1: string, param2: any): void
          }
       }
       
-      private ioErrorHandler(param1: IOErrorEvent): void
+      private ioErrorHandler(param1: any): void
       {
          DebugUtil.error("Client: IO Error");
          if(this.errorHandler != null)

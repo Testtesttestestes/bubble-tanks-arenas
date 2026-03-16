@@ -3,22 +3,22 @@
 
 export class Caller{
       
-      private static calls: Dictionary;
-      private static controller: Sprite;
+      private static calls!: Dictionary;
+      private static controller!: Sprite;
       private static ids: number = 0;
       private static paused: boolean = false;
       private static frame: number = 0;
       constructor(){
-         super();
+
       }
       
-      public static addCall(param1: number, param2: Function, param3: any[] = null as any, param4: number = 1): void
+      public static addCall(param1: number, param2: Function, param3: any[] = null, param4: number = 1): void
       {
-         if(!this.calls)
+         if(!calls)
          {
-            this.calls = new Dictionary();
+            calls = new Dictionary();
          }
-         let _loc5_: Record<string, any> = {
+         var _loc5_: Record<string, any> = {
             "maxTime":param1,
             "elasped":0,
             "last":getTimer(),
@@ -26,45 +26,45 @@ export class Caller{
             "funcParams":param3,
             "loops":0,
             "maxLoops":param4,
-            "id":this.ids,
+            "id":ids,
             "useFrames":false
          };
-         this.calls[_loc5_] = this.ids.toString();
-         ++this.ids;
+         calls[_loc5_] = ids.toString();
+         ++ids;
          start();
       }
       
-      public static addFrameCall(param1: number, param2: Function, param3: any[] = null as any, param4: number = 1): void
+      public static addFrameCall(param1: number, param2: Function, param3: any[] = null, param4: number = 1): void
       {
-         if(!this.calls)
+         if(!calls)
          {
-            this.calls = new Dictionary();
+            calls = new Dictionary();
          }
-         let _loc5_: Record<string, any> = {
+         var _loc5_: Record<string, any> = {
             "maxTime":param1,
             "elasped":0,
-            "last":this.frame,
+            "last":frame,
             "func":param2,
             "funcParams":param3,
             "loops":0,
             "maxLoops":param4,
-            "id":this.ids,
+            "id":ids,
             "useFrames":true
          };
-         this.calls[_loc5_] = this.ids.toString();
-         ++this.ids;
+         calls[_loc5_] = ids.toString();
+         ++ids;
          start();
       }
       
       public static isCalling(param1: Function): boolean
       {
-         let _loc3_: Record<string, any> = null;
-         if(!this.calls)
+         var _loc3_: Record<string, any> = null as any;
+         if(!calls)
          {
             return false;
          }
-         let _loc2_: boolean = false;
-         for (let _loc3_ in this.calls)
+         var _loc2_: boolean = false;
+         for (let _loc3_ in calls)
          {
             if(_loc3_.func == param1)
             {
@@ -76,19 +76,19 @@ export class Caller{
       
       public static removeCall(param1: Function): void
       {
-         let _loc3_: Record<string, any> = null;
-         if(!this.calls)
+         var _loc3_: Record<string, any> = null as any;
+         if(!calls)
          {
             return;
          }
-         let _loc2_: number = 0;
-         for (let _loc3_ in this.calls)
+         var _loc2_: number = 0;
+         for (let _loc3_ in calls)
          {
             if(_loc3_.func == param1)
             {
-               this.calls[_loc3_] = null;
-               delete this.calls[_loc3_];
-               _loc3_ = null;
+               calls[_loc3_] = null as any;
+               delete calls[_loc3_];
+               _loc3_ = null as any;
             }
             _loc2_++;
          }
@@ -100,66 +100,66 @@ export class Caller{
       
       public static removeAllCalls(): void
       {
-         let _loc1_: Record<string, any> = null;
-         if(!this.calls)
+         var _loc1_: Record<string, any> = null as any;
+         if(!calls)
          {
             return;
          }
-         for (let _loc1_ in this.calls)
+         for (let _loc1_ in calls)
          {
-            this.calls[_loc1_] = null;
-            delete this.calls[_loc1_];
-            _loc1_ = null;
+            calls[_loc1_] = null as any;
+            delete calls[_loc1_];
+            _loc1_ = null as any;
          }
          this.stop();
-         this.paused = false;
+         paused = false;
       }
       
       public static pauseAllCalls(): void
       {
-         this.paused = true;
+         paused = true;
       }
       
       public static resumeAllCalls(): void
       {
-         this.paused = false;
+         paused = false;
       }
       
       private static start(): void
       {
-         if(Boolean(this.controller))
+         if(Boolean(controller))
          {
             return;
          }
-         this.controller = new Sprite();
-         this.controller.addEventListener(Event.ENTER_FRAME, update.bind(this));
+         controller = new Sprite();
+         controller.addEventListener("enterFrame", update.bind(this));
       }
       
       private static stop(): void
       {
-         if(!this.controller)
+         if(!controller)
          {
             return;
          }
-         this.controller.removeEventListener(Event.ENTER_FRAME, update.bind(this));
-         this.controller = null;
+         controller.removeEventListener("enterFrame", update.bind(this));
+         controller = null as any;
       }
       
-      private static update(param1: Event): void
+      private static update(param1: any): void
       {
-         let _loc4_: Record<string, any> = null;
-         if(this.paused)
+         var _loc4_: Record<string, any> = null as any;
+         if(paused)
          {
             return;
          }
-         ++this.frame;
-         let _loc2_: number = Math.floor(getTimer());
-         let _loc3_: number = 0;
-         for (let _loc4_ in this.calls)
+         ++frame;
+         var _loc2_: number = Math.floor(getTimer());
+         var _loc3_: number = 0;
+         for (let _loc4_ in calls)
          {
             if(Boolean(_loc4_.useFrames))
             {
-               _loc4_.elapsed = this.frame - _loc4_.last;
+               _loc4_.elapsed = frame - _loc4_.last;
             }
             else
             {
@@ -169,7 +169,7 @@ export class Caller{
             {
                if(Boolean(_loc4_.useFrames))
                {
-                  _loc4_.last = this.frame;
+                  _loc4_.last = frame;
                }
                else
                {
@@ -182,9 +182,9 @@ export class Caller{
                ++_loc4_.loops;
                if(_loc4_.loops >= _loc4_.maxLoops && _loc4_.maxLoops != 0)
                {
-                  this.calls[_loc4_] = null;
-                  delete this.calls[_loc4_];
-                  _loc4_ = null;
+                  calls[_loc4_] = null as any;
+                  delete calls[_loc4_];
+                  _loc4_ = null as any;
                }
             }
             _loc3_++;

@@ -3,11 +3,11 @@
 
 export class LoginStatus extends Sprite{
       
-      public logIn_mc: MovieClip;
-      public loggedIn_mc: MovieClip;
-      public loggingIn_mc: MovieClip;
-      public logo_mc: MovieClip;
-      private _loader: Loader;
+      public logIn_mc!: MovieClip & Record<string, any>;
+      public loggedIn_mc!: MovieClip & Record<string, any>;
+      public loggingIn_mc!: MovieClip & Record<string, any>;
+      public logo_mc!: MovieClip & Record<string, any>;
+      private _loader!: Loader;
       constructor(){
          super();
          this.logIn_mc.mouseEnabled = false;
@@ -21,23 +21,23 @@ export class LoginStatus extends Sprite{
          this.logo_mc.mouseChildren = false;
       }
       
-      private handleAddedToStage(param1: Event): void
+      private handleAddedToStage(param1: any): void
       {
-         this.addEventListener(MouseEvent.CLICK, this.handleLoginStatusClick.bind(this));
+         this.addEventListener("click", this.handleLoginStatusClick.bind(this));
       }
       
-      private handleRemovedFromStage(param1: Event): void
+      private handleRemovedFromStage(param1: any): void
       {
-         this.removeEventListener(MouseEvent.CLICK, this.handleLoginStatusClick.bind(this));
+         this.removeEventListener("click", this.handleLoginStatusClick.bind(this));
       }
       
-      private handleLoginStatusClick(param1: MouseEvent): void
+      private handleLoginStatusClick(param1: any): void
       {
       }
       
       public update(param1: AGUser, param2: boolean = false): void
       {
-         let _loc3_: ColorTransform = null;
+         var _loc3_: ColorTransform = null as any;
          if(Boolean(param1))
          {
             _loc3_ = new ColorTransform();
@@ -50,7 +50,7 @@ export class LoginStatus extends Sprite{
             if(!this._loader)
             {
                this._loader = new Loader();
-               this._loader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.handleAvatarLoaded.bind(this));
+               this._loader.contentLoaderInfo.addEventListener("complete", this.handleAvatarLoaded.bind(this));
                this._loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, this.handleAvatarFailed.bind(this));
                this._loader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.handleAvatarFailed.bind(this));
                this._loader.load(new URLRequest(param1.avatar_url));
@@ -69,23 +69,23 @@ export class LoginStatus extends Sprite{
                   this.loggedIn_mc.thumbnail_mc.removeChild(this._loader);
                }
                this._loader.unload();
-               this._loader = null;
+               this._loader = null as any;
             }
          }
       }
       
-      private handleAvatarLoaded(param1: Event): void
+      private handleAvatarLoaded(param1: any): void
       {
          if(!this._loader)
          {
             return;
          }
-         let _loc2_: number = 29 / this._loader.width;
+         var _loc2_: number = 29 / this._loader.width;
          this.loggedIn_mc.thumbnail_mc.scaleX = this.loggedIn_mc.thumbnail_mc.scaleY = _loc2_;
          this.loggedIn_mc.thumbnail_mc.addChild(this._loader);
       }
       
-      private handleAvatarFailed(param1: SecurityErrorEvent): void
+      private handleAvatarFailed(param1: any): void
       {
          DebugUtil.error("Login Status User Avatar failed to load.");
       }

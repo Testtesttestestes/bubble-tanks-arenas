@@ -3,16 +3,16 @@
 
 export class HighscoreRankVO{
       
-      public isOk: boolean;
-      public status: string;
-      public value: any;
+      public isOk!: boolean;
+      public status!: string;
+      public value!: any;
       constructor(){
-         super();
+
       }
       
       public toObject(): Record<string, any>
       {
-         let _loc1_: Record<string, any> = new Object();
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.success = this.isOk;
          if(!this.isOk)
          {

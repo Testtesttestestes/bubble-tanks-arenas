@@ -5,7 +5,7 @@ export class SHABase implements IHash
    {
       
       constructor(){
-         super();
+
       }
       
       public getHashSize(): number
@@ -25,14 +25,14 @@ export class SHABase implements IHash
       
       public hash(src: ByteArray): ByteArray
       {
-         let savedLength: number = 0;
-         let savedEndian: string = null;
-         let len: number = 0;
-         let a: any[] = null;
-         let i: number = 0;
-         let h: any[] = null;
-         let out: ByteArray = null;
-         let words: number = 0;
+         var savedLength: number = 0;
+         var savedEndian: string = null as any;
+         var len: number = 0;
+         var a: any[] = null as any;
+         var i: number = 0;
+         var h: any[] = null as any;
+         var out: ByteArray = null as any;
+         var words: number = 0;
          savedLength = src.length;
          savedEndian = src.endian;
          src.endian = Endian.BIG_ENDIAN;

@@ -4,10 +4,10 @@
 export class ClassicReduction implements IReduction
    {
       
-      private m: BigInteger;
+      private m!: BigInteger;
       constructor(m: BigInteger){
-         super();
-         this.m = this.m;
+
+         this.m = m;
       }
       
       public revert(x: BigInteger): BigInteger
@@ -17,14 +17,14 @@ export class ClassicReduction implements IReduction
       
       public reduce(x: BigInteger): void
       {
-         x.divRemTo(this.m,null,x);
+         x.divRemTo(m,null,x);
       }
       
       public convert(x: BigInteger): BigInteger
       {
-         if(x.s < 0 || x.compareTo(this.m) >= 0)
+         if(x.s < 0 || x.compareTo(m) >= 0)
          {
-            return x.mod(this.m);
+            return x.mod(m);
          }
          return x;
       }

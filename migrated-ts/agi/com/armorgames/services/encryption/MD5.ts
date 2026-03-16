@@ -10,7 +10,7 @@ export class MD5{
       public static hexcase: number = 0;
       public static b64pad: string = "";
       constructor(){
-         super();
+
       }
       
       public static encrypt(param1: string): string
@@ -60,30 +60,30 @@ export class MD5{
       
       public static rstr_hmac_md5(param1: string, param2: string): string
       {
-         let _loc3_: any[] = rstr2binl(param1);
+         var _loc3_: any[] = rstr2binl(param1);
          if(_loc3_.length > 16)
          {
             _loc3_ = binl_md5(_loc3_,param1.length * 8);
          }
-         let _loc4_: any[] = new Array(16);
-         let _loc5_: any[] = new Array(16);
-         let _loc6_: number = 0;
+         var _loc4_: any[] = new (16 as unknown as any[]);
+         var _loc5_: any[] = new (16 as unknown as any[]);
+         var _loc6_: number = 0;
          while(_loc6_ < 16)
          {
             _loc4_[_loc6_] = _loc3_[_loc6_] ^ 0x36363636;
             _loc5_[_loc6_] = _loc3_[_loc6_] ^ 0x5C5C5C5C;
             _loc6_++;
          }
-         let _loc7_: any[] = binl_md5(_loc4_.concat(rstr2binl(param2)),512 + param2.length * 8);
+         var _loc7_: any[] = binl_md5(_loc4_.concat(rstr2binl(param2)),512 + param2.length * 8);
          return binl2rstr(binl_md5(_loc5_.concat(_loc7_),512 + 128));
       }
       
       public static rstr2hex(param1: string): string
       {
-         let _loc4_: number = NaN;
-         let _loc2_: string = Boolean(this.hexcase) ? "0123456789ABCDEF" : "0123456789abcdef";
-         let _loc3_: string = "";
-         let _loc5_: number = 0;
+         var _loc4_: number = NaN;
+         var _loc2_: string = Boolean(hexcase) ? "0123456789ABCDEF" : "0123456789abcdef";
+         var _loc3_: string = "";
+         var _loc5_: number = 0;
          while(_loc5_ < param1.length)
          {
             _loc4_ = param1.charCodeAt(_loc5_);
@@ -95,12 +95,12 @@ export class MD5{
       
       public static rstr2b64(param1: string): string
       {
-         let _loc6_: number = NaN;
-         let _loc7_: number = NaN;
-         let _loc2_: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-         let _loc3_: string = "";
-         let _loc4_: number = param1.length;
-         let _loc5_: number = 0;
+         var _loc6_: number = NaN;
+         var _loc7_: number = NaN;
+         var _loc2_: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+         var _loc3_: string = "";
+         var _loc4_: number = param1.length;
+         var _loc5_: number = 0;
          while(_loc5_ < _loc4_)
          {
             _loc6_ = param1.charCodeAt(_loc5_) << 16 | (_loc5_ + 1 < _loc4_ ? param1.charCodeAt(_loc5_ + 1) << 8 : 0) | (_loc5_ + 2 < _loc4_ ? param1.charCodeAt(_loc5_ + 2) : 0);
@@ -109,7 +109,7 @@ export class MD5{
             {
                if(_loc5_ * 8 + _loc7_ * 6 > param1.length * 8)
                {
-                  _loc3_ += this.b64pad;
+                  _loc3_ += b64pad;
                }
                else
                {
@@ -124,13 +124,13 @@ export class MD5{
       
       public static rstr2any(param1: string, param2: string): string
       {
-         let _loc5_: number = NaN;
-         let _loc6_: number = NaN;
-         let _loc7_: number = NaN;
-         let _loc8_: any[] = null;
-         let _loc3_: number = param2.length;
-         let _loc4_: any[] = [];
-         let _loc9_: any[] = new Array(param1.length / 2);
+         var _loc5_: number = NaN;
+         var _loc6_: number = NaN;
+         var _loc7_: number = NaN;
+         var _loc8_: any[] = null as any;
+         var _loc3_: number = param2.length;
+         var _loc4_: any[] = [];
+         var _loc9_: any[] = new (param1.length / 2 as unknown as any[]);
          _loc5_ = 0;
          while(_loc5_ < _loc9_.length)
          {
@@ -156,7 +156,7 @@ export class MD5{
             _loc4_[_loc4_.length] = _loc7_;
             _loc9_ = _loc8_;
          }
-         let _loc10_: string = "";
+         var _loc10_: string = "";
          _loc5_ = _loc4_.length - 1;
          while(_loc5_ >= 0)
          {
@@ -168,10 +168,10 @@ export class MD5{
       
       public static str2rstr_utf8(param1: string): string
       {
-         let _loc4_: number = NaN;
-         let _loc5_: number = NaN;
-         let _loc2_: string = "";
-         let _loc3_: number = -1;
+         var _loc4_: number = NaN;
+         var _loc5_: number = NaN;
+         var _loc2_: string = "";
+         var _loc3_: number = -1;
          while(++_loc3_ < param1.length)
          {
             _loc4_ = param1.charCodeAt(_loc3_);
@@ -203,8 +203,8 @@ export class MD5{
       
       public static str2rstr_utf16le(param1: string): string
       {
-         let _loc2_: string = "";
-         let _loc3_: number = 0;
+         var _loc2_: string = "";
+         var _loc3_: number = 0;
          while(_loc3_ < param1.length)
          {
             _loc2_ += String.fromCharCode(param1.charCodeAt(_loc3_) & 0xFF,param1.charCodeAt(_loc3_) >>> 8 & 0xFF);
@@ -215,8 +215,8 @@ export class MD5{
       
       public static str2rstr_utf16be(param1: string): string
       {
-         let _loc2_: string = "";
-         let _loc3_: number = 0;
+         var _loc2_: string = "";
+         var _loc3_: number = 0;
          while(_loc3_ < param1.length)
          {
             _loc2_ += String.fromCharCode(param1.charCodeAt(_loc3_) >>> 8 & 0xFF,param1.charCodeAt(_loc3_) & 0xFF);
@@ -227,14 +227,14 @@ export class MD5{
       
       public static rstr2binl(param1: string): any[]
       {
-         let _loc2_: any[] = new Array(param1.length >> 2);
-         let _loc3_: number = 0;
+         var _loc2_: any[] = new (param1.length >> 2 as unknown as any[]);
+         var _loc3_: number = 0;
          while(_loc3_ < _loc2_.length)
          {
             _loc2_[_loc3_] = 0;
             _loc3_++;
          }
-         let _loc4_: number = 0;
+         var _loc4_: number = 0;
          while(_loc4_ < param1.length * 8)
          {
             _loc2_[_loc4_ >> 5] |= (param1.charCodeAt(_loc4_ / 8) & 0xFF) << _loc4_ % 32;
@@ -245,8 +245,8 @@ export class MD5{
       
       public static binl2rstr(param1: any[]): string
       {
-         let _loc2_: string = "";
-         let _loc3_: number = 0;
+         var _loc2_: string = "";
+         var _loc3_: number = 0;
          while(_loc3_ < param1.length * 32)
          {
             _loc2_ += String.fromCharCode(param1[_loc3_ >> 5] >>> _loc3_ % 32 & 0xFF);
@@ -257,17 +257,17 @@ export class MD5{
       
       public static binl_md5(param1: any[], param2: number): any[]
       {
-         let _loc8_: number = NaN;
-         let _loc9_: number = NaN;
-         let _loc10_: number = NaN;
-         let _loc11_: number = NaN;
+         var _loc8_: number = NaN;
+         var _loc9_: number = NaN;
+         var _loc10_: number = NaN;
+         var _loc11_: number = NaN;
          param1[param2 >> 5] |= 128 << param2 % 32;
          param1[(param2 + 64 >>> 9 << 4) + 14] = param2;
-         let _loc3_: number = 1732584193;
-         let _loc4_: number = -271733879;
-         let _loc5_: number = -1732584194;
-         let _loc6_: number = 271733878;
-         let _loc7_: number = 0;
+         var _loc3_: number = 1732584193;
+         var _loc4_: number = -271733879;
+         var _loc5_: number = -1732584194;
+         var _loc6_: number = 271733878;
+         var _loc7_: number = 0;
          while(_loc7_ < param1.length)
          {
             _loc8_ = _loc3_;
@@ -374,8 +374,8 @@ export class MD5{
       
       public static safe_add(param1: number, param2: number): number
       {
-         let _loc3_: number = (param1 & 0xFFFF) + (param2 & 0xFFFF);
-         let _loc4_: number = (param1 >> 16) + (param2 >> 16) + (_loc3_ >> 16);
+         var _loc3_: number = (param1 & 0xFFFF) + (param2 & 0xFFFF);
+         var _loc4_: number = (param1 >> 16) + (param2 >> 16) + (_loc3_ >> 16);
          return _loc4_ << 16 | _loc3_ & 0xFFFF;
       }
       

@@ -6,6 +6,6 @@ export class BitString{
       public len: number = 0;
       public val: number = 0;
       constructor(){
-         super();
+
       }
    }

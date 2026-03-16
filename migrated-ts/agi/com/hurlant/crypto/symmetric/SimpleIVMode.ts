@@ -4,20 +4,20 @@
 export class SimpleIVMode implements IMode, ICipher
    {
       
-      protected mode: IVMode;
-      protected cipher: ICipher;
+      protected mode!: IVMode;
+      protected cipher!: ICipher;
       constructor(mode: IVMode){
-         super();
-         this.mode = this.mode;
-         this.cipher = this.mode  as unknown as ICipher;
+
+         this.mode = mode;
+         cipher = mode  as unknown as ICipher;
       }
       
       public encrypt(src: ByteArray): void
       {
-         let tmp: ByteArray = null;
-         this.cipher.encrypt(src);
+         var tmp: ByteArray = null as any;
+         cipher.encrypt(src);
          tmp = new ByteArray();
-         tmp.writeBytes(this.mode.IV);
+         tmp.writeBytes(mode.IV);
          tmp.writeBytes(src);
          src.position = 0;
          src.writeBytes(tmp);
@@ -25,32 +25,32 @@ export class SimpleIVMode implements IMode, ICipher
       
       public decrypt(src: ByteArray): void
       {
-         let tmp: ByteArray = null;
+         var tmp: ByteArray = null as any;
          tmp = new ByteArray();
          tmp.writeBytes(src,0,getBlockSize());
-         this.mode.IV = tmp;
+         mode.IV = tmp;
          tmp = new ByteArray();
          tmp.writeBytes(src,getBlockSize());
-         this.cipher.decrypt(tmp);
+         cipher.decrypt(tmp);
          src.length = 0;
          src.writeBytes(tmp);
       }
       
       public dispose(): void
       {
-         this.mode.dispose();
-         this.mode = null;
-         this.cipher = null;
+         mode.dispose();
+         mode = null as any;
+         cipher = null as any;
          Memory.gc();
       }
       
       public toString(): string
       {
-         return "simple-" + this.cipher.toString();
+         return "simple-" + cipher.toString();
       }
       
       public getBlockSize(): number
       {
-         return this.mode.getBlockSize();
+         return mode.getBlockSize();
       }
    }

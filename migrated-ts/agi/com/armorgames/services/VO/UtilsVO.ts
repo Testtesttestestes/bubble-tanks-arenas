@@ -3,16 +3,16 @@
 
 export class UtilsVO{
       
-      public isOk: boolean;
-      public status: string;
-      public value: Record<string, any>;
+      public isOk!: boolean;
+      public status!: string;
+      public value!: Record<string, any>;
       constructor(){
-         super();
+
       }
       
       public toContainsProfanityObject(): Record<string, any>
       {
-         let _loc1_: Record<string, any> = new Object();
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.success = this.isOk;
          if(!this.isOk)
          {
@@ -24,7 +24,7 @@ export class UtilsVO{
       
       public toFilterProfanityObject(): Record<string, any>
       {
-         let _loc1_: Record<string, any> = new Object();
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.success = this.isOk;
          if(!this.isOk)
          {

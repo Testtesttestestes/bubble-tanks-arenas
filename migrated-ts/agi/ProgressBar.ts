@@ -3,10 +3,10 @@
 
 export class ProgressBar extends MovieClip{
       
-      public back_mc: MovieClip;
-      public close_btn: SimpleButton;
-      public label_txt: TextField;
-      public logo_mc: MovieClip;
+      public back_mc!: MovieClip & Record<string, any>;
+      public close_btn!: SimpleButton;
+      public label_txt!: TextField;
+      public logo_mc!: MovieClip & Record<string, any>;
       constructor(){
          super();
       }

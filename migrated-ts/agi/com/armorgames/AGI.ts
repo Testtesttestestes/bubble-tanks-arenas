@@ -8,44 +8,44 @@ export class AGI extends Sprite{
       private readonly MAX_SHARES: number = 32;
       private readonly DEFAULT_SCORE_TYPE: string = "[empty]";
       private agui_url: string = "";
-      private client: Client;
+      private client!: Client;
       private clientDevKey: string = "";
       private clientGameKey: string = "";
       private clientGameName: string = "";
       private clientGameURL: string = "";
       private clientGameURLShort: string = "";
-      private agUser: AGUser;
+      private agUser!: AGUser;
       private ready: boolean = false;
       private connected: boolean = false;
       private connecting: boolean = false;
       private connectionAttempts: number = 0;
-      private clientErrorCallback: Function;
-      private globalCallback: Function;
-      private loginStatusCallback: Function;
-      private debugOutputCallback: Function;
-      private agui: any;
-      private aguiLoader: Loader;
-      private aguiParams: Record<string, any>;
+      private clientErrorCallback!: Function;
+      private globalCallback!: Function;
+      private loginStatusCallback!: Function;
+      private debugOutputCallback!: Function;
+      private agui!: any;
+      private aguiLoader!: Loader;
+      private aguiParams!: Record<string, any>;
       private aguiState: string = "";
-      private aguiStateParams: Record<string, any>;
-      private aguiInitialized: boolean;
-      private scoreTypes: any[];
-      private cachedGameShare: Record<string, any>;
-      private loginStatus: LoginStatus;
-      private avatarLoader: Loader;
-      private progress: MovieClip;
-      private error: MovieClip;
-      private darkBG: MovieClip;
-      private closedProgressBar: boolean;
-      private displayRoot: DisplayObjectContainer;
-      private parentFrameRate: number;
-      private callQueue: any[];
-      private callRetryCounter: number;
+      private aguiStateParams!: Record<string, any>;
+      private aguiInitialized!: boolean;
+      private scoreTypes!: any[];
+      private cachedGameShare!: Record<string, any>;
+      private loginStatus!: LoginStatus;
+      private avatarLoader!: Loader;
+      private progress!: MovieClip & Record<string, any>;
+      private error!: MovieClip & Record<string, any>;
+      private darkBG!: MovieClip & Record<string, any>;
+      private closedProgressBar!: boolean;
+      private displayRoot!: DisplayObjectContainer;
+      private parentFrameRate!: number;
+      private callQueue!: any[];
+      private callRetryCounter!: number;
       constructor(){
     super(); // AUTO-INJECTED
-         let _loc1_: string = null;
-         let _loc2_: boolean = false;
-         let _loc3_: TextField = null;
+         var _loc1_: string = null as any;
+         var _loc2_: boolean = false;
+         var _loc3_: TextField = null as any;
          this.aguiParams = new Object();
          super();
          Security.allowDomain("*");
@@ -61,7 +61,7 @@ export class AGI extends Sprite{
             super.addChild(_loc3_);
          }
       }
-public init(param1: string, param2: string, param3: Function = null as any, param4: boolean = false): void
+public init(param1: string, param2: string, param3: Function = null, param4: boolean = false): void
       {
          if(this.ready)
          {
@@ -75,12 +75,12 @@ public init(param1: string, param2: string, param3: Function = null as any, para
          this.callQueue = new Array();
          this.displayRoot = stage;
          this.agui_url = "";
-         let _loc5_: string = unescape(this.loaderInfo.url);
-         let _loc6_: boolean = _loc5_.lastIndexOf("_debug.swf") != -1;
-         let _loc7_: boolean = Boolean(this.getDomain(_loc5_) != "");
-         let _loc8_: any[] = _loc7_ ? _loc5_.split("?") : new Array();
-         let _loc9_: any[] = _loc5_.split("/");
-         let _loc10_: number = 0;
+         var _loc5_: string = unescape(this.loaderInfo.url);
+         var _loc6_: boolean = _loc5_.lastIndexOf("_debug.swf") != -1;
+         var _loc7_: boolean = Boolean(this.getDomain(_loc5_) != "");
+         var _loc8_: any[] = _loc7_ ? _loc5_.split("?") : new Array();
+         var _loc9_: any[] = _loc5_.split("/");
+         var _loc10_: number = 0;
          while(_loc10_ < _loc9_.length - 1)
          {
             this.agui_url += _loc9_[_loc10_] + "/";
@@ -124,7 +124,7 @@ public init(param1: string, param2: string, param3: Function = null as any, para
          this.aguiParams = new Object();
          this.aguiInitialized = false;
          this.connectionAttempts = 0;
-         let _loc11_: string = this.displayRoot.root.loaderInfo.parameters["auth_token"];
+         var _loc11_: string = this.displayRoot.root.loaderInfo.parameters["auth_token"];
          this.loaderInfo.addEventListener(Event.UNLOAD, this.handleUnload.bind(this));
          this.ready = true;
          if(Boolean(_loc11_) && _loc11_ != "")
@@ -133,48 +133,48 @@ public init(param1: string, param2: string, param3: Function = null as any, para
          }
       }
       
-      private handleUnload(param1: Event): void
+      private handleUnload(param1: any): void
       {
          this.clearBackground();
          this.destroyAGUI();
-         this.agui = null;
+         this.agui = null as any;
          if(Boolean(this.aguiLoader))
          {
-            this.aguiLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, this.handleAGUILoaded.bind(this));
+            this.aguiLoader.contentLoaderInfo.removeEventListener("complete", this.handleAGUILoaded.bind(this));
             this.aguiLoader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, this.handleAGUILoadFailed.bind(this));
             this.aguiLoader.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, this.handleAGUILoadFailed.bind(this));
             this.aguiLoader.unload();
-            this.aguiLoader = null;
+            this.aguiLoader = null as any;
          }
-         this.clientErrorCallback = null;
-         this.globalCallback = null;
-         this.loginStatusCallback = null;
-         this.debugOutputCallback = null;
+         this.clientErrorCallback = null as any;
+         this.globalCallback = null as any;
+         this.loginStatusCallback = null as any;
+         this.debugOutputCallback = null as any;
          this.clearQueue();
-         this.callQueue = null;
-         this.displayRoot = null;
+         this.callQueue = null as any;
+         this.displayRoot = null as any;
          if(Boolean(this.client))
          {
             this.client.destroy();
-            this.client = null;
+            this.client = null as any;
          }
-         this.agUser = null;
+         this.agUser = null as any;
          this.restoreFrameRate();
          this.ready = false;
       }
-public submitScore(param1: string, param2: number, param3: string = null as any, param4: Function = null as any, param5: boolean = true): void
+public submitScore(param1: string, param2: number, param3: string = null, param4: Function = null, param5: boolean = true): void
       {
          this.addCallToQueue(this.iSubmitScore,[param1,param2,param3,param4,param5]);
       }
-public retrieveScores(param1: Function, param2: string = null as any, param3: string = "alltime", param4: boolean = true): void
+public retrieveScores(param1: Function, param2: string = null, param3: string = "alltime", param4: boolean = true): void
       {
          this.addCallToQueue(this.iRetrievePublicScores,[param1,param2,param3,param4,1,false]);
       }
-public retrievePublicScores(param1: Function, param2: string = null as any, param3: string = "alltime", param4: boolean = true, param5: number = 1, param6: boolean = false): void
+public retrievePublicScores(param1: Function, param2: string = null, param3: string = "alltime", param4: boolean = true, param5: number = 1, param6: boolean = false): void
       {
          this.addCallToQueue(this.iRetrievePublicScores,[param1,param2,param3,param4,param5,param6]);
       }
-public retrieveUserScores(param1: Function, param2: string = null as any, param3: boolean = true, param4: number = 1): void
+public retrieveUserScores(param1: Function, param2: string = null, param3: boolean = true, param4: number = 1): void
       {
          if(!this.agUser)
          {
@@ -189,7 +189,7 @@ public retrieveUserScores(param1: Function, param2: string = null as any, param3
          }
          this.addCallToQueue(this.iRetrieveUserScores,[param1,param2,param3,param4]);
       }
-public retrieveFriendScores(param1: Function, param2: string = null as any, param3: boolean = true, param4: number = 1): void
+public retrieveFriendScores(param1: Function, param2: string = null, param3: boolean = true, param4: number = 1): void
       {
          if(!this.agUser)
          {
@@ -204,11 +204,11 @@ public retrieveFriendScores(param1: Function, param2: string = null as any, para
          }
          this.addCallToQueue(this.iRetrieveFriendScores,[param1,param2,param3,param4]);
       }
-public shareGameData(param1: string, param2: string, param3: Function = null as any, param4: any = null): void
+public shareGameData(param1: string, param2: string, param3: Function = null, param4: any = null): void
       {
          this.addCallToQueue(this.iSubmitGameShare,[param1,param2,param3,param4]);
       }
-public submitGameShare(param1: string, param2: string, param3: Function = null as any, param4: any = null): void
+public submitGameShare(param1: string, param2: string, param3: Function = null, param4: any = null): void
       {
          this.addCallToQueue(this.iSubmitGameShare,[param1,param2,param3,param4]);
       }
@@ -218,8 +218,8 @@ public retrieveGameData(param1: Function): void
       }
 public isComingFromShareURL(param1: Function): void
       {
-         let _loc3_: string = null;
-         let _loc4_: string = null;
+         var _loc3_: string = null as any;
+         var _loc4_: string = null as any;
          if(!this.displayRoot)
          {
             _loc3_ = "AGI Error: AGI requires access to the stage property in order retrieve game data. Please add the AGI  as unknown as a child to your document class before calling isComingFromShareURL().";
@@ -233,7 +233,7 @@ public isComingFromShareURL(param1: Function): void
             }
             return;
          }
-         let _loc2_: string = this.displayRoot.root.loaderInfo.parameters["ag_data_id"];
+         var _loc2_: string = this.displayRoot.root.loaderInfo.parameters["ag_data_id"];
          if(!_loc2_ || _loc2_ == "")
          {
             _loc4_ = "Game instanceof not being played from a short url, so there instanceof no game data to retrieve.";
@@ -316,9 +316,9 @@ public incGameShareView(param1: string): void
       {
          this.addCallToQueue(this.iIncGameShareView,[param1]);
       }
-public submitPublicData(param1: string, param2: any, param3: Function = null as any): void
+public submitPublicData(param1: string, param2: any, param3: Function = null): void
       {
-         let _loc4_: string = this.convertDataToString(param2);
+         var _loc4_: string = this.convertDataToString(param2);
          if(_loc4_ == null)
          {
             if(param3 != null)
@@ -332,17 +332,17 @@ public submitPublicData(param1: string, param2: any, param3: Function = null as 
          }
          this.addCallToQueue(this.iSubmitGameSave,["game",param1,_loc4_,param3]);
       }
-public submitPublicDataObject(param1: Record<string, any>, param2: Function = null as any): void
+public submitPublicDataObject(param1: Record<string, any>, param2: Function = null): void
       {
-         let _loc4_: string = null;
-         let _loc3_: Record<string, any> = new Object();
+         var _loc4_: string = null as any;
+         var _loc3_: Record<string, any> = new Object();
          for (let _loc4_ in param1)
          {
             _loc3_[_loc4_] = this.convertDataToString(param1[_loc4_]);
          }
          this.addCallToQueue(this.iSubmitGameSaveObject,["game",_loc3_,param2]);
       }
-public retrievePublicData(param1: Function, param2: string = null as any): void
+public retrievePublicData(param1: Function, param2: string = null): void
       {
          if(param2 != null && param2 != "")
          {
@@ -353,7 +353,7 @@ public retrievePublicData(param1: Function, param2: string = null as any): void
             this.addCallToQueue(this.iRetrieveGameSaveObject,["game",param1]);
          }
       }
-public deletePublicData(param1: string = null as any, param2: Function = null as any): void
+public deletePublicData(param1: string = null, param2: Function = null): void
       {
          if(param1 != null && param1 != "")
          {
@@ -364,15 +364,15 @@ public deletePublicData(param1: string = null as any, param2: Function = null as
             this.addCallToQueue(this.iDeleteAllGameSaves,["game",param2]);
          }
       }
-public incPublicData(param1: string, param2: number = 1, param3: Function = null as any): void
+public incPublicData(param1: string, param2: number = 1, param3: Function = null): void
       {
          this.addCallToQueue(this.iIncGameSave,["game",param1,param2,param3]);
       }
-public decPublicData(param1: string, param2: number = 1, param3: Function = null as any): void
+public decPublicData(param1: string, param2: number = 1, param3: Function = null): void
       {
          this.addCallToQueue(this.iDecGameSave,["game",param1,param2,param3]);
       }
-public submitUserData(param1: string, param2: any, param3: Function = null as any): void
+public submitUserData(param1: string, param2: any, param3: Function = null): void
       {
          if(!this.agUser)
          {
@@ -385,7 +385,7 @@ public submitUserData(param1: string, param2: any, param3: Function = null as an
             }
             return;
          }
-         let _loc4_: string = this.convertDataToString(param2);
+         var _loc4_: string = this.convertDataToString(param2);
          if(_loc4_ == null)
          {
             if(param3 != null)
@@ -399,9 +399,9 @@ public submitUserData(param1: string, param2: any, param3: Function = null as an
          }
          this.addCallToQueue(this.iSubmitGameSave,["user-" + this.agUser.user_id,param1,_loc4_,param3]);
       }
-public submitUserDataObject(param1: Record<string, any>, param2: Function = null as any): void
+public submitUserDataObject(param1: Record<string, any>, param2: Function = null): void
       {
-         let _loc4_: string = null;
+         var _loc4_: string = null as any;
          if(!this.agUser)
          {
             if(param2 != null)
@@ -413,14 +413,14 @@ public submitUserDataObject(param1: Record<string, any>, param2: Function = null
             }
             return;
          }
-         let _loc3_: Record<string, any> = new Object();
+         var _loc3_: Record<string, any> = new Object();
          for (let _loc4_ in param1)
          {
             _loc3_[_loc4_] = this.convertDataToString(param1[_loc4_]);
          }
          this.addCallToQueue(this.iSubmitGameSaveObject,["user-" + this.agUser.user_id,_loc3_,param2]);
       }
-public retrieveUserData(param1: Function, param2: string = null as any): void
+public retrieveUserData(param1: Function, param2: string = null): void
       {
          if(!this.agUser)
          {
@@ -442,7 +442,7 @@ public retrieveUserData(param1: Function, param2: string = null as any): void
             this.addCallToQueue(this.iRetrieveGameSaveObject,["user-" + this.agUser.user_id,param1]);
          }
       }
-public deleteUserData(param1: string = null as any, param2: Function = null as any): void
+public deleteUserData(param1: string = null, param2: Function = null): void
       {
          if(!this.agUser)
          {
@@ -464,7 +464,7 @@ public deleteUserData(param1: string = null as any, param2: Function = null as a
             this.addCallToQueue(this.iDeleteAllGameSaves,["user-" + this.agUser.user_id,param2]);
          }
       }
-public incUserData(param1: string, param2: number = 1, param3: Function = null as any): void
+public incUserData(param1: string, param2: number = 1, param3: Function = null): void
       {
          if(!this.agUser)
          {
@@ -479,7 +479,7 @@ public incUserData(param1: string, param2: number = 1, param3: Function = null a
          }
          this.addCallToQueue(this.iIncGameSave,["user-" + this.agUser.user_id,param1,param2,param3]);
       }
-public decUserData(param1: string, param2: number = 1, param3: Function = null as any): void
+public decUserData(param1: string, param2: number = 1, param3: Function = null): void
       {
          if(!this.agUser)
          {
@@ -524,7 +524,7 @@ public closeAGUI(): void
          this.clearBackground();
          this.addCallToQueue(this.killAGUI);
       }
-public showLogin(param1: Function = null as any, param2: any = null): void
+public showLogin(param1: Function = null, param2: any = null): void
       {
          this.removeAGUIFromScreen();
          if(Boolean(param2) && param2 instanceof DisplayObjectContainer)
@@ -532,10 +532,10 @@ public showLogin(param1: Function = null as any, param2: any = null): void
             param2.addChild(this);
          }
          this.showProgress();
-         let _loc3_: Record<string, any> = {"onLoginLogout":param1};
+         var _loc3_: Record<string, any> = {"onLoginLogout":param1};
          this.addCallToQueue(this.loadAGUI,[AGUIState.LOGIN,_loc3_]);
       }
-public showUserProfile(param1: Function = null as any, param2: any = null): void
+public showUserProfile(param1: Function = null, param2: any = null): void
       {
          this.removeAGUIFromScreen();
          if(Boolean(param2) && param2 instanceof DisplayObjectContainer)
@@ -543,10 +543,10 @@ public showUserProfile(param1: Function = null as any, param2: any = null): void
             param2.addChild(this);
          }
          this.showProgress();
-         let _loc3_: Record<string, any> = {"onLoginLogout":param1};
+         var _loc3_: Record<string, any> = {"onLoginLogout":param1};
          this.addCallToQueue(this.loadAGUI,[AGUIState.USER_PROFILE,_loc3_]);
       }
-public showLoginStatus(param1: number = 0, param2: number = 0, param3: Function = null as any, param4: any = null): void
+public showLoginStatus(param1: number = 0, param2: number = 0, param3: Function = null, param4: any = null): void
       {
          if(Boolean(param4) && param4 instanceof DisplayObjectContainer)
          {
@@ -573,7 +573,7 @@ public hideLoginStatus(): void
             super.removeChild(this.loginStatus);
          }
       }
-public showScoreboardSubmit(param1: number, param2: string = "", param3: string = null as any, param4: any[] = null as any, param5: any = null): void
+public showScoreboardSubmit(param1: number, param2: string = "", param3: string = null, param4: any[] = null, param5: any = null): void
       {
          this.removeAGUIFromScreen();
          if(Boolean(param5) && param5 instanceof DisplayObjectContainer)
@@ -585,15 +585,15 @@ public showScoreboardSubmit(param1: number, param2: string = "", param3: string 
          {
             this.addCallToQueue(this.iRetrieveScoreTypes);
          }
-         let _loc6_: Record<string, any> = {
+         var _loc6_: Record<string, any> = {
             "score":param1,
             "name":param2,
             "scoreType":param3,
-            "this.scoreTypes":param4
+            "scoreTypes":param4
          };
          this.addCallToQueue(this.loadAGUI,[AGUIState.SCORE_SUBMIT,_loc6_]);
       }
-public showScoreboardList(param1: any[] = null as any, param2: string = null as any, param3: any = null): void
+public showScoreboardList(param1: any[] = null, param2: string = null, param3: any = null): void
       {
          this.removeAGUIFromScreen();
          if(Boolean(param3) && param3 instanceof DisplayObjectContainer)
@@ -605,8 +605,8 @@ public showScoreboardList(param1: any[] = null as any, param2: string = null as 
          {
             this.addCallToQueue(this.iRetrieveScoreTypes);
          }
-         let _loc4_: Record<string, any> = {
-            "this.scoreTypes":param1,
+         var _loc4_: Record<string, any> = {
+            "scoreTypes":param1,
             "defaultScoreType":param2
          };
          this.addCallToQueue(this.loadAGUI,[AGUIState.SCORE_LIST,_loc4_]);
@@ -620,7 +620,7 @@ public showScoreboard(param1: Record<string, any> = null, param2: Record<string,
          }
          this.showProgress();
          this.initAGUI(param1);
-         let _loc4_: Record<string, any> = {"this.scoreTypes":null};
+         var _loc4_: Record<string, any> = {"scoreTypes":null};
          if(Boolean(param1))
          {
             if(Boolean(param1.scoreTypes))
@@ -648,9 +648,9 @@ public showScoreboard(param1: Record<string, any> = null, param2: Record<string,
             this.addCallToQueue(this.loadAGUI,[AGUIState.SCORE_LIST,_loc4_]);
          }
       }
-public showGameShareSubmit(param1: string, param2: string = "", param3: any = null, param4: Function = null as any, param5: any = null): void
+public showGameShareSubmit(param1: string, param2: string = "", param3: any = null, param4: Function = null, param5: any = null): void
       {
-         let _loc6_: Bitmap = null;
+         var _loc6_: Bitmap = null as any;
          this.removeAGUIFromScreen();
          if(Boolean(param5) && param5 instanceof DisplayObjectContainer)
          {
@@ -661,7 +661,7 @@ public showGameShareSubmit(param1: string, param2: string = "", param3: any = nu
          {
             _loc6_ = this.getBitmapFromDisplayObject(param3,1000);
          }
-         let _loc7_: Record<string, any> = {
+         var _loc7_: Record<string, any> = {
             "data":param1,
             "shareName":param2,
             "thumbnail":_loc6_,
@@ -669,7 +669,7 @@ public showGameShareSubmit(param1: string, param2: string = "", param3: any = nu
          };
          this.addCallToQueue(this.loadAGUI,[AGUIState.SHARE_SUBMIT,_loc7_]);
       }
-public showGameShareList(param1: Function = null as any, param2: any = null): void
+public showGameShareList(param1: Function = null, param2: any = null): void
       {
          this.removeAGUIFromScreen();
          if(Boolean(param2) && param2 instanceof DisplayObjectContainer)
@@ -677,10 +677,10 @@ public showGameShareList(param1: Function = null as any, param2: any = null): vo
             param2.addChild(this);
          }
          this.showProgress();
-         let _loc3_: Record<string, any> = {"onShareClicked":param1};
+         var _loc3_: Record<string, any> = {"onShareClicked":param1};
          this.addCallToQueue(this.loadAGUI,[AGUIState.SHARE_LIST,_loc3_]);
       }
-public showGameShareNavi(param1: number = Infinity, param2: number = Infinity, param3: Function = null as any, param4: any = null): void
+public showGameShareNavi(param1: number = Infinity, param2: number = Infinity, param3: Function = null, param4: any = null): void
       {
          this.removeAGUIFromScreen();
          if(Boolean(param4) && param4 instanceof DisplayObjectContainer)
@@ -700,7 +700,7 @@ public showGameShareNavi(param1: number = Infinity, param2: number = Infinity, p
          {
             this.aguiParams.naviY = param2;
          }
-         let _loc5_: Record<string, any> = {"onShareClicked":param3};
+         var _loc5_: Record<string, any> = {"onShareClicked":param3};
          this.addCallToQueue(this.loadAGUI,[AGUIState.SHARE_NAVI,_loc5_]);
       }
 public isConnected(): boolean
@@ -733,8 +733,8 @@ public getUserName(): string
       }
 public getVersion(): string
       {
-         let _loc1_: string = this.loaderInfo.url;
-         let _loc2_: boolean = _loc1_.lastIndexOf("_debug.swf") != -1;
+         var _loc1_: string = this.loaderInfo.url;
+         var _loc2_: boolean = _loc1_.lastIndexOf("_debug.swf") != -1;
          return "AGI " + this.VERSION + (_loc2_ ? " debug" : "");
       }
 public getAGUIVersion(): string
@@ -747,11 +747,11 @@ public getAGUIVersion(): string
       }
 public __login(param1: string, param2: string, param3: Function): void
       {
-         let _loc4_: ByteArray = new ByteArray();
+         var _loc4_: ByteArray = new ByteArray();
          _loc4_.writeUTFBytes("1ac240b575462c27da90fed5355917a1");
-         let _loc5_: ByteArray = new ByteArray();
+         var _loc5_: ByteArray = new ByteArray();
          _loc5_.writeUTFBytes(param2);
-         let _loc6_: ICipher = Crypto.getCipher("rc4",_loc4_);
+         var _loc6_: ICipher = Crypto.getCipher("rc4",_loc4_);
          _loc6_.encrypt(_loc5_);
          this.addCallToQueue(this.iLogin,[param1,Base64.Encode(_loc5_),param3]);
          _loc6_.dispose();
@@ -760,7 +760,7 @@ private autoLogin(param1: string): void
       {
          this.addCallToQueue(this.iAutoLogin,[param1]);
       }
-public logout(param1: Function = null as any): void
+public logout(param1: Function = null): void
       {
          this.addCallToQueue(this.iLogout,[param1]);
       }
@@ -772,11 +772,11 @@ public setDebugOutputCallback(param1: Function): void
       
       private iConnect(): void
       {
-         DebugUtil.out("AGI Services this.connecting ...");
+         DebugUtil.out("AGI Services connecting ...");
          if(Boolean(this.client))
          {
             this.client.destroy();
-            this.client = null;
+            this.client = null as any;
          }
          this.client = new Client(this.clientDevKey,this.clientGameKey,this.displayRoot,this.onClientError);
          this.client.authenticate(this.authenticationSuccess,this.authenticationFailed);
@@ -797,11 +797,11 @@ public setDebugOutputCallback(param1: Function): void
          this.updateLoginStatus(true);
       }
       
-      private iLogout(param1: Function = null as any): void
+      private iLogout(param1: Function = null): void
       {
-         let callback: Function = param1;
+         var callback: Function = param1;
          DebugUtil.out("Logging out ...");
-         this.agUser = null;
+         this.agUser = null as any;
          this.updateLoginStatus();
          DebugUtil.out("Log out successful.");
          this.finishCall();
@@ -838,7 +838,7 @@ public setDebugOutputCallback(param1: Function): void
          }
       }
       
-      private iSubmitScore(param1: string, param2: number, param3: string = null as any, param4: Function = null as any, param5: boolean = true): void
+      private iSubmitScore(param1: string, param2: number, param3: string = null, param4: Function = null, param5: boolean = true): void
       {
          this.globalCallback = param4;
          if(param2 > int.MAX_VALUE)
@@ -847,7 +847,7 @@ public setDebugOutputCallback(param1: Function): void
             this.finishCall();
             this.callGlobalCallback({
                "success":false,
-               "this.error":"Score value instanceof too high to submit. Please make sure the value instanceof lower than " + int.MAX_VALUE + "."
+               "error":"Score value instanceof too high to submit. Please make sure the value instanceof lower than " + int.MAX_VALUE + "."
             });
             return;
          }
@@ -855,7 +855,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("highscore.put",this.onHighscorePutResult,param1,Boolean(this.agUser) ? this.agUser.user_id : this.client.clientID,param2,this.agUser == null ? null : this.agUser.avatar_url,param3 == null ? null : param3.toLowerCase(),param5);
       }
       
-      private iRetrievePublicScores(param1: Function, param2: string = null as any, param3: string = "alltime", param4: boolean = true, param5: number = 1, param6: boolean = false): void
+      private iRetrievePublicScores(param1: Function, param2: string = null, param3: string = "alltime", param4: boolean = true, param5: number = 1, param6: boolean = false): void
       {
          this.globalCallback = param1;
          DebugUtil.out("Retrieving public scores ...");
@@ -866,7 +866,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("highscore.getPublicScores",this.onHighscoreGetResult,param6 ? (Boolean(this.agUser) ? this.agUser.user_id : this.client.clientID) : null,param2 == null ? this.DEFAULT_SCORE_TYPE : param2.toLowerCase(),param3.toLowerCase(),param4,this.MAX_SCORES,param5);
       }
       
-      private iRetrieveUserScores(param1: Function, param2: string = null as any, param3: boolean = true, param4: number = 1, param5: boolean = false): void
+      private iRetrieveUserScores(param1: Function, param2: string = null, param3: boolean = true, param4: number = 1, param5: boolean = false): void
       {
          this.globalCallback = param1;
          DebugUtil.out("Retrieving user scores ...");
@@ -877,7 +877,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("highscore.getUserScores",this.onHighscoreGetResult,this.agUser.user_id,param2 == null ? this.DEFAULT_SCORE_TYPE : param2.toLowerCase(),param3,this.MAX_SCORES,param4);
       }
       
-      private iRetrieveFriendScores(param1: Function, param2: string = null as any, param3: boolean = true, param4: number = 1, param5: boolean = false): void
+      private iRetrieveFriendScores(param1: Function, param2: string = null, param3: boolean = true, param4: number = 1, param5: boolean = false): void
       {
          this.globalCallback = param1;
          DebugUtil.out("Retrieving friend scores ...");
@@ -901,11 +901,11 @@ public setDebugOutputCallback(param1: Function): void
          }
       }
       
-      private iSubmitGameShare(param1: string, param2: string, param3: Function = null as any, param4: any = null): void
+      private iSubmitGameShare(param1: string, param2: string, param3: Function = null, param4: any = null): void
       {
-         let _loc6_: ByteArray = null;
-         let _loc7_: Bitmap = null;
-         let _loc8_: JPGEncoder = null;
+         var _loc6_: ByteArray = null as any;
+         var _loc7_: Bitmap = null as any;
+         var _loc8_: JPGEncoder = null as any;
          DebugUtil.out("Sharing game data ...");
          if(Boolean(param4) && param4 instanceof DisplayObject)
          {
@@ -913,22 +913,22 @@ public setDebugOutputCallback(param1: Function): void
             _loc8_ = new JPGEncoder(80);
             _loc6_ = _loc8_.encode(_loc7_.bitmapData);
          }
-         let _loc5_: string = "#~`" + Compressor.compress(param2);
+         var _loc5_: string = "#~`" + Compressor.compress(param2);
          this.client.call("gameshare.put",this.onSubmitGameShare,param1,_loc5_,_loc6_,Boolean(this.agUser) ? this.agUser.user_id : this.client.clientID);
          this.globalCallback = param3;
       }
       
       private iRetrieveGameShare(param1: string, param2: Function): void
       {
-         let obj: Record<string, any> = null;
-         let shareId: string = param1;
-         let callback: Function = param2;
+         var obj: Record<string, any> = null as any;
+         var shareId: string = param1;
+         var callback: Function = param2;
          if(!shareId || shareId == "")
          {
             this.finishCall();
             obj = {
                "success":false,
-               "this.error":"Invalid Share ID"
+               "error":"Invalid Share ID"
             };
             try
             {
@@ -985,10 +985,10 @@ public setDebugOutputCallback(param1: Function): void
       
       private iRetrieveUserGameShares(param1: Function, param2: string = "shares", param3: number = 1): void
       {
-         let obj: Record<string, any> = null;
-         let callback: Function = param1;
-         let listMetric: string = param2;
-         let pageNumber: number = param3;
+         var obj: Record<string, any> = null as any;
+         var callback: Function = param1;
+         var listMetric: string = param2;
+         var pageNumber: number = param3;
          DebugUtil.out("Retrieving User Game Shares list ...");
          this.globalCallback = callback;
          listMetric = listMetric.toLowerCase();
@@ -1009,7 +1009,7 @@ public setDebugOutputCallback(param1: Function): void
             this.finishCall();
             obj = {
                "success":false,
-               "this.error":"List Metric instanceof unsupported"
+               "error":"List Metric instanceof unsupported"
             };
             try
             {
@@ -1027,10 +1027,10 @@ public setDebugOutputCallback(param1: Function): void
       
       private iRetrieveFriendGameShares(param1: Function, param2: string = "shares", param3: number = 1): void
       {
-         let obj: Record<string, any> = null;
-         let callback: Function = param1;
-         let listMetric: string = param2;
-         let pageNumber: number = param3;
+         var obj: Record<string, any> = null as any;
+         var callback: Function = param1;
+         var listMetric: string = param2;
+         var pageNumber: number = param3;
          DebugUtil.out("Retrieving Friend Game Shares list ...");
          this.globalCallback = callback;
          listMetric = listMetric.toLowerCase();
@@ -1051,7 +1051,7 @@ public setDebugOutputCallback(param1: Function): void
             this.finishCall();
             obj = {
                "success":false,
-               "this.error":"List Metric instanceof unsupported"
+               "error":"List Metric instanceof unsupported"
             };
             try
             {
@@ -1112,7 +1112,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("gameshare.incrementView",this.onIncGameShareView,param1,Boolean(this.agUser) ? this.agUser.user_id : this.client.clientID);
       }
       
-      private iSubmitGameSave(param1: string, param2: string, param3: string, param4: Function = null as any): void
+      private iSubmitGameSave(param1: string, param2: string, param3: string, param4: Function = null): void
       {
          if(!param1 || param1 == "")
          {
@@ -1123,7 +1123,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("gamesave.put",this.onSubmitGameSave,param1,param2,param3);
       }
       
-      private iSubmitGameSaveObject(param1: string, param2: Record<string, any>, param3: Function = null as any): void
+      private iSubmitGameSaveObject(param1: string, param2: Record<string, any>, param3: Function = null): void
       {
          if(!param1 || param1 == "")
          {
@@ -1156,7 +1156,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("gamesave.get",this.onRetrieveGameSaveObject,param1);
       }
       
-      private iDeleteGameSave(param1: string, param2: string, param3: Function = null as any): void
+      private iDeleteGameSave(param1: string, param2: string, param3: Function = null): void
       {
          if(!param1 || param1 == "")
          {
@@ -1167,7 +1167,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("gamesave.delete",this.onDeleteGameSave,param1,param2);
       }
       
-      private iDeleteAllGameSaves(param1: string, param2: Function = null as any): void
+      private iDeleteAllGameSaves(param1: string, param2: Function = null): void
       {
          if(!param1 || param1 == "")
          {
@@ -1178,7 +1178,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("gamesave.delete",this.onDeleteAllGameData,param1);
       }
       
-      private iIncGameSave(param1: string, param2: string, param3: number = 1, param4: Function = null as any): void
+      private iIncGameSave(param1: string, param2: string, param3: number = 1, param4: Function = null): void
       {
          if(!param1 || param1 == "")
          {
@@ -1189,7 +1189,7 @@ public setDebugOutputCallback(param1: Function): void
          this.client.call("gamesave.increment",this.onIncrementGameSave,param1,param2,param3);
       }
       
-      private iDecGameSave(param1: string, param2: string, param3: number = 1, param4: Function = null as any): void
+      private iDecGameSave(param1: string, param2: string, param3: number = 1, param4: Function = null): void
       {
          if(!param1 || param1 == "")
          {
@@ -1216,7 +1216,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private authenticationSuccess(param1: Record<string, any>): void
       {
-         DebugUtil.out("AGI Services successfully this.connected.");
+         DebugUtil.out("AGI Services successfully connected.");
          this.connected = true;
          this.connecting = false;
          this.clientGameName = param1.gameName;
@@ -1237,15 +1237,15 @@ public setDebugOutputCallback(param1: Function): void
       
       private handleConnectionFailed(param1: ClientError): void
       {
-         let obj: Record<string, any>;
-         let error: ClientError = param1;
+         var obj: Record<string, any>;
+         var error: ClientError = param1;
          this.connected = false;
          this.connecting = false;
          this.connectionAttempts = 0;
          obj = {"success":false};
-         if(Boolean(this.error))
+         if(Boolean(error))
          {
-            obj.error = this.error.toString();
+            obj.error = error.toString();
          }
          this.removeProgress();
          this.clearBackground();
@@ -1266,15 +1266,15 @@ public setDebugOutputCallback(param1: Function): void
       
       private onClientError(param1: ClientError): void
       {
-         let conCall: Record<string, any> = null;
-         let obj: Record<string, any> = null;
-         let error: ClientError = param1;
-         if(this.error.getCode() == ClientError.CLIENT_TIMEOUT_ERROR)
+         var conCall: Record<string, any> = null as any;
+         var obj: Record<string, any> = null as any;
+         var error: ClientError = param1;
+         if(error.getCode() == ClientError.CLIENT_TIMEOUT_ERROR)
          {
             if(this.connectionAttempts >= 3)
             {
                DebugUtil.error("AGI Services has failed to connect after " + this.connectionAttempts + " attempts.");
-               this.handleConnectionFailed(this.error);
+               this.handleConnectionFailed(error);
                return;
             }
             DebugUtil.error("Client has timed out. Reconnecting now ...");
@@ -1294,7 +1294,7 @@ public setDebugOutputCallback(param1: Function): void
          }
          if(!this.connected)
          {
-            this.authenticationFailed(this.error);
+            this.authenticationFailed(error);
             return;
          }
          DebugUtil.error("A call has failed.");
@@ -1303,9 +1303,9 @@ public setDebugOutputCallback(param1: Function): void
             return;
          }
          obj = {"success":false};
-         if(Boolean(this.error))
+         if(Boolean(error))
          {
-            obj.error = this.error.toString();
+            obj.error = error.toString();
          }
          this.finishCall();
          this.callGlobalCallback(obj);
@@ -1324,8 +1324,8 @@ public setDebugOutputCallback(param1: Function): void
       
       private handleLoginResult(param1: any): void
       {
-         let obj: Record<string, any> = null;
-         let data: any = param1;
+         var obj: Record<string, any> = null as any;
+         var data: any = param1;
          DebugUtil.out("Login " + (Boolean(data) && Boolean(data.isOk) ? "successful." : "failed."));
          if(!data || !data.isOk)
          {
@@ -1351,7 +1351,7 @@ public setDebugOutputCallback(param1: Function): void
             {
                obj = {
                   "success":false,
-                  "this.error":"Invalid callback value."
+                  "error":"Invalid callback value."
                };
             }
          }
@@ -1359,7 +1359,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             obj = {
                "success":false,
-               "this.error":data.status
+               "error":data.status
             };
          }
          this.updateLoginStatus();
@@ -1383,7 +1383,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onHighscorePutResult(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Submit score " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1401,7 +1401,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1410,7 +1410,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onHighscoreGetResult(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve scores " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1428,7 +1428,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1437,9 +1437,9 @@ public setDebugOutputCallback(param1: Function): void
       
       private onScoreTypesResult(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
-         let _loc3_: Record<string, any> = null;
-         let _loc4_: number = 0;
+         var _loc2_: Record<string, any> = null as any;
+         var _loc3_: Record<string, any> = null as any;
+         var _loc4_: number = 0;
          DebugUtil.out("Retrieve score types " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1458,7 +1458,7 @@ public setDebugOutputCallback(param1: Function): void
                _loc3_ = new Object();
                if(_loc2_.list[_loc4_] == this.DEFAULT_SCORE_TYPE || _loc2_.list[_loc4_] == "")
                {
-                  _loc3_.type = null;
+                  _loc3_.type = null as any;
                }
                else
                {
@@ -1477,7 +1477,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onSubmitGameShare(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Submit game share " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1494,7 +1494,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1503,8 +1503,8 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveGameShare(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
-         let _loc3_: string = null;
+         var _loc2_: Record<string, any> = null as any;
+         var _loc3_: string = null as any;
          DebugUtil.out("Retrieve game share " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1521,7 +1521,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          if(Boolean(_loc2_.data))
@@ -1538,7 +1538,7 @@ public setDebugOutputCallback(param1: Function): void
          }
          else
          {
-            this.cachedGameShare = null;
+            this.cachedGameShare = null as any;
          }
          if(Boolean(this.agui) && Boolean(this.cachedGameShare) && Boolean(this.cachedGameShare.success))
          {
@@ -1550,7 +1550,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveLatestGameShares(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve latest game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1567,7 +1567,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1576,7 +1576,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveGameShares(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1593,7 +1593,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1602,7 +1602,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveStaffPickedGameShares(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve staff picked game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1619,7 +1619,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1628,7 +1628,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveUserGameShares(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve user game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1646,7 +1646,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1655,7 +1655,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveUserGameShareLikes(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve user liked game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1673,7 +1673,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1682,7 +1682,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveFriendGameShares(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve users friends game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1700,7 +1700,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1709,7 +1709,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveFriendGameShareLikes(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve users friends liked game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1727,7 +1727,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1736,8 +1736,8 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveRandomGameShare(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
-         let _loc3_: string = null;
+         var _loc2_: Record<string, any> = null as any;
+         var _loc3_: string = null as any;
          DebugUtil.out("Retrieve random game shares " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1754,7 +1754,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          if(Boolean(_loc2_.data))
@@ -1771,7 +1771,7 @@ public setDebugOutputCallback(param1: Function): void
          }
          else
          {
-            this.cachedGameShare = null;
+            this.cachedGameShare = null as any;
          }
          if(Boolean(this.agui) && Boolean(this.cachedGameShare) && Boolean(this.cachedGameShare.success))
          {
@@ -1822,7 +1822,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onSubmitGameSave(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Submit game data " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1839,7 +1839,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1848,7 +1848,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onSubmitGameSaveObject(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Submit game data object " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1865,7 +1865,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1874,7 +1874,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveGameSave(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Retrieve game data " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1891,7 +1891,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          if(Boolean(_loc2_.success))
@@ -1904,9 +1904,9 @@ public setDebugOutputCallback(param1: Function): void
       
       private onRetrieveGameSaveObject(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
-         let _loc3_: Record<string, any> = null;
-         let _loc4_: string = null;
+         var _loc2_: Record<string, any> = null as any;
+         var _loc3_: Record<string, any> = null as any;
+         var _loc4_: string = null as any;
          DebugUtil.out("Retrieve game data object " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1932,7 +1932,7 @@ public setDebugOutputCallback(param1: Function): void
             {
                _loc2_ = {
                   "success":false,
-                  "this.error":"Invalid callback value."
+                  "error":"Invalid callback value."
                };
             }
          }
@@ -1940,7 +1940,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":param1.status
+               "error":param1.status
             };
          }
          this.finishCall();
@@ -1949,7 +1949,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onDeleteGameSave(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Delete game data " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1966,7 +1966,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -1975,7 +1975,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onDeleteAllGameData(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Delete all game data " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -1992,7 +1992,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -2001,7 +2001,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onIncrementGameSave(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Incremement game data " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -2021,7 +2021,7 @@ public setDebugOutputCallback(param1: Function): void
             {
                _loc2_ = {
                   "success":false,
-                  "this.error":"Invalid callback value."
+                  "error":"Invalid callback value."
                };
             }
          }
@@ -2029,7 +2029,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":param1.status
+               "error":param1.status
             };
          }
          this.finishCall();
@@ -2038,7 +2038,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onDecrementGameSave(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Decrement game data " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -2058,7 +2058,7 @@ public setDebugOutputCallback(param1: Function): void
             {
                _loc2_ = {
                   "success":false,
-                  "this.error":"Invalid callback value."
+                  "error":"Invalid callback value."
                };
             }
          }
@@ -2066,7 +2066,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":param1.status
+               "error":param1.status
             };
          }
          this.finishCall();
@@ -2075,7 +2075,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onContainsProfanity(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Check contains profanity " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -2092,7 +2092,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
@@ -2101,7 +2101,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private onFilterProfanity(param1: any): void
       {
-         let _loc2_: Record<string, any> = null;
+         var _loc2_: Record<string, any> = null as any;
          DebugUtil.out("Filter profanity " + (Boolean(param1) && Boolean(param1.isOk) ? "successful." : "failed."));
          if(!param1 || !param1.isOk)
          {
@@ -2118,22 +2118,22 @@ public setDebugOutputCallback(param1: Function): void
          {
             _loc2_ = {
                "success":false,
-               "this.error":"Invalid callback value."
+               "error":"Invalid callback value."
             };
          }
          this.finishCall();
          this.callGlobalCallback(_loc2_);
       }
       
-      private addCallToQueue(param1: Function, param2: any[] = null as any): void
+      private addCallToQueue(param1: Function, param2: any[] = null): void
       {
-         let _loc4_: Record<string, any> = null;
+         var _loc4_: Record<string, any> = null as any;
          if(!this.callQueue)
          {
             return;
          }
          this.removeError();
-         let _loc3_: Record<string, any> = {
+         var _loc3_: Record<string, any> = {
             "func":param1,
             "params":param2
          };
@@ -2184,7 +2184,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private callNext(): void
       {
-         let _loc1_: Record<string, any> = null;
+         var _loc1_: Record<string, any> = null as any;
          if(!this.callQueue)
          {
             return;
@@ -2226,7 +2226,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private callGlobalCallback(param1: Record<string, any>): void
       {
-         let obj: Record<string, any> = param1;
+         var obj: Record<string, any> = param1;
          try
          {
             if(this.globalCallback != null)
@@ -2262,7 +2262,7 @@ public setDebugOutputCallback(param1: Function): void
             {
                DebugUtil.out("Loading AGUI ...");
                this.aguiLoader = new Loader();
-               this.aguiLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.handleAGUILoaded.bind(this));
+               this.aguiLoader.contentLoaderInfo.addEventListener("complete", this.handleAGUILoaded.bind(this));
                this.aguiLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, this.handleAGUILoadFailed.bind(this));
                this.aguiLoader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, this.handleAGUILoadFailed.bind(this));
                this.aguiLoader.load(new URLRequest(this.agui_url),new LoaderContext(true));
@@ -2328,13 +2328,13 @@ public setDebugOutputCallback(param1: Function): void
             return;
          }
          this.loginStatus.update(this.agUser,param1);
-         if(!this.loginStatus.hasEventListener(MouseEvent.CLICK))
+         if(!this.loginStatus.hasEventListener("click"))
          {
-            this.loginStatus.addEventListener(MouseEvent.CLICK, this.handleLoginStatusClick.bind(this));
+            this.loginStatus.addEventListener("click", this.handleLoginStatusClick.bind(this));
          }
       }
       
-      private handleLoginStatusClick(param1: MouseEvent): void
+      private handleLoginStatusClick(param1: any): void
       {
          if(!this.loginStatus)
          {
@@ -2352,8 +2352,8 @@ public setDebugOutputCallback(param1: Function): void
             return;
          }
          this.error = new ErrorMessage();
-         this.error.close_btn.addEventListener(MouseEvent.CLICK, this.handleErrorClose.bind(this));
-         this.error.ok_btn.addEventListener(MouseEvent.CLICK, this.handleErrorClose.bind(this));
+         this.error.close_btn.addEventListener("click", this.handleErrorClose.bind(this));
+         this.error.ok_btn.addEventListener("click", this.handleErrorClose.bind(this));
          this.error.label_txt.htmlText = HTMLTextUtil.bold(param1);
          super.addChild(this.error);
          if(Boolean(this.aguiParams) && Boolean(this.aguiParams.x) && Boolean(this.aguiParams.y))
@@ -2381,13 +2381,13 @@ public setDebugOutputCallback(param1: Function): void
             {
                super.removeChild(this.error);
             }
-            this.error = null;
+            this.error = null as any;
          }
       }
       
-      private handleErrorClose(param1: MouseEvent): void
+      private handleErrorClose(param1: any): void
       {
-         let e: MouseEvent = param1;
+         var e: any = param1;
          this.clearBackground();
          this.removeError();
          this.destroyAGUI();
@@ -2411,7 +2411,7 @@ public setDebugOutputCallback(param1: Function): void
       {
          this.changeFrameRate();
          this.progress = new ProgressBar();
-         this.progress.close_btn.addEventListener(MouseEvent.CLICK, this.handleProgressClose.bind(this));
+         this.progress.close_btn.addEventListener("click", this.handleProgressClose.bind(this));
          super.addChild(this.progress);
          if(Boolean(this.aguiParams) && Boolean(this.aguiParams.x) && Boolean(this.aguiParams.y))
          {
@@ -2441,13 +2441,13 @@ public setDebugOutputCallback(param1: Function): void
             {
                super.removeChild(this.progress);
             }
-            this.progress = null;
+            this.progress = null as any;
          }
       }
       
-      private handleProgressClose(param1: MouseEvent): void
+      private handleProgressClose(param1: any): void
       {
-         let e: MouseEvent = param1;
+         var e: any = param1;
          this.closedProgressBar = true;
          this.removeProgress();
          this.clearBackground();
@@ -2469,19 +2469,19 @@ public setDebugOutputCallback(param1: Function): void
       
       private convertDataToString(param1: any): string
       {
-         let _loc2_: string = null;
+         var _loc2_: string = null as any;
          if(param1 == null)
          {
             return null;
          }
-         if(param1 instanceof Number && isNaN(param1))
+         if(typeof param1 === "number" && isNaN(param1))
          {
             return null;
          }
-         if(param1 instanceof Array || param1 instanceof Boolean || param1 instanceof Number || param1 instanceof String || param1 instanceof Object)
+         if(param1 instanceof Array || typeof param1 === "boolean" || typeof param1 === "number" || typeof param1 === "string" || param1 instanceof Object)
          {
             _loc2_ = JSON.encode(param1);
-            if(!(param1 instanceof Number) && !(param1 instanceof Boolean))
+            if(!(typeof param1 === "number") && !(typeof param1 === "boolean"))
             {
                _loc2_ = "#" + Compressor.compress(_loc2_);
             }
@@ -2492,7 +2492,7 @@ public setDebugOutputCallback(param1: Function): void
       
       private convertStringToData(param1: string): any
       {
-         let _loc2_: string = null;
+         var _loc2_: string = null as any;
          if(param1 == "" || param1 == null)
          {
             return null;
@@ -2539,7 +2539,7 @@ public setDebugOutputCallback(param1: Function): void
             {
                super.removeChild(this.darkBG);
             }
-            this.darkBG = null;
+            this.darkBG = null as any;
          }
       }
       
@@ -2573,19 +2573,19 @@ public setDebugOutputCallback(param1: Function): void
       
       private getDomain(param1: string): string
       {
-         let _loc2_: number = param1.indexOf(":/") + 3;
-         let _loc3_: number = param1.indexOf("/",_loc2_);
-         let _loc4_: string = param1.substring(_loc2_,_loc3_);
-         let _loc5_: number = _loc4_.lastIndexOf(".") - 1;
-         let _loc6_: number = _loc4_.lastIndexOf(".",_loc5_) + 1;
+         var _loc2_: number = param1.indexOf(":/") + 3;
+         var _loc3_: number = param1.indexOf("/",_loc2_);
+         var _loc4_: string = param1.substring(_loc2_,_loc3_);
+         var _loc5_: number = _loc4_.lastIndexOf(".") - 1;
+         var _loc6_: number = _loc4_.lastIndexOf(".",_loc5_) + 1;
          return _loc4_.substring(_loc6_,_loc4_.length);
       }
       
       private getBitmapFromDisplayObject(param1: DisplayObject, param2: number = 1000): Bitmap
       {
-         let _loc5_: BitmapData = null;
-         let _loc3_: number = param2;
-         let _loc4_: number = 1;
+         var _loc5_: BitmapData = null as any;
+         var _loc3_: number = param2;
+         var _loc4_: number = 1;
          if(param1.width > param1.height)
          {
             _loc3_ = param1.width;
@@ -2619,7 +2619,7 @@ public setDebugOutputCallback(param1: Function): void
          }
       }
       
-      private handleAGUILoaded(param1: Event = null as any): void
+      private handleAGUILoaded(param1: any = null): void
       {
          DebugUtil.out("AGUI load successful.");
          this.agui = this.aguiLoader.content;
@@ -2628,10 +2628,10 @@ public setDebugOutputCallback(param1: Function): void
       
       private showAGUI(): void
       {
-         let aguiPos: Point;
-         let scale: number;
-         let data: Record<string, any>;
-         let types: any[] = null;
+         var aguiPos: Point;
+         var scale: number;
+         var data: Record<string, any>;
+         var types: any[] = null as any;
          if(!this.agui || this.closedProgressBar)
          {
             this.finishCall();
@@ -2654,7 +2654,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             scale = Number(this.aguiParams.scale);
          }
-         if(this.aguiParams.hasOwnProperty("x"))
+         if(this.aguiParams.hasOwnProperty("this.x"))
          {
             aguiPos.x = Number(this.aguiParams.x);
          }
@@ -2662,7 +2662,7 @@ public setDebugOutputCallback(param1: Function): void
          {
             aguiPos.x = stage.stageWidth * 0.5 - 250 * scale;
          }
-         if(this.aguiParams.hasOwnProperty("y"))
+         if(this.aguiParams.hasOwnProperty("this.y"))
          {
             aguiPos.y = this.aguiParams.y;
          }
@@ -2706,7 +2706,7 @@ public setDebugOutputCallback(param1: Function): void
          data.loginMethod = this.__login;
          data.logoutMethod = this.logout;
          this.agui.init(this,data);
-         if(this.aguiStateParams.hasOwnProperty("this.scoreTypes") && this.aguiStateParams.scoreTypes != null)
+         if(this.aguiStateParams.hasOwnProperty("scoreTypes") && this.aguiStateParams.scoreTypes != null)
          {
             types = this.aguiStateParams.scoreTypes;
          }
@@ -2747,7 +2747,7 @@ public setDebugOutputCallback(param1: Function): void
          }
          else
          {
-            this.agui.showError("The Armor Games Interface has encountered an this.error. Please try again soon");
+            this.agui.showError("The Armor Games Interface has encountered an error. Please try again soon");
          }
          this.finishCall();
          if(Boolean(this.aguiParams))
@@ -2768,7 +2768,7 @@ public setDebugOutputCallback(param1: Function): void
       
       protected handleAGUILoginLogout(param1: Record<string, any>): void
       {
-         let data: Record<string, any> = param1;
+         var data: Record<string, any> = param1;
          if(Boolean(this.aguiStateParams))
          {
             try
@@ -2787,7 +2787,7 @@ public setDebugOutputCallback(param1: Function): void
       
       protected handleAGUIShareClicked(param1: Record<string, any>): void
       {
-         let data: Record<string, any> = param1;
+         var data: Record<string, any> = param1;
          if(Boolean(this.aguiStateParams))
          {
             try
@@ -2804,9 +2804,9 @@ public setDebugOutputCallback(param1: Function): void
          }
       }
       
-      private handleAGUILoadFailed(param1: Event): void
+      private handleAGUILoadFailed(param1: any): void
       {
-         let e: Event = param1;
+         var e: any = param1;
          DebugUtil.error("AGUI failed to load.");
          this.removeProgress();
          this.finishCall();
@@ -2953,7 +2953,7 @@ public setDebugOutputCallback(param1: Function): void
       {
       }
       
-      public startDrag(param1: boolean = false, param2: Rectangle = null as any): void
+      public startDrag(param1: boolean = false, param2: Rectangle = null): void
       {
       }
       

@@ -3,23 +3,23 @@
 
 export class TripleDESKey extends DESKey{
       
-      protected decKey2: any[];
-      protected decKey3: any[];
-      protected encKey2: any[];
-      protected encKey3: any[];
+      protected decKey2!: any[];
+      protected decKey3!: any[];
+      protected encKey2!: any[];
+      protected encKey3!: any[];
       constructor(key: ByteArray){
          super(key);
-         this.encKey2 = generateWorkingKey(false,key,8);
-         this.decKey2 = generateWorkingKey(true,key,8);
+         encKey2 = generateWorkingKey(false,key,8);
+         decKey2 = generateWorkingKey(true,key,8);
          if(key.length > 16)
          {
-            this.encKey3 = generateWorkingKey(true,key,16);
-            this.decKey3 = generateWorkingKey(false,key,16);
+            encKey3 = generateWorkingKey(true,key,16);
+            decKey3 = generateWorkingKey(false,key,16);
          }
          else
          {
-            this.encKey3 = encKey;
-            this.decKey3 = decKey;
+            encKey3 = encKey;
+            decKey3 = decKey;
          }
       }
       
@@ -39,48 +39,48 @@ export class TripleDESKey extends DESKey{
       
       public dispose(): void
       {
-         let i: number = 0;
+         var i: number = 0;
          super.dispose();
          i = 0;
-         if(this.encKey2 != null)
+         if(encKey2 != null)
          {
             i = 0;
-            while(i < this.encKey2.length)
+            while(i < encKey2.length)
             {
-               this.encKey2[i] = 0;
+               encKey2[i] = 0;
                i++;
             }
-            this.encKey2 = null;
+            encKey2 = null as any;
          }
-         if(this.encKey3 != null)
+         if(encKey3 != null)
          {
             i = 0;
-            while(i < this.encKey3.length)
+            while(i < encKey3.length)
             {
-               this.encKey3[i] = 0;
+               encKey3[i] = 0;
                i++;
             }
-            this.encKey3 = null;
+            encKey3 = null as any;
          }
-         if(this.decKey2 != null)
+         if(decKey2 != null)
          {
             i = 0;
-            while(i < this.decKey2.length)
+            while(i < decKey2.length)
             {
-               this.decKey2[i] = 0;
+               decKey2[i] = 0;
                i++;
             }
-            this.decKey2 = null;
+            decKey2 = null as any;
          }
-         if(this.decKey3 != null)
+         if(decKey3 != null)
          {
             i = 0;
-            while(i < this.decKey3.length)
+            while(i < decKey3.length)
             {
-               this.decKey3[i] = 0;
+               decKey3[i] = 0;
                i++;
             }
-            this.decKey3 = null;
+            decKey3 = null as any;
          }
          Memory.gc();
       }

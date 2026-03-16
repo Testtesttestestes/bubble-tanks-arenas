@@ -4,12 +4,12 @@
 export class Compressor{
       
       constructor(){
-         super();
+
       }
       
       public static compress(param1: string): string
       {
-         let _loc2_: ByteArray = new ByteArray();
+         var _loc2_: ByteArray = new ByteArray();
          _loc2_.writeUTFBytes(param1);
          _loc2_.compress();
          return Base64.Encode(_loc2_);
@@ -17,7 +17,7 @@ export class Compressor{
       
       public static uncompress(param1: string): string
       {
-         let _loc2_: ByteArray = Base64.Decode(param1);
+         var _loc2_: ByteArray = Base64.Decode(param1);
          _loc2_.uncompress();
          return _loc2_.toString();
       }

@@ -16,6 +16,6 @@ export class JSONTokenType{
       public static readonly STRING: number = 10;
       public static readonly NUMBER: number = 11;
       constructor(){
-         super();
+
       }
    }

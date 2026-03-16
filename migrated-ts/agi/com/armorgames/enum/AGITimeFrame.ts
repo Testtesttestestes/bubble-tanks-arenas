@@ -8,6 +8,6 @@ export class AGITimeFrame{
       public static readonly WEEK: string = "weekly";
       public static readonly MONTH: string = "monthly";
       constructor(){
-         super();
+
       }
    }

@@ -3,27 +3,27 @@
 
 export class DebugUtil{
       
-      private static _debugOutputCallback: Function;
+      private static _debugOutputCallback!: Function;
       private static _apiName: string = "";
       private static ON: boolean = true;
       private static EXTERN: boolean = false;
       private static _filters: any[] = new Array();
       constructor(){
-         super();
+
       }
       
-      public static init(param1: string, param2: boolean = true, param3: boolean = false, param4: any[] = null as any): void
+      public static init(param1: string, param2: boolean = true, param3: boolean = false, param4: any[] = null): void
       {
-         this.ON = param2;
-         this.EXTERN = param3;
-         this._apiName = param1;
+         ON = param2;
+         EXTERN = param3;
+         _apiName = param1;
          if(!param4)
          {
-            this._filters = ["OUT","ERROR","WARN","INFO","FATAL","DEBUG"];
+            _filters = ["OUT","ERROR","WARN","INFO","FATAL","DEBUG"];
          }
          else
          {
-            this._filters = param4;
+            _filters = param4;
          }
       }
       
@@ -69,17 +69,17 @@ export class DebugUtil{
       
       public static getDebugInfo(param1: number = 3): string
       {
-         let _loc9_: any[] = null;
-         let _loc2_: string = "";
-         let _loc3_: Error = new Error();
-         let _loc4_: string = _loc3_.getStackTrace();
+         var _loc9_: any[] = null as any;
+         var _loc2_: string = "";
+         var _loc3_: Error = new Error();
+         var _loc4_: string = _loc3_.getStackTrace();
          if(_loc4_.indexOf("[") == -1)
          {
             return "";
          }
-         let _loc5_: any[] = _loc4_.split("\n");
-         let _loc6_: any[] = _loc5_[param1].split("[");
-         let _loc7_: string = "";
+         var _loc5_: any[] = _loc4_.split("\n");
+         var _loc6_: any[] = _loc5_[param1].split("[");
+         var _loc7_: string = "";
          if(_loc6_[1] != null)
          {
             _loc9_ = _loc6_[1].split(":");
@@ -89,20 +89,20 @@ export class DebugUtil{
                _loc7_ = _loc7_.substring(0,_loc7_.length - 1);
             }
          }
-         let _loc8_: string = _loc6_[0].substring(4);
+         var _loc8_: string = _loc6_[0].substring(4);
          return "[ " + _loc8_ + (_loc7_ != "" ? " : " + _loc7_ : "") + " ]";
       }
       
       public static setDebugCallback(param1: Function): void
       {
-         this._debugOutputCallback = param1;
+         _debugOutputCallback = param1;
       }
       
       private static output(param1: string, param2: any[], param3: boolean = false): void
       {
          if(!param3)
          {
-            if(this._apiName == "" || !this.ON || this._filters.indexOf(param1) == -1)
+            if(_apiName == "" || !ON || _filters.indexOf(param1) == -1)
             {
                return;
             }
@@ -111,8 +111,8 @@ export class DebugUtil{
          {
             param1 = "";
          }
-         let _loc4_: string = "[ " + this._apiName + " ] -> " + param1 + ": ";
-         let _loc5_: number = 0;
+         var _loc4_: string = "[ " + _apiName + " ] -> " + param1 + ": ";
+         var _loc5_: number = 0;
          while(_loc5_ < param2.length)
          {
             if(param2[_loc5_] == null)
@@ -126,13 +126,13 @@ export class DebugUtil{
             _loc5_++;
          }
          console.log(_loc4_);
-         if(this._debugOutputCallback != null)
+         if(_debugOutputCallback != null)
          {
-            this._debugOutputCallback(_loc4_);
+            _debugOutputCallback(_loc4_);
          }
          try
          {
-            if(this.EXTERN && ExternalInterface.available)
+            if(EXTERN && ExternalInterface.available)
             {
                ExternalInterface.call("console.log",_loc4_);
             }

@@ -20,22 +20,22 @@ export class BlowFishKey implements ISymmetricKey
       private static readonly ROUNDS: number = 16;
       private static readonly BLOCK_SIZE: number = 8;
       private static readonly SBOX_SK: number = 256;
-      private static readonly P_SZ: number = this.ROUNDS + 2;
-      private S3: any[];
-      private S2: any[];
-      private P: any[];
+      private static readonly P_SZ: number = ROUNDS + 2;
+      private S3!: any[];
+      private S2!: any[];
+      private P!: any[];
       private key: ByteArray = null as any;
-      private S0: any[];
-      private S1: any[];
+      private S0!: any[];
+      private S1!: any[];
       constructor(key: ByteArray){
-         super();
-         this.key = this.key;
+
+         this.key = key;
          setKey(key);
       }
       
       private F(x: number): number
       {
-         return(S0[x >>> 24] + S1[x >>> 16 & 0xFF] ^ S2[x >>> 8 & 0xFF]) + this.S3[x & 0xFF];
+         return(S0[x >>> 24] + S1[x >>> 16 & 0xFF] ^ S2[x >>> 8 & 0xFF]) + S3[x & 0xFF];
       }
       
       private BytesTo32bits(b: ByteArray, i: number): number
@@ -50,48 +50,48 @@ export class BlowFishKey implements ISymmetricKey
       
       private decryptBlock(src: ByteArray, srcIndex: number, dst: ByteArray, dstIndex: number): void
       {
-         let xl: number = 0;
-         let xr: number = 0;
-         let i: number = 0;
-         xl = (src,srcIndex as unknown as BytesTo32bits);
-         xr = (src,srcIndex + 4 as unknown as BytesTo32bits);
-         xl ^= this.P[this.ROUNDS + 1];
-         for(i = this.ROUNDS; i > 0; i -= 2)
+         var xl: number = 0;
+         var xr: number = 0;
+         var i: number = 0;
+         xl = BytesTo32bits(src,srcIndex);
+         xr = BytesTo32bits(src,srcIndex + 4);
+         xl ^= P[ROUNDS + 1];
+         for(i = ROUNDS; i > 0; i -= 2)
          {
-            xr ^= (xl as unknown as F) ^ this.P[i];
-            xl ^= (xr as unknown as F) ^ this.P[i - 1];
+            xr ^= F(xl) ^ P[i];
+            xl ^= F(xr) ^ P[i - 1];
          }
-         xr ^= this.P[0];
-         (xr,dst,dstIndex as unknown as Bits32ToBytes);
-         (xl,dst,dstIndex + 4 as unknown as Bits32ToBytes);
+         xr ^= P[0];
+         Bits32ToBytes(xr,dst,dstIndex);
+         Bits32ToBytes(xl,dst,dstIndex + 4);
       }
       
       private setKey(key: ByteArray): void
       {
-         let keyLength: number = 0;
-         let keyIndex: number = 0;
-         let i: number = 0;
-         let data: number = 0;
-         let j: number = 0;
-         this.S0 = this.KS0.concat();
-         this.S1 = this.KS1.concat();
-         this.S2 = this.KS2.concat();
-         this.S3 = this.KS3.concat();
-         this.P = this.KP.concat();
-         keyLength = this.key.length;
+         var keyLength: number = 0;
+         var keyIndex: number = 0;
+         var i: number = 0;
+         var data: number = 0;
+         var j: number = 0;
+         S0 = KS0.concat();
+         S1 = KS1.concat();
+         S2 = KS2.concat();
+         S3 = KS3.concat();
+         P = KP.concat();
+         keyLength = key.length;
          keyIndex = 0;
-         for(i = 0; i < this.P_SZ; i++)
+         for(i = 0; i < P_SZ; i++)
          {
             data = 0;
             for(j = 0; j < 4; j++)
             {
-               data = Math.floor(data << 8 | this.key[keyIndex++] & 0xFF);
+               data = Math.floor(data << 8 | key[keyIndex++] & 0xFF);
                if(keyIndex >= keyLength)
                {
                   keyIndex = 0;
                }
             }
-            this.P[i] ^= data;
+            P[i] ^= data;
          }
          processTable(0,0,P);
          processTable(P[P_SZ - 2],P[P_SZ - 1],S0);
@@ -102,68 +102,68 @@ export class BlowFishKey implements ISymmetricKey
       
       public dispose(): void
       {
-         let i: number = 0;
+         var i: number = 0;
          i = 0;
          i = 0;
-         while(i < this.S0.length)
+         while(i < S0.length)
          {
-            this.S0[i] = 0;
+            S0[i] = 0;
             i++;
          }
          i = 0;
-         while(i < this.S1.length)
+         while(i < S1.length)
          {
-            this.S1[i] = 0;
+            S1[i] = 0;
             i++;
          }
          i = 0;
-         while(i < this.S2.length)
+         while(i < S2.length)
          {
-            this.S2[i] = 0;
+            S2[i] = 0;
             i++;
          }
          i = 0;
-         while(i < this.S3.length)
+         while(i < S3.length)
          {
-            this.S3[i] = 0;
+            S3[i] = 0;
             i++;
          }
          i = 0;
-         while(i < this.P.length)
+         while(i < P.length)
          {
-            this.P[i] = 0;
+            P[i] = 0;
             i++;
          }
-         this.S0 = null;
-         this.S1 = null;
-         this.S2 = null;
-         this.S3 = null;
-         this.P = null;
-         for(i = 0; i < this.key.length; i++)
+         S0 = null as any;
+         S1 = null as any;
+         S2 = null as any;
+         S3 = null as any;
+         P = null as any;
+         for(i = 0; i < key.length; i++)
          {
-            this.key[i] = 0;
+            key[i] = 0;
          }
-         this.key.length = 0;
-         this.key = null;
+         key.length = 0;
+         key = null as any;
          Memory.gc();
       }
       
       private encryptBlock(src: ByteArray, srcIndex: number, dst: ByteArray, dstIndex: number): void
       {
-         let xl: number = 0;
-         let xr: number = 0;
-         let i: number = 0;
-         xl = (src,srcIndex as unknown as BytesTo32bits);
-         xr = (src,srcIndex + 4 as unknown as BytesTo32bits);
-         xl ^= this.P[0];
-         for(i = 1; i < this.ROUNDS; i += 2)
+         var xl: number = 0;
+         var xr: number = 0;
+         var i: number = 0;
+         xl = BytesTo32bits(src,srcIndex);
+         xr = BytesTo32bits(src,srcIndex + 4);
+         xl ^= P[0];
+         for(i = 1; i < ROUNDS; i += 2)
          {
-            xr ^= (xl as unknown as F) ^ this.P[i];
-            xl ^= (xr as unknown as F) ^ this.P[i + 1];
+            xr ^= F(xl) ^ P[i];
+            xl ^= F(xr) ^ P[i + 1];
          }
-         xr ^= this.P[this.ROUNDS + 1];
-         (xr,dst,dstIndex as unknown as Bits32ToBytes);
-         (xl,dst,dstIndex + 4 as unknown as Bits32ToBytes);
+         xr ^= P[ROUNDS + 1];
+         Bits32ToBytes(xr,dst,dstIndex);
+         Bits32ToBytes(xl,dst,dstIndex + 4);
       }
       
       public encrypt(block: ByteArray, index: number = 0): void
@@ -181,19 +181,19 @@ export class BlowFishKey implements ISymmetricKey
       
       private processTable(xl: number, xr: number, table: any[]): void
       {
-         let size: number = 0;
-         let s: number = 0;
-         let i: number = 0;
+         var size: number = 0;
+         var s: number = 0;
+         var i: number = 0;
          size = table.length;
          for(s = 0; s < size; s += 2)
          {
-            xl ^= this.P[0];
-            for(i = 1; i < this.ROUNDS; i += 2)
+            xl ^= P[0];
+            for(i = 1; i < ROUNDS; i += 2)
             {
-               xr ^= (xl as unknown as F) ^ this.P[i];
-               xl ^= (xr as unknown as F) ^ this.P[i + 1];
+               xr ^= F(xl) ^ P[i];
+               xl ^= F(xr) ^ P[i + 1];
             }
-            xr ^= this.P[this.ROUNDS + 1];
+            xr ^= P[ROUNDS + 1];
             table[s] = xr;
             table[s + 1] = xl;
             xr = xl;
@@ -208,6 +208,6 @@ export class BlowFishKey implements ISymmetricKey
       
       public getBlockSize(): number
       {
-         return this.BLOCK_SIZE;
+         return BLOCK_SIZE;
       }
    }

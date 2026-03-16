@@ -28,16 +28,16 @@ export class AESKey implements ISymmetricKey
 
   static {
     while(this.i < 256) {
-         this.Sbox[this.i] = this._Sbox[this.i];
-         this.InvSbox[this.i] = this._InvSbox[this.i];
-         this.Xtime2Sbox[this.i] = this._Xtime2Sbox[this.i];
-         this.Xtime3Sbox[this.i] = this._Xtime3Sbox[this.i];
-         this.Xtime2[this.i] = this._Xtime2[this.i];
-         this.Xtime9[this.i] = this._Xtime9[this.i];
-         this.XtimeB[this.i] = this._XtimeB[this.i];
-         this.XtimeD[this.i] = this._XtimeD[this.i];
-         this.XtimeE[this.i] = this._XtimeE[this.i];
-         ++this.i;
+         Sbox[i] = _Sbox[i];
+         InvSbox[i] = _InvSbox[i];
+         Xtime2Sbox[i] = _Xtime2Sbox[i];
+         Xtime3Sbox[i] = _Xtime3Sbox[i];
+         Xtime2[i] = _Xtime2[i];
+         Xtime9[i] = _Xtime9[i];
+         XtimeB[i] = _XtimeB[i];
+         XtimeD[i] = _XtimeD[i];
+         XtimeE[i] = _XtimeE[i];
+         ++i;
       }
   }
 
@@ -46,39 +46,39 @@ export class AESKey implements ISymmetricKey
   static {
     this.i = 0;
     while(this.i < this._Rcon.length) {
-         this.Rcon[this.i] = this._Rcon[this.i];
-         ++this.i;
+         Rcon[i] = _Rcon[i];
+         ++i;
       }
   }
 
-  private state: ByteArray;
-      private tmp: ByteArray;
-      private Nr: number;
-      private keyLength: number;
-      private key: ByteArray;
+  private state!: ByteArray;
+      private tmp!: ByteArray;
+      private Nr!: number;
+      private keyLength!: number;
+      private key!: ByteArray;
       constructor(key: ByteArray){
-         super();
-         this.tmp = new ByteArray();
-         this.state = new ByteArray();
-         this.keyLength = this.key.length;
+
+         tmp = new ByteArray();
+         state = new ByteArray();
+         keyLength = key.length;
          this.key = new ByteArray();
-         this.key.writeBytes(this.key);
+         this.key.writeBytes(key);
          expandKey();
       }
       
       public toString(): string
       {
-         return "aes" + 8 * this.keyLength;
+         return "aes" + 8 * keyLength;
       }
       
       public decrypt(block: ByteArray, index: number = 0): void
       {
-         let round: number = 0;
-         this.state.position = 0;
-         this.state.writeBytes(block,index,this.Nb * 4);
+         var round: number = 0;
+         state.position = 0;
+         state.writeBytes(block,index,Nb * 4);
          addRoundKey(key,Nr * Nb * 4);
          invShiftRows();
-         for(round = this.Nr; Boolean(round--); )
+         for(round = Nr; Boolean(round--); )
          {
             addRoundKey(key,round * Nb * 4);
             if(Boolean(round))
@@ -87,146 +87,146 @@ export class AESKey implements ISymmetricKey
             }
          }
          block.position = index;
-         block.writeBytes(this.state);
+         block.writeBytes(state);
       }
       
       protected invShiftRows(): void
       {
-         let tmp: number = 0;
-         this.state[0] = this.InvSbox[this.state[0]];
-         this.state[4] = this.InvSbox[this.state[4]];
-         this.state[8] = this.InvSbox[this.state[8]];
-         this.state[12] = this.InvSbox[this.state[12]];
-         this.tmp = Math.floor(this.InvSbox[this.state[13]]);
-         this.state[13] = this.InvSbox[this.state[9]];
-         this.state[9] = this.InvSbox[this.state[5]];
-         this.state[5] = this.InvSbox[this.state[1]];
-         this.state[1] = this.tmp;
-         this.tmp = Math.floor(this.InvSbox[this.state[2]]);
-         this.state[2] = this.InvSbox[this.state[10]];
-         this.state[10] = this.tmp;
-         this.tmp = Math.floor(this.InvSbox[this.state[6]]);
-         this.state[6] = this.InvSbox[this.state[14]];
-         this.state[14] = this.tmp;
-         this.tmp = Math.floor(this.InvSbox[this.state[3]]);
-         this.state[3] = this.InvSbox[this.state[7]];
-         this.state[7] = this.InvSbox[this.state[11]];
-         this.state[11] = this.InvSbox[this.state[15]];
-         this.state[15] = this.tmp;
+         var tmp: number = 0;
+         state[0] = InvSbox[state[0]];
+         state[4] = InvSbox[state[4]];
+         state[8] = InvSbox[state[8]];
+         state[12] = InvSbox[state[12]];
+         tmp = Math.floor(InvSbox[state[13]]);
+         state[13] = InvSbox[state[9]];
+         state[9] = InvSbox[state[5]];
+         state[5] = InvSbox[state[1]];
+         state[1] = tmp;
+         tmp = Math.floor(InvSbox[state[2]]);
+         state[2] = InvSbox[state[10]];
+         state[10] = tmp;
+         tmp = Math.floor(InvSbox[state[6]]);
+         state[6] = InvSbox[state[14]];
+         state[14] = tmp;
+         tmp = Math.floor(InvSbox[state[3]]);
+         state[3] = InvSbox[state[7]];
+         state[7] = InvSbox[state[11]];
+         state[11] = InvSbox[state[15]];
+         state[15] = tmp;
       }
       
       public dispose(): void
       {
-         let i: number = 0;
-         let r: Random = null;
+         var i: number = 0;
+         var r: Random = null as any;
          r = new Random();
-         for(this.i = 0; this.i < this.key.length; this.i++)
+         for(i = 0; i < key.length; i++)
          {
-            this.key[this.i] = r.nextByte();
+            key[i] = r.nextByte();
          }
-         this.Nr = r.nextByte();
-         for(this.i = 0; this.i < this.state.length; this.i++)
+         Nr = r.nextByte();
+         for(i = 0; i < state.length; i++)
          {
-            this.state[this.i] = r.nextByte();
+            state[i] = r.nextByte();
          }
-         for(this.i = 0; this.i < this.tmp.length; this.i++)
+         for(i = 0; i < tmp.length; i++)
          {
-            this.tmp[this.i] = r.nextByte();
+            tmp[i] = r.nextByte();
          }
-         this.key.length = 0;
-         this.keyLength = 0;
-         this.state.length = 0;
-         this.tmp.length = 0;
-         this.key = null;
-         this.state = null;
-         this.tmp = null;
-         this.Nr = 0;
+         key.length = 0;
+         keyLength = 0;
+         state.length = 0;
+         tmp.length = 0;
+         key = null as any;
+         state = null as any;
+         tmp = null as any;
+         Nr = 0;
          Memory.gc();
       }
       
       protected invMixSubColumns(): void
       {
-         let i: number = 0;
-         this.tmp.length = 0;
-         this.tmp[0] = this.XtimeE[this.state[0]] ^ this.XtimeB[this.state[1]] ^ this.XtimeD[this.state[2]] ^ this.Xtime9[this.state[3]];
-         this.tmp[5] = this.Xtime9[this.state[0]] ^ this.XtimeE[this.state[1]] ^ this.XtimeB[this.state[2]] ^ this.XtimeD[this.state[3]];
-         this.tmp[10] = this.XtimeD[this.state[0]] ^ this.Xtime9[this.state[1]] ^ this.XtimeE[this.state[2]] ^ this.XtimeB[this.state[3]];
-         this.tmp[15] = this.XtimeB[this.state[0]] ^ this.XtimeD[this.state[1]] ^ this.Xtime9[this.state[2]] ^ this.XtimeE[this.state[3]];
-         this.tmp[4] = this.XtimeE[this.state[4]] ^ this.XtimeB[this.state[5]] ^ this.XtimeD[this.state[6]] ^ this.Xtime9[this.state[7]];
-         this.tmp[9] = this.Xtime9[this.state[4]] ^ this.XtimeE[this.state[5]] ^ this.XtimeB[this.state[6]] ^ this.XtimeD[this.state[7]];
-         this.tmp[14] = this.XtimeD[this.state[4]] ^ this.Xtime9[this.state[5]] ^ this.XtimeE[this.state[6]] ^ this.XtimeB[this.state[7]];
-         this.tmp[3] = this.XtimeB[this.state[4]] ^ this.XtimeD[this.state[5]] ^ this.Xtime9[this.state[6]] ^ this.XtimeE[this.state[7]];
-         this.tmp[8] = this.XtimeE[this.state[8]] ^ this.XtimeB[this.state[9]] ^ this.XtimeD[this.state[10]] ^ this.Xtime9[this.state[11]];
-         this.tmp[13] = this.Xtime9[this.state[8]] ^ this.XtimeE[this.state[9]] ^ this.XtimeB[this.state[10]] ^ this.XtimeD[this.state[11]];
-         this.tmp[2] = this.XtimeD[this.state[8]] ^ this.Xtime9[this.state[9]] ^ this.XtimeE[this.state[10]] ^ this.XtimeB[this.state[11]];
-         this.tmp[7] = this.XtimeB[this.state[8]] ^ this.XtimeD[this.state[9]] ^ this.Xtime9[this.state[10]] ^ this.XtimeE[this.state[11]];
-         this.tmp[12] = this.XtimeE[this.state[12]] ^ this.XtimeB[this.state[13]] ^ this.XtimeD[this.state[14]] ^ this.Xtime9[this.state[15]];
-         this.tmp[1] = this.Xtime9[this.state[12]] ^ this.XtimeE[this.state[13]] ^ this.XtimeB[this.state[14]] ^ this.XtimeD[this.state[15]];
-         this.tmp[6] = this.XtimeD[this.state[12]] ^ this.Xtime9[this.state[13]] ^ this.XtimeE[this.state[14]] ^ this.XtimeB[this.state[15]];
-         this.tmp[11] = this.XtimeB[this.state[12]] ^ this.XtimeD[this.state[13]] ^ this.Xtime9[this.state[14]] ^ this.XtimeE[this.state[15]];
-         for(this.i = 0; this.i < 4 * this.Nb; this.i++)
+         var i: number = 0;
+         tmp.length = 0;
+         tmp[0] = XtimeE[state[0]] ^ XtimeB[state[1]] ^ XtimeD[state[2]] ^ Xtime9[state[3]];
+         tmp[5] = Xtime9[state[0]] ^ XtimeE[state[1]] ^ XtimeB[state[2]] ^ XtimeD[state[3]];
+         tmp[10] = XtimeD[state[0]] ^ Xtime9[state[1]] ^ XtimeE[state[2]] ^ XtimeB[state[3]];
+         tmp[15] = XtimeB[state[0]] ^ XtimeD[state[1]] ^ Xtime9[state[2]] ^ XtimeE[state[3]];
+         tmp[4] = XtimeE[state[4]] ^ XtimeB[state[5]] ^ XtimeD[state[6]] ^ Xtime9[state[7]];
+         tmp[9] = Xtime9[state[4]] ^ XtimeE[state[5]] ^ XtimeB[state[6]] ^ XtimeD[state[7]];
+         tmp[14] = XtimeD[state[4]] ^ Xtime9[state[5]] ^ XtimeE[state[6]] ^ XtimeB[state[7]];
+         tmp[3] = XtimeB[state[4]] ^ XtimeD[state[5]] ^ Xtime9[state[6]] ^ XtimeE[state[7]];
+         tmp[8] = XtimeE[state[8]] ^ XtimeB[state[9]] ^ XtimeD[state[10]] ^ Xtime9[state[11]];
+         tmp[13] = Xtime9[state[8]] ^ XtimeE[state[9]] ^ XtimeB[state[10]] ^ XtimeD[state[11]];
+         tmp[2] = XtimeD[state[8]] ^ Xtime9[state[9]] ^ XtimeE[state[10]] ^ XtimeB[state[11]];
+         tmp[7] = XtimeB[state[8]] ^ XtimeD[state[9]] ^ Xtime9[state[10]] ^ XtimeE[state[11]];
+         tmp[12] = XtimeE[state[12]] ^ XtimeB[state[13]] ^ XtimeD[state[14]] ^ Xtime9[state[15]];
+         tmp[1] = Xtime9[state[12]] ^ XtimeE[state[13]] ^ XtimeB[state[14]] ^ XtimeD[state[15]];
+         tmp[6] = XtimeD[state[12]] ^ Xtime9[state[13]] ^ XtimeE[state[14]] ^ XtimeB[state[15]];
+         tmp[11] = XtimeB[state[12]] ^ XtimeD[state[13]] ^ Xtime9[state[14]] ^ XtimeE[state[15]];
+         for(i = 0; i < 4 * Nb; i++)
          {
-            this.state[this.i] = this.InvSbox[this.tmp[this.i]];
+            state[i] = InvSbox[tmp[i]];
          }
       }
       
       private expandKey(): void
       {
-         let tmp0: number = 0;
-         let tmp1: number = 0;
-         let tmp2: number = 0;
-         let tmp3: number = 0;
-         let tmp4: number = 0;
-         let idx: number = 0;
-         let Nk: number = 0;
-         Nk = this.key.length / 4;
-         this.Nr = Nk + 6;
-         for(idx = Nk; idx < this.Nb * (this.Nr + 1); idx++)
+         var tmp0: number = 0;
+         var tmp1: number = 0;
+         var tmp2: number = 0;
+         var tmp3: number = 0;
+         var tmp4: number = 0;
+         var idx: number = 0;
+         var Nk: number = 0;
+         Nk = key.length / 4;
+         Nr = Nk + 6;
+         for(idx = Nk; idx < Nb * (Nr + 1); idx++)
          {
-            tmp0 = Math.floor(this.key[4 * idx - 4]);
-            tmp1 = Math.floor(this.key[4 * idx - 3]);
-            tmp2 = Math.floor(this.key[4 * idx - 2]);
-            tmp3 = Math.floor(this.key[4 * idx - 1]);
+            tmp0 = Math.floor(key[4 * idx - 4]);
+            tmp1 = Math.floor(key[4 * idx - 3]);
+            tmp2 = Math.floor(key[4 * idx - 2]);
+            tmp3 = Math.floor(key[4 * idx - 1]);
             if(!(idx % Nk))
             {
                tmp4 = tmp3;
-               tmp3 = Math.floor(this.Sbox[tmp0]);
-               tmp0 = Math.floor(this.Sbox[tmp1] ^ this.Rcon[idx / Nk]);
-               tmp1 = Math.floor(this.Sbox[tmp2]);
-               tmp2 = Math.floor(this.Sbox[tmp4]);
+               tmp3 = Math.floor(Sbox[tmp0]);
+               tmp0 = Math.floor(Sbox[tmp1] ^ Rcon[idx / Nk]);
+               tmp1 = Math.floor(Sbox[tmp2]);
+               tmp2 = Math.floor(Sbox[tmp4]);
             }
             else if(Nk > 6 && idx % Nk == 4)
             {
-               tmp0 = Math.floor(this.Sbox[tmp0]);
-               tmp1 = Math.floor(this.Sbox[tmp1]);
-               tmp2 = Math.floor(this.Sbox[tmp2]);
-               tmp3 = Math.floor(this.Sbox[tmp3]);
+               tmp0 = Math.floor(Sbox[tmp0]);
+               tmp1 = Math.floor(Sbox[tmp1]);
+               tmp2 = Math.floor(Sbox[tmp2]);
+               tmp3 = Math.floor(Sbox[tmp3]);
             }
-            this.key[4 * idx + 0] = this.key[4 * idx - 4 * Nk + 0] ^ tmp0;
-            this.key[4 * idx + 1] = this.key[4 * idx - 4 * Nk + 1] ^ tmp1;
-            this.key[4 * idx + 2] = this.key[4 * idx - 4 * Nk + 2] ^ tmp2;
-            this.key[4 * idx + 3] = this.key[4 * idx - 4 * Nk + 3] ^ tmp3;
+            key[4 * idx + 0] = key[4 * idx - 4 * Nk + 0] ^ tmp0;
+            key[4 * idx + 1] = key[4 * idx - 4 * Nk + 1] ^ tmp1;
+            key[4 * idx + 2] = key[4 * idx - 4 * Nk + 2] ^ tmp2;
+            key[4 * idx + 3] = key[4 * idx - 4 * Nk + 3] ^ tmp3;
          }
       }
       
       protected addRoundKey(key: ByteArray, offset: number): void
       {
-         let idx: number = 0;
+         var idx: number = 0;
          for(idx = 0; idx < 16; idx++)
          {
-            this.state[idx] ^= this.key[idx + offset];
+            state[idx] ^= key[idx + offset];
          }
       }
       
       public encrypt(block: ByteArray, index: number = 0): void
       {
-         let round: number = 0;
-         this.state.position = 0;
-         this.state.writeBytes(block,index,this.Nb * 4);
+         var round: number = 0;
+         state.position = 0;
+         state.writeBytes(block,index,Nb * 4);
          addRoundKey(key,0);
-         for(round = 1; round < this.Nr + 1; round++)
+         for(round = 1; round < Nr + 1; round++)
          {
-            if(round < this.Nr)
+            if(round < Nr)
             {
                mixSubColumns();
             }
@@ -237,55 +237,55 @@ export class AESKey implements ISymmetricKey
             addRoundKey(key,round * Nb * 4);
          }
          block.position = index;
-         block.writeBytes(this.state);
+         block.writeBytes(state);
       }
       
       protected mixSubColumns(): void
       {
-         this.tmp.length = 0;
-         this.tmp[0] = this.Xtime2Sbox[this.state[0]] ^ this.Xtime3Sbox[this.state[5]] ^ this.Sbox[this.state[10]] ^ this.Sbox[this.state[15]];
-         this.tmp[1] = this.Sbox[this.state[0]] ^ this.Xtime2Sbox[this.state[5]] ^ this.Xtime3Sbox[this.state[10]] ^ this.Sbox[this.state[15]];
-         this.tmp[2] = this.Sbox[this.state[0]] ^ this.Sbox[this.state[5]] ^ this.Xtime2Sbox[this.state[10]] ^ this.Xtime3Sbox[this.state[15]];
-         this.tmp[3] = this.Xtime3Sbox[this.state[0]] ^ this.Sbox[this.state[5]] ^ this.Sbox[this.state[10]] ^ this.Xtime2Sbox[this.state[15]];
-         this.tmp[4] = this.Xtime2Sbox[this.state[4]] ^ this.Xtime3Sbox[this.state[9]] ^ this.Sbox[this.state[14]] ^ this.Sbox[this.state[3]];
-         this.tmp[5] = this.Sbox[this.state[4]] ^ this.Xtime2Sbox[this.state[9]] ^ this.Xtime3Sbox[this.state[14]] ^ this.Sbox[this.state[3]];
-         this.tmp[6] = this.Sbox[this.state[4]] ^ this.Sbox[this.state[9]] ^ this.Xtime2Sbox[this.state[14]] ^ this.Xtime3Sbox[this.state[3]];
-         this.tmp[7] = this.Xtime3Sbox[this.state[4]] ^ this.Sbox[this.state[9]] ^ this.Sbox[this.state[14]] ^ this.Xtime2Sbox[this.state[3]];
-         this.tmp[8] = this.Xtime2Sbox[this.state[8]] ^ this.Xtime3Sbox[this.state[13]] ^ this.Sbox[this.state[2]] ^ this.Sbox[this.state[7]];
-         this.tmp[9] = this.Sbox[this.state[8]] ^ this.Xtime2Sbox[this.state[13]] ^ this.Xtime3Sbox[this.state[2]] ^ this.Sbox[this.state[7]];
-         this.tmp[10] = this.Sbox[this.state[8]] ^ this.Sbox[this.state[13]] ^ this.Xtime2Sbox[this.state[2]] ^ this.Xtime3Sbox[this.state[7]];
-         this.tmp[11] = this.Xtime3Sbox[this.state[8]] ^ this.Sbox[this.state[13]] ^ this.Sbox[this.state[2]] ^ this.Xtime2Sbox[this.state[7]];
-         this.tmp[12] = this.Xtime2Sbox[this.state[12]] ^ this.Xtime3Sbox[this.state[1]] ^ this.Sbox[this.state[6]] ^ this.Sbox[this.state[11]];
-         this.tmp[13] = this.Sbox[this.state[12]] ^ this.Xtime2Sbox[this.state[1]] ^ this.Xtime3Sbox[this.state[6]] ^ this.Sbox[this.state[11]];
-         this.tmp[14] = this.Sbox[this.state[12]] ^ this.Sbox[this.state[1]] ^ this.Xtime2Sbox[this.state[6]] ^ this.Xtime3Sbox[this.state[11]];
-         this.tmp[15] = this.Xtime3Sbox[this.state[12]] ^ this.Sbox[this.state[1]] ^ this.Sbox[this.state[6]] ^ this.Xtime2Sbox[this.state[11]];
-         this.state.position = 0;
-         this.state.writeBytes(this.tmp,0,this.Nb * 4);
+         tmp.length = 0;
+         tmp[0] = Xtime2Sbox[state[0]] ^ Xtime3Sbox[state[5]] ^ Sbox[state[10]] ^ Sbox[state[15]];
+         tmp[1] = Sbox[state[0]] ^ Xtime2Sbox[state[5]] ^ Xtime3Sbox[state[10]] ^ Sbox[state[15]];
+         tmp[2] = Sbox[state[0]] ^ Sbox[state[5]] ^ Xtime2Sbox[state[10]] ^ Xtime3Sbox[state[15]];
+         tmp[3] = Xtime3Sbox[state[0]] ^ Sbox[state[5]] ^ Sbox[state[10]] ^ Xtime2Sbox[state[15]];
+         tmp[4] = Xtime2Sbox[state[4]] ^ Xtime3Sbox[state[9]] ^ Sbox[state[14]] ^ Sbox[state[3]];
+         tmp[5] = Sbox[state[4]] ^ Xtime2Sbox[state[9]] ^ Xtime3Sbox[state[14]] ^ Sbox[state[3]];
+         tmp[6] = Sbox[state[4]] ^ Sbox[state[9]] ^ Xtime2Sbox[state[14]] ^ Xtime3Sbox[state[3]];
+         tmp[7] = Xtime3Sbox[state[4]] ^ Sbox[state[9]] ^ Sbox[state[14]] ^ Xtime2Sbox[state[3]];
+         tmp[8] = Xtime2Sbox[state[8]] ^ Xtime3Sbox[state[13]] ^ Sbox[state[2]] ^ Sbox[state[7]];
+         tmp[9] = Sbox[state[8]] ^ Xtime2Sbox[state[13]] ^ Xtime3Sbox[state[2]] ^ Sbox[state[7]];
+         tmp[10] = Sbox[state[8]] ^ Sbox[state[13]] ^ Xtime2Sbox[state[2]] ^ Xtime3Sbox[state[7]];
+         tmp[11] = Xtime3Sbox[state[8]] ^ Sbox[state[13]] ^ Sbox[state[2]] ^ Xtime2Sbox[state[7]];
+         tmp[12] = Xtime2Sbox[state[12]] ^ Xtime3Sbox[state[1]] ^ Sbox[state[6]] ^ Sbox[state[11]];
+         tmp[13] = Sbox[state[12]] ^ Xtime2Sbox[state[1]] ^ Xtime3Sbox[state[6]] ^ Sbox[state[11]];
+         tmp[14] = Sbox[state[12]] ^ Sbox[state[1]] ^ Xtime2Sbox[state[6]] ^ Xtime3Sbox[state[11]];
+         tmp[15] = Xtime3Sbox[state[12]] ^ Sbox[state[1]] ^ Sbox[state[6]] ^ Xtime2Sbox[state[11]];
+         state.position = 0;
+         state.writeBytes(tmp,0,Nb * 4);
       }
       
       protected shiftRows(): void
       {
-         let tmp: number = 0;
-         this.state[0] = this.Sbox[this.state[0]];
-         this.state[4] = this.Sbox[this.state[4]];
-         this.state[8] = this.Sbox[this.state[8]];
-         this.state[12] = this.Sbox[this.state[12]];
-         this.tmp = Math.floor(this.Sbox[this.state[1]]);
-         this.state[1] = this.Sbox[this.state[5]];
-         this.state[5] = this.Sbox[this.state[9]];
-         this.state[9] = this.Sbox[this.state[13]];
-         this.state[13] = this.tmp;
-         this.tmp = Math.floor(this.Sbox[this.state[2]]);
-         this.state[2] = this.Sbox[this.state[10]];
-         this.state[10] = this.tmp;
-         this.tmp = Math.floor(this.Sbox[this.state[6]]);
-         this.state[6] = this.Sbox[this.state[14]];
-         this.state[14] = this.tmp;
-         this.tmp = Math.floor(this.Sbox[this.state[15]]);
-         this.state[15] = this.Sbox[this.state[11]];
-         this.state[11] = this.Sbox[this.state[7]];
-         this.state[7] = this.Sbox[this.state[3]];
-         this.state[3] = this.tmp;
+         var tmp: number = 0;
+         state[0] = Sbox[state[0]];
+         state[4] = Sbox[state[4]];
+         state[8] = Sbox[state[8]];
+         state[12] = Sbox[state[12]];
+         tmp = Math.floor(Sbox[state[1]]);
+         state[1] = Sbox[state[5]];
+         state[5] = Sbox[state[9]];
+         state[9] = Sbox[state[13]];
+         state[13] = tmp;
+         tmp = Math.floor(Sbox[state[2]]);
+         state[2] = Sbox[state[10]];
+         state[10] = tmp;
+         tmp = Math.floor(Sbox[state[6]]);
+         state[6] = Sbox[state[14]];
+         state[14] = tmp;
+         tmp = Math.floor(Sbox[state[15]]);
+         state[15] = Sbox[state[11]];
+         state[11] = Sbox[state[7]];
+         state[7] = Sbox[state[3]];
+         state[3] = tmp;
       }
       
       public getBlockSize(): number

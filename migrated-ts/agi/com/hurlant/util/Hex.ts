@@ -4,12 +4,12 @@
 export class Hex{
       
       constructor(){
-         super();
+
       }
       
       public static fromString(str: string, colons: boolean = false): string
       {
-         let a: ByteArray = null;
+         var a: ByteArray = null as any;
          a = new ByteArray();
          a.writeUTFBytes(str);
          return fromArray(a,colons);
@@ -17,15 +17,15 @@ export class Hex{
       
       public static toString(hex: string): string
       {
-         let a: ByteArray = null;
+         var a: ByteArray = null as any;
          a = toArray(hex);
          return a.readUTFBytes(a.length);
       }
       
       public static toArray(hex: string): ByteArray
       {
-         let a: ByteArray = null;
-         let i: number = 0;
+         var a: ByteArray = null as any;
+         var i: number = 0;
          hex = hex.replace(/\s|:/gm,"");
          a = new ByteArray();
          if(Boolean(hex.length & 1 == 1))
@@ -41,8 +41,8 @@ export class Hex{
       
       public static fromArray(array: ByteArray, colons: boolean = false): string
       {
-         let s: string = null;
-         let i: number = 0;
+         var s: string = null as any;
+         var i: number = 0;
          s = "";
          for(i = 0; i < array.length; i++)
          {

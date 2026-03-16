@@ -3,17 +3,17 @@
 
 export class AmfAuthenticationVO{
       
-      public token: string;
-      public gameName: string;
-      public gameUrl: string;
-      public gameUrlShort: string;
+      public token!: string;
+      public gameName!: string;
+      public gameUrl!: string;
+      public gameUrlShort!: string;
       constructor(){
-         super();
+
       }
       
       public toObject(): Record<string, any>
       {
-         let _loc1_: Record<string, any> = new Object();
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.token = this.token;
          _loc1_.gameName = this.gameName;
          _loc1_.gameUrl = this.gameUrl;

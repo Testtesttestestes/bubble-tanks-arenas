@@ -5,7 +5,7 @@ export class NullReduction implements IReduction
    {
       
       constructor(){
-         super();
+
       }
       
       public reduce(x: BigInteger): void

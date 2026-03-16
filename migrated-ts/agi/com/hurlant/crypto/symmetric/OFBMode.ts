@@ -4,7 +4,7 @@
 export class OFBMode extends IVMode implements IMode
    {
       
-      constructor(key: ISymmetricKey, padding: IPad = null as any){
+      constructor(key: ISymmetricKey, padding: IPad = null){
          super(key,null);
       }
       
@@ -15,11 +15,11 @@ export class OFBMode extends IVMode implements IMode
       
       private core(src: ByteArray, iv: ByteArray): void
       {
-         let l: number = 0;
-         let tmp: ByteArray = null;
-         let i: number = 0;
-         let chunk: number = 0;
-         let j: number = 0;
+         var l: number = 0;
+         var tmp: ByteArray = null as any;
+         var i: number = 0;
+         var chunk: number = 0;
+         var j: number = 0;
          l = src.length;
          tmp = new ByteArray();
          for(i = 0; i < src.length; i += blockSize)
@@ -39,14 +39,14 @@ export class OFBMode extends IVMode implements IMode
       
       public decrypt(src: ByteArray): void
       {
-         let vector: ByteArray = null;
+         var vector: ByteArray = null as any;
          vector = getIV4d();
          core(src,vector);
       }
       
       public encrypt(src: ByteArray): void
       {
-         let vector: ByteArray = null;
+         var vector: ByteArray = null as any;
          vector = getIV4e();
          core(src,vector);
       }

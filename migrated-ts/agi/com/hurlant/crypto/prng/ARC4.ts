@@ -4,13 +4,13 @@
 export class ARC4 implements IPRNG, IStreamCipher
    {
       
-      private S: ByteArray;
+      private S!: ByteArray;
       private i: number = 0;
       private j: number = 0;
       private readonly psize: number = 256;
-      constructor(key: ByteArray = null as any){
-         super();
-         this.S = new ByteArray();
+      constructor(key: ByteArray = null){
+
+         S = new ByteArray();
          if(Boolean(key))
          {
             init(key);
@@ -24,20 +24,20 @@ export class ARC4 implements IPRNG, IStreamCipher
       
       public init(key: ByteArray): void
       {
-         let i: number = 0;
-         let j: number = 0;
-         let t: number = 0;
-         for(this.i = 0; this.i < 256; this.i++)
+         var i: number = 0;
+         var j: number = 0;
+         var t: number = 0;
+         for(i = 0; i < 256; i++)
          {
-            this.S[this.i] = this.i;
+            S[i] = i;
          }
-         this.j = 0;
-         for(this.i = 0; this.i < 256; this.i++)
+         j = 0;
+         for(i = 0; i < 256; i++)
          {
-            this.j = this.j + this.S[this.i] + key[this.i % key.length] & 0xFF;
-            t = Math.floor(this.S[this.i]);
-            this.S[this.i] = this.S[this.j];
-            this.S[this.j] = t;
+            j = j + S[i] + key[i % key.length] & 0xFF;
+            t = Math.floor(S[i]);
+            S[i] = S[j];
+            S[j] = t;
          }
          this.i = 0;
          this.j = 0;
@@ -45,16 +45,16 @@ export class ARC4 implements IPRNG, IStreamCipher
       
       public dispose(): void
       {
-         let i: number = 0;
-         this.i = 0;
-         if(this.S != null)
+         var i: number = 0;
+         i = 0;
+         if(S != null)
          {
-            for(this.i = 0; this.i < this.S.length; this.i++)
+            for(i = 0; i < S.length; i++)
             {
-               this.S[this.i] = Math.random() * 256;
+               S[i] = Math.random() * 256;
             }
-            this.S.length = 0;
-            this.S = null;
+            S.length = 0;
+            S = null as any;
          }
          this.i = 0;
          this.j = 0;
@@ -63,25 +63,25 @@ export class ARC4 implements IPRNG, IStreamCipher
       
       public encrypt(block: ByteArray): void
       {
-         let i: number = 0;
-         this.i = 0;
-         while(this.i < block.length)
+         var i: number = 0;
+         i = 0;
+         while(i < block.length)
          {
-            let _temp_2: any = block;
-            let _loc3_: number = this.i++;
+            var _temp_2: any = block;
+            var _loc3_: number = i++;
             _temp_2[_loc3_] ^= next();
          }
       }
       
       public next(): number
       {
-         let t: number = 0;
-         this.i = this.i + 1 & 0xFF;
-         this.j = this.j + this.S[this.i] & 0xFF;
-         t = Math.floor(this.S[this.i]);
-         this.S[this.i] = this.S[this.j];
-         this.S[this.j] = t;
-         return this.S[t + this.S[this.i] & 0xFF];
+         var t: number = 0;
+         i = i + 1 & 0xFF;
+         j = j + S[i] & 0xFF;
+         t = Math.floor(S[i]);
+         S[i] = S[j];
+         S[j] = t;
+         return S[t + S[i] & 0xFF];
       }
       
       public getBlockSize(): number
@@ -91,7 +91,7 @@ export class ARC4 implements IPRNG, IStreamCipher
       
       public getPoolSize(): number
       {
-         return this.psize;
+         return psize;
       }
       
       public toString(): string

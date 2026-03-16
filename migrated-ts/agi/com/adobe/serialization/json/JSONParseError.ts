@@ -3,11 +3,11 @@
 
 export class JSONParseError extends Error{
       
-      private _location: number;
-      private _text: string;
+      private _location!: number;
+      private _text!: string;
       constructor(param1: string = "", param2: number = 0, param3: string = ""){
          super(param1);
-         name = "JSONParseError";
+this.name = "JSONParseError";
          this._location = param2;
          this._text = param3;
       }

@@ -18,35 +18,35 @@ export class DESKey implements ISymmetricKey
       private static readonly SP6: any[] = [536870928,541065216,16384,541081616,541065216,16,541081616,4194304,536887296,4210704,4194304,536870928,4194320,536887296,536870912,16400,0,4194320,536887312,16384,4210688,536887312,16,541065232,541065232,0,4210704,541081600,16400,4210688,541081600,536870912,536887296,16,541065232,4210688,541081616,4194304,16400,536870928,4194304,536887296,536870912,16400,536870928,541081616,4210688,541065216,4210704,541081600,0,541065232,16,16384,541065216,4210704,16384,4194320,536887312,0,541081600,536870912,4194320,536887312];
       private static readonly SP7: any[] = [2097152,69206018,67110914,0,2048,67110914,2099202,69208064,69208066,2097152,0,67108866,2,67108864,69206018,2050,67110912,2099202,2097154,67110912,67108866,69206016,69208064,2097154,69206016,2048,2050,69208066,2099200,2,67108864,2099200,67108864,2099200,2097152,67110914,67110914,69206018,69206018,2,2097154,67108864,67110912,2097152,69208064,2050,2099202,69208064,2050,67108866,69208066,69206016,2099200,0,2,69208066,0,2099202,69206016,2048,67108866,67110912,2048,2097154];
       private static readonly SP8: any[] = [268439616,4096,262144,268701760,268435456,268439616,64,268435456,262208,268697600,268701760,266240,268701696,266304,4096,64,268697600,268435520,268439552,4160,266240,262208,268697664,268701696,4160,0,0,268697664,268435520,268439552,266304,262144,266304,262144,268701696,4096,64,268697664,4096,266304,268439552,64,268435520,268697600,268697664,268435456,262144,268439616,0,268701760,262208,268435520,268697600,268439552,268439616,0,268701760,266240,266240,4160,4160,262208,268435456,268701696];
-      protected encKey: any[];
-      protected key: ByteArray;
-      protected decKey: any[];
+      protected encKey!: any[];
+      protected key!: ByteArray;
+      protected decKey!: any[];
       constructor(key: ByteArray){
-         super();
-         this.key = this.key;
-         this.encKey = generateWorkingKey(true,this.key,0);
-         this.decKey = generateWorkingKey(false,this.key,0);
+
+         this.key = key;
+         this.encKey = generateWorkingKey(true,key,0);
+         this.decKey = generateWorkingKey(false,key,0);
       }
       
       protected generateWorkingKey(encrypting: boolean, key: ByteArray, off: number): any[]
       {
-         let newKey: any[] = null;
-         let pc1m: ByteArray = null;
-         let pcr: ByteArray = null;
-         let l: number = 0;
-         let j: number = 0;
-         let i: number = 0;
-         let m: number = 0;
-         let n: number = 0;
-         let i1: number = 0;
-         let i2: number = 0;
+         var newKey: any[] = null as any;
+         var pc1m: ByteArray = null as any;
+         var pcr: ByteArray = null as any;
+         var l: number = 0;
+         var j: number = 0;
+         var i: number = 0;
+         var m: number = 0;
+         var n: number = 0;
+         var i1: number = 0;
+         var i2: number = 0;
          newKey = [];
          pc1m = new ByteArray();
          pcr = new ByteArray();
          for(j = 0; j < 56; j++)
          {
-            l = Math.floor(this.pc1[j]);
-            pc1m[j] = (this.key[off + (l >>> 3)] & this.bytebit[l & 7]) != 0;
+            l = Math.floor(pc1[j]);
+            pc1m[j] = (key[off + (l >>> 3)] & bytebit[l & 7]) != 0;
          }
          for(i = 0; i < 16; i++)
          {
@@ -62,7 +62,7 @@ export class DESKey implements ISymmetricKey
             newKey[m] = newKey[n] = 0;
             for(j = 0; j < 28; j++)
             {
-               l = j + this.totrot[i];
+               l = j + totrot[i];
                if(l < 28)
                {
                   pcr[j] = pc1m[l];
@@ -74,7 +74,7 @@ export class DESKey implements ISymmetricKey
             }
             for(j = 28; j < 56; j++)
             {
-               l = j + this.totrot[i];
+               l = j + totrot[i];
                if(l < 56)
                {
                   pcr[j] = pc1m[l];
@@ -86,13 +86,13 @@ export class DESKey implements ISymmetricKey
             }
             for(j = 0; j < 24; j++)
             {
-               if(Boolean(pcr[this.pc2[j]]))
+               if(Boolean(pcr[pc2[j]]))
                {
-                  newKey[m] |= this.bigbyte[j];
+                  newKey[m] |= bigbyte[j];
                }
-               if(Boolean(pcr[this.pc2[j + 24]]))
+               if(Boolean(pcr[pc2[j + 24]]))
                {
-                  newKey[n] |= this.bigbyte[j];
+                  newKey[n] |= bigbyte[j];
                }
             }
          }
@@ -118,40 +118,40 @@ export class DESKey implements ISymmetricKey
       
       public dispose(): void
       {
-         let i: number = 0;
+         var i: number = 0;
          i = 0;
          i = 0;
-         while(i < this.encKey.length)
+         while(i < encKey.length)
          {
-            this.encKey[i] = 0;
+            encKey[i] = 0;
             i++;
          }
          i = 0;
-         while(i < this.decKey.length)
+         while(i < decKey.length)
          {
-            this.decKey[i] = 0;
+            decKey[i] = 0;
             i++;
          }
-         this.encKey = null;
-         this.decKey = null;
+         encKey = null as any;
+         decKey = null as any;
          i = 0;
-         while(i < this.key.length)
+         while(i < key.length)
          {
-            this.key[i] = 0;
+            key[i] = 0;
             i++;
          }
-         this.key.length = 0;
-         this.key = null;
+         key.length = 0;
+         key = null as any;
          Memory.gc();
       }
       
       protected desFunc(wKey: any[], inp: ByteArray, inOff: number, out: ByteArray, outOff: number): void
       {
-         let work: number = 0;
-         let right: number = 0;
-         let left: number = 0;
-         let round: number = 0;
-         let fval: number = 0;
+         var work: number = 0;
+         var right: number = 0;
+         var left: number = 0;
+         var round: number = 0;
+         var fval: number = 0;
          left = Math.floor((inp[inOff + 0] & 0xFF) << 24);
          left |= (inp[inOff + 1] & 0xFF) << 16;
          left |= (inp[inOff + 2] & 0xFF) << 8;
@@ -181,27 +181,27 @@ export class DESKey implements ISymmetricKey
          {
             work = Math.floor(right << 28 | right >>> 4);
             work ^= wKey[round * 4 + 0];
-            fval = Math.floor(this.SP7[work & 0x3F]);
-            fval |= this.SP5[work >>> 8 & 0x3F];
-            fval |= this.SP3[work >>> 16 & 0x3F];
-            fval |= this.SP1[work >>> 24 & 0x3F];
+            fval = Math.floor(SP7[work & 0x3F]);
+            fval |= SP5[work >>> 8 & 0x3F];
+            fval |= SP3[work >>> 16 & 0x3F];
+            fval |= SP1[work >>> 24 & 0x3F];
             work = Math.floor(right ^ wKey[round * 4 + 1]);
-            fval |= this.SP8[work & 0x3F];
-            fval |= this.SP6[work >>> 8 & 0x3F];
-            fval |= this.SP4[work >>> 16 & 0x3F];
-            fval |= this.SP2[work >>> 24 & 0x3F];
+            fval |= SP8[work & 0x3F];
+            fval |= SP6[work >>> 8 & 0x3F];
+            fval |= SP4[work >>> 16 & 0x3F];
+            fval |= SP2[work >>> 24 & 0x3F];
             left ^= fval;
             work = Math.floor(left << 28 | left >>> 4);
             work ^= wKey[round * 4 + 2];
-            fval = Math.floor(this.SP7[work & 0x3F]);
-            fval |= this.SP5[work >>> 8 & 0x3F];
-            fval |= this.SP3[work >>> 16 & 0x3F];
-            fval |= this.SP1[work >>> 24 & 0x3F];
+            fval = Math.floor(SP7[work & 0x3F]);
+            fval |= SP5[work >>> 8 & 0x3F];
+            fval |= SP3[work >>> 16 & 0x3F];
+            fval |= SP1[work >>> 24 & 0x3F];
             work = Math.floor(left ^ wKey[round * 4 + 3]);
-            fval |= this.SP8[work & 0x3F];
-            fval |= this.SP6[work >>> 8 & 0x3F];
-            fval |= this.SP4[work >>> 16 & 0x3F];
-            fval |= this.SP2[work >>> 24 & 0x3F];
+            fval |= SP8[work & 0x3F];
+            fval |= SP6[work >>> 8 & 0x3F];
+            fval |= SP4[work >>> 16 & 0x3F];
+            fval |= SP2[work >>> 24 & 0x3F];
             right ^= fval;
          }
          right = Math.floor(right << 31 | right >>> 1);
