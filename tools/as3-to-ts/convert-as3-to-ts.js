@@ -202,7 +202,12 @@ function convertAs3ToTs(source) {
   };
 
   for (const [as3Event, tsEvent] of Object.entries(eventMap)) {
-    const regex = new RegExp(`\\b${as3Event.replace(/\\./g, '\\\\.')}\\b`, 'g');
+    const [, eventClass, eventConst] = as3Event.match(/^(\w+)\.(\w+)$/) || [];
+    if (!eventClass || !eventConst) continue;
+    // Handle both short and fully-qualified forms, including optional spacing around dots.
+    // Examples: MouseEvent.CLICK, flash.events.MouseEvent.CLICK, flash.events.MouseEvent . CLICK.
+    const fqPrefix = '(?:\\bflash\\s*\\.\\s*events\\s*\\.\\s*)?';
+    const regex = new RegExp(`${fqPrefix}${eventClass}\\s*\\.\\s*${eventConst}\\b`, 'g');
     converted = converted.replace(regex, tsEvent);
   }
 

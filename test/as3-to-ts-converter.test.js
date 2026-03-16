@@ -6,6 +6,7 @@ const path = require('node:path');
 
 const { convertAs3ToTs, mapType, convertParams } = require('../tools/as3-to-ts/convert-as3-to-ts');
 const { extractClassScopePropertyNames, addThisToPropertyUsage, processFile } = require('../tools/as3-to-ts/fix-implicit-this');
+const { applyImports, buildSymbolMap } = require('../tools/as3-to-ts/resolve-imports');
 
 const { healFunctionParamThisPrefixes } = require('../tools/as3-to-ts/heal-signature-params');
 
@@ -188,6 +189,26 @@ test('convertAs3ToTs rewrites E4X wildcard and filter notations', () => {
   assert.match(output, /xml\._filter\(id == 1\)/);
 });
 
+test('convertAs3ToTs rewrites fully-qualified event constants with optional spacing', () => {
+  const input = `package
+{
+   public class Events
+   {
+      public function hook(target:MovieClip) : void
+      {
+         target.addEventListener(flash.events.MouseEvent . CLICK, onClick);
+         target.addEventListener(flash.events.FocusEvent.FOCUS_IN, onFocus);
+         target.addEventListener(flash.events.Event.ENTER_FRAME, onFrame);
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /addEventListener\("click", onClick\.bind\(this\)\)/);
+  assert.match(output, /addEventListener\("focusin", onFocus\.bind\(this\)\)/);
+  assert.match(output, /addEventListener\("enterframe", onFrame\.bind\(this\)\)/);
+});
+
 test('convertAs3ToTs normalizes interface getter signatures with space before type colon', () => {
   const input = `package fl.controls.listClasses
 {
@@ -258,6 +279,24 @@ test('convertAs3ToTs does not rewrite uppercase method calls as class casts', ()
   const output = convertAs3ToTs(input);
   assert.match(output, /F\(xl\)/);
   assert.doesNotMatch(output, /as unknown as F/);
+});
+
+test('resolve-imports handles CRLF files and preserves line endings', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'resolve-imports-'));
+  const provider = path.join(tmp, 'TankData.ts');
+  const consumer = path.join(tmp, 'Viewer.ts');
+
+  fs.writeFileSync(provider, 'export class TankData {}\r\n', 'utf8');
+  fs.writeFileSync(consumer, 'export class Viewer {\r\n  public data: TankData;\r\n}\r\n', 'utf8');
+
+  const files = [provider, consumer];
+  const symbolMap = buildSymbolMap(files);
+  const changed = applyImports(consumer, symbolMap);
+  const updated = fs.readFileSync(consumer, 'utf8');
+
+  assert.equal(changed, true);
+  assert.match(updated, /import \{ TankData \} from '\.\/TankData';\r\n\r\nexport class Viewer/);
+  assert.match(updated, /\r\n/g);
 });
 
 
