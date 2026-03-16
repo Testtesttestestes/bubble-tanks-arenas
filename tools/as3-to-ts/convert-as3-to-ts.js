@@ -364,7 +364,7 @@ function convertAs3ToTs(source) {
 
   // Keep casting rewrites narrow: broad `ClassName(x)` rewrites break legitimate
   // crypto/math calls such as `F(xl)` or `MontgomeryReduction(...)`.
-  converted = converted.replace(/\b(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event)\(([^)]+)\)/g, (match, type, inner) => {
+  converted = converted.replace(/\b(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader)\(([^)]+)\)/g, (match, type, inner) => {
     if (type === 'Array') return `(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${type}(${inner})`;
     return `(${inner} as unknown as ${type})`;

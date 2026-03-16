@@ -129,10 +129,17 @@ declare class SoundTransform {
   volume: number;
 }
 declare class URLLoader extends EventDispatcher {
+  constructor(request?: URLRequest);
   dataFormat: string;
   load(req: any): void;
   data: any;
 }
+
+declare const URLLoader: {
+  new (request?: URLRequest): URLLoader;
+  (request?: URLRequest): URLLoader;
+  prototype: URLLoader;
+};
 declare class Loader extends DisplayObjectContainer {
   contentLoaderInfo: LoaderInfo;
   content: DisplayObject;
@@ -212,4 +219,8 @@ interface EventTarget {
   gotoAndPlay?(frame: any): void;
   soundTransform?: SoundTransform;
   name?: string;
+}
+
+interface ArrayConstructor {
+  NUMERIC: number;
 }
