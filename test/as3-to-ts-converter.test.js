@@ -6,7 +6,7 @@ const path = require('node:path');
 
 const { convertAs3ToTs, mapType, convertParams } = require('../tools/as3-to-ts/convert-as3-to-ts');
 const { extractClassScopePropertyNames, addThisToPropertyUsage, processFile } = require('../tools/as3-to-ts/fix-implicit-this');
-const { applyImports, buildSymbolMap } = require('../tools/as3-to-ts/resolve-imports');
+const { applyImports, buildSymbolMap, analyzeFile, getDeclaredNames, getUsedIdentifiers } = require('../tools/as3-to-ts/resolve-imports');
 
 const { healFunctionParamThisPrefixes } = require('../tools/as3-to-ts/heal-signature-params');
 
@@ -398,4 +398,41 @@ test('fix-implicit-this does not prefix obfuscated class field declarations with
   assert.match(fixed, /var_388!: number;/);
   assert.match(fixed, /this\.var_388 = 1;/);
   assert.doesNotMatch(fixed, /this\.var_388!: number;/);
+});
+
+
+test('resolve-imports treats definite assignment class fields as declared names', () => {
+  const declared = getDeclaredNames(`export class AGI {\n  private client!: Client;\n}`);
+  assert.equal(declared.has('client'), true);
+  assert.equal(declared.has('Client'), false);
+});
+
+test('resolve-imports skips member-access identifiers in usage scan', () => {
+  const used = getUsedIdentifiers(`export class AGI {\n  public test(): void {\n    this.client = this.client;\n    stage.frameRate = 60;\n  }\n}`);
+  assert.equal(used.has('client'), false);
+  assert.equal(used.has('frameRate'), false);
+});
+
+test('resolve-imports diagnostics include unresolved and provider candidates', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'resolve-imports-debug-'));
+  const providerA = path.join(tmp, 'pkgA', 'Client.ts');
+  const providerB = path.join(tmp, 'pkgB', 'Client.ts');
+  const consumer = path.join(tmp, 'AGI.ts');
+
+  fs.mkdirSync(path.dirname(providerA), { recursive: true });
+  fs.mkdirSync(path.dirname(providerB), { recursive: true });
+
+  fs.writeFileSync(providerA, 'export class Client {}\n', 'utf8');
+  fs.writeFileSync(providerB, 'export class Client {}\n', 'utf8');
+  fs.writeFileSync(consumer, 'export class AGI {\n  private client!: Client;\n  private loginStatus!: LoginStatus;\n}\n', 'utf8');
+
+  const symbolMap = buildSymbolMap([providerA, providerB, consumer]);
+  const analysis = analyzeFile(consumer, symbolMap);
+
+  const unresolved = new Map(analysis.unresolved.map((item) => [item.id, item.providers.length]));
+  assert.equal(unresolved.get('LoginStatus'), 0);
+
+  const neededClient = analysis.needed.find((item) => item.id === 'Client');
+  assert.ok(neededClient);
+  assert.equal(neededClient.providers.length, 2);
 });

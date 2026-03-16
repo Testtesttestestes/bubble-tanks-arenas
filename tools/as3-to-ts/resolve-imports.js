@@ -58,7 +58,14 @@ function getDeclaredNames(source) {
   const declared = new Set();
 
   for (const m of source.matchAll(/^\s*import\s+\{([^}]+)\}\s+from\s+['"][^'"]+['"];?\s*$/gm)) {
-    m[1].split(',').map((v) => v.trim()).filter(Boolean).forEach((n) => declared.add(n));
+    m[1]
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean)
+      .forEach((n) => {
+        const aliasMatch = n.match(/^([A-Za-z_$][\w$]*)\s+as\s+([A-Za-z_$][\w$]*)$/i);
+        declared.add(aliasMatch ? aliasMatch[2] : n);
+      });
   }
   for (const m of source.matchAll(/^\s*import\s+([A-Za-z_$][\w$]*)\s+from\s+['"][^'"]+['"];?\s*$/gm)) {
     declared.add(m[1]);
@@ -68,7 +75,7 @@ function getDeclaredNames(source) {
     /^\s*export\s+(?:class|interface|type|enum)\s+([A-Za-z_$][\w$]*)\b/gm,
     /^\s*(?:class|interface|type|enum)\s+([A-Za-z_$][\w$]*)\b/gm,
     /\b(?:const|let|var|function)\s+([A-Za-z_$][\w$]*)\b/gm,
-    /\b(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*:/gm,
+    /\b(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*!?\s*:/gm,
     /^\s*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*(?::\s*[^\s{]+)?\s*\{/gm,
     /\b(?:constructor)\s*\(([^)]*)\)/gm
   ];
@@ -108,6 +115,9 @@ function getUsedIdentifiers(source) {
   const re = /\b([A-Za-z_$][\w$]*)\b/g;
   for (const m of stripped.matchAll(re)) {
     const id = m[1];
+    const startIndex = m.index ?? 0;
+    const prevChar = stripped[startIndex - 1];
+    if (prevChar === '.') continue;
     if (TS_KEYWORDS.has(id) || BUILTIN_GLOBALS.has(id) || FLASH_TYPES.has(id)) continue;
     used.add(id);
   }
@@ -136,7 +146,29 @@ function relativeImport(fromFile, toFile) {
   return rel;
 }
 
-function applyImports(file, symbolMap) {
+function chooseProvider(file, id, providers, existingImports) {
+  const existingProvider = [...existingImports.keys()].find((from) => existingImports.get(from)?.has(id));
+  if (existingProvider) {
+    const abs = path.resolve(path.dirname(file), `${existingProvider}.ts`);
+    if (providers.includes(abs)) return abs;
+  }
+
+  const nonSelfProviders = providers.filter((p) => p !== file);
+  if (nonSelfProviders.length === 0) return null;
+
+  return nonSelfProviders
+    .slice()
+    .sort((a, b) => {
+      const relA = relativeImport(file, a);
+      const relB = relativeImport(file, b);
+      const depthA = relA.split('/').length;
+      const depthB = relB.split('/').length;
+      if (depthA !== depthB) return depthA - depthB;
+      return relA.localeCompare(relB);
+    })[0];
+}
+
+function analyzeFile(file, symbolMap) {
   const originalSource = fs.readFileSync(file, 'utf8');
   const normalized = normalizeLineEndings(originalSource);
   const source = normalized.text;
@@ -147,21 +179,32 @@ function applyImports(file, symbolMap) {
 
   const existingImports = new Map();
   for (const m of source.matchAll(/^\s*import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"];?\s*$/gm)) {
-    const names = m[1].split(',').map((v) => v.trim()).filter(Boolean);
+    const names = m[1]
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean)
+      .map((n) => {
+        const aliasMatch = n.match(/^([A-Za-z_$][\w$]*)\s+as\s+([A-Za-z_$][\w$]*)$/i);
+        return aliasMatch ? aliasMatch[2] : n;
+      });
     const from = m[2];
     if (!existingImports.has(from)) existingImports.set(from, new Set());
     for (const n of names) existingImports.get(from).add(n);
   }
 
   const needed = [];
+  const unresolved = [];
   const seen = new Set();
 
   for (const id of used) {
     if (declared.has(id) || knownMembers.has(id)) continue;
-    const providers = symbolMap.get(id);
-    if (!providers || providers.length === 0) continue;
-    const target = providers.find((p) => p !== file) || providers[0];
-    if (!target || target === file) continue;
+    const providers = symbolMap.get(id) || [];
+    const target = chooseProvider(file, id, providers, existingImports);
+
+    if (!target) {
+      unresolved.push({ id, providers });
+      continue;
+    }
 
     const from = relativeImport(file, target);
     if (existingImports.get(from)?.has(id)) continue;
@@ -169,8 +212,14 @@ function applyImports(file, symbolMap) {
     const key = `${from}::${id}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    needed.push({ id, from });
+    needed.push({ id, from, providers });
   }
+
+  return { originalSource, normalized, source, existingImports, needed, unresolved };
+}
+
+function applyImports(file, symbolMap) {
+  const { normalized, source, existingImports, needed } = analyzeFile(file, symbolMap);
 
   if (needed.length === 0) return false;
 
@@ -204,13 +253,39 @@ function applyImports(file, symbolMap) {
 }
 
 function parseArgs(argv) {
-  const args = { input: null };
+  const args = { input: null, debug: false, debugFile: null };
   for (let i = 2; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--input' || token === '-i') args.input = argv[++i];
+    if (token === '--debug') args.debug = true;
+    if (token === '--debug-file') args.debugFile = path.resolve(argv[++i]);
   }
-  if (!args.input) throw new Error('Usage: node resolve-imports.js --input <file-or-dir>');
+  if (!args.input) throw new Error('Usage: node resolve-imports.js --input <file-or-dir> [--debug] [--debug-file <file>]');
   return args;
+}
+
+function printDiagnostics(file, analysis) {
+  const relevantNeeded = analysis.needed.map((n) => ({
+    id: n.id,
+    selectedFrom: n.from,
+    providers: n.providers.map((p) => relativeImport(file, p))
+  }));
+  const unresolved = analysis.unresolved.map((item) => ({
+    id: item.id,
+    providers: item.providers.map((p) => relativeImport(file, p))
+  }));
+
+  console.log(`\n[resolve-imports:debug] ${file}`);
+  console.log(`  unresolved identifiers (${unresolved.length}):`);
+  for (const item of unresolved.sort((a, b) => a.id.localeCompare(b.id))) {
+    const providers = item.providers.length ? item.providers.join(', ') : '(none)';
+    console.log(`    - ${item.id} | providers: ${providers}`);
+  }
+
+  console.log(`  auto-resolved identifiers (${relevantNeeded.length}):`);
+  for (const item of relevantNeeded.sort((a, b) => a.id.localeCompare(b.id))) {
+    console.log(`    - ${item.id} -> ${item.selectedFrom} | providers: ${item.providers.join(', ')}`);
+  }
 }
 
 function runCli() {
@@ -219,6 +294,9 @@ function runCli() {
   const symbolMap = buildSymbolMap(files);
   let changed = 0;
   for (const file of files) {
+    if (args.debug && (!args.debugFile || args.debugFile === path.resolve(file))) {
+      printDiagnostics(file, analyzeFile(file, symbolMap));
+    }
     if (applyImports(file, symbolMap)) changed += 1;
   }
   console.log(`resolved imports in ${changed}/${files.length}`);
@@ -228,4 +306,4 @@ if (require.main === module) {
   runCli();
 }
 
-module.exports = { collectTsFiles, buildSymbolMap, applyImports };
+module.exports = { collectTsFiles, buildSymbolMap, applyImports, analyzeFile, getDeclaredNames, getUsedIdentifiers };
