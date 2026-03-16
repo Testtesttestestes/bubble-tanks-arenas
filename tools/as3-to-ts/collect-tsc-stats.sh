@@ -6,6 +6,7 @@ LOG_FILE="${1:-tsc_output.log}"
 ERROR_SLICE_RADIUS="${ERROR_SLICE_RADIUS:-10}"
 MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-20}"
 MAX_ERROR_MESSAGES_PER_CODE="${MAX_ERROR_MESSAGES_PER_CODE:-5}"
+PRINT_ALL_ERRORS="${PRINT_ALL_ERRORS:-1}"
 
 if [[ "$LOG_FILE" != /* ]]; then
   LOG_FILE="$ROOT_DIR/$LOG_FILE"
@@ -35,6 +36,11 @@ printf '\nTop error codes:\n'
 
 printf '\nTop file+code pairs:\n'
 error_stream | sed -E 's#^(.+)\([0-9]+,[0-9]+\): error (TS[0-9]+):.*$#\1 :: \2#' | sort | uniq -c | sort -nr | head -n 20 || true
+
+if [[ "$PRINT_ALL_ERRORS" == "1" ]]; then
+  printf '\nAll TypeScript errors:\n'
+  error_stream || true
+fi
 
 printf '\nError code details (top messages per code, max %s):\n' "$MAX_ERROR_MESSAGES_PER_CODE"
 for code in $( (error_stream | grep -o "TS[0-9]\+" || true) | sort -u ); do
