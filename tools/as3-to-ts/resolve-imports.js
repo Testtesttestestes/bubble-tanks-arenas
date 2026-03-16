@@ -98,11 +98,9 @@ function getUsedIdentifiers(source) {
 
   const used = new Set();
 
-  const typeUsages = stripped.match(/:\s*([A-Z]\w*|class_\d+)/g) || [];
-  for (const usage of typeUsages) {
-    const idMatch = usage.match(/([A-Z]\w*|class_\d+)$/);
-    if (!idMatch) continue;
-    const id = idMatch[1];
+  const usageRegex = /(?:new\s+|:\s*|extends\s+|implements\s+|\b)([A-Z]\w*|class_\d+)\b/g;
+  for (const m of stripped.matchAll(usageRegex)) {
+    const id = m[1];
     if (TS_KEYWORDS.has(id) || BUILTIN_GLOBALS.has(id) || FLASH_TYPES.has(id)) continue;
     used.add(id);
   }
