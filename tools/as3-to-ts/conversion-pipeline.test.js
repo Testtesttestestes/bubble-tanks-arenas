@@ -9,6 +9,16 @@ function runNode(script, args) {
   execFileSync('node', [path.resolve('tools/as3-to-ts', script), ...args], { stdio: 'pipe' });
 }
 
+function runTsc(projectPath, logPath) {
+  try {
+    execFileSync('npx', ['tsc', '--pretty', 'false', '--project', projectPath], {
+      stdio: ['ignore', fs.openSync(logPath, 'w'), fs.openSync(logPath, 'a')]
+    });
+  } catch {
+    // Expected when TypeScript finds diagnostics; logs are still written for stats parsing.
+  }
+}
+
 test('conversion pipeline runs end-to-end and collect-tsc-stats analyzes generated log', () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'conversion-pipeline-'));
   const inputDir = path.join(tempRoot, 'as3-input');
@@ -61,9 +71,7 @@ test('conversion pipeline runs end-to-end and collect-tsc-stats analyzes generat
   );
 
   const tscLogPath = path.join(outputDir, 'tsc_output.log');
-  execFileSync('npx', ['tsc', '--pretty', 'false', '--project', tsconfigPath], {
-    stdio: ['ignore', fs.openSync(tscLogPath, 'w'), fs.openSync(tscLogPath, 'a')]
-  });
+  runTsc(tsconfigPath, tscLogPath);
 
   const statsOutput = execFileSync('bash', [path.resolve('tools/as3-to-ts/collect-tsc-stats.sh'), tscLogPath], {
     env: { ...process.env, TSC_PROJECT: tsconfigPath },
@@ -73,4 +81,20 @@ test('conversion pipeline runs end-to-end and collect-tsc-stats analyzes generat
   assert.match(statsOutput, /Total errors:\s*0/);
   assert.match(statsOutput, /Top error codes:/);
   assert.match(statsOutput, /Detailed TS\/AS error contexts/);
+
+  fs.writeFileSync(
+    path.join(outputDir, 'Broken.ts'),
+    'export const broken: number = missingIdentifier;\n',
+    'utf8'
+  );
+
+  runTsc(tsconfigPath, tscLogPath);
+
+  const statsOutputWithError = execFileSync('bash', [path.resolve('tools/as3-to-ts/collect-tsc-stats.sh'), tscLogPath], {
+    env: { ...process.env, TSC_PROJECT: tsconfigPath },
+    encoding: 'utf8'
+  });
+
+  assert.match(statsOutputWithError, /Total errors:\s*[1-9][0-9]*/);
+  assert.match(statsOutputWithError, /TS2304/);
 });
