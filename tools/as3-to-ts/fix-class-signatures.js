@@ -1,0 +1,101 @@
+#!/usr/bin/env node
+
+const fs = require('node:fs');
+const path = require('node:path');
+
+function fixClassSignatures(source) {
+  let content = source;
+
+  // Remove invalid `this.` prefixes in type positions.
+  content = content.replace(/(:\s*)this\.([A-Za-z_$][\w$.]*)/g, '$1$2');
+  content = content.replace(/(\bas\s+(?:unknown\s+as\s+)?)this\.([A-Za-z_$][\w$.]*)/g, '$1$2');
+
+  // Heal constructors missing parameter list.
+  content = content.replace(
+    /^(\s*(?:(?:public|private|protected|readonly|override|abstract)\s+)*)constructor\s*\{/gm,
+    '$1constructor() {'
+  );
+
+  // Heal malformed class members where access modifier is followed by `{`.
+  content = content.replace(
+    /^(\s*)(public|private|protected)\s*\{/gm,
+    '$1$2 __fixedSignature(): any {'
+  );
+
+  return content;
+}
+
+function collectTsFiles(inputPath, scope) {
+  const targetPath = scope ? path.join(inputPath, scope) : inputPath;
+  if (!fs.existsSync(targetPath)) return [];
+
+  const stat = fs.statSync(targetPath);
+  if (stat.isFile()) return [targetPath];
+
+  const files = [];
+  const stack = [targetPath];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  return files.sort();
+}
+
+function processFile(filePath) {
+  const source = fs.readFileSync(filePath, 'utf8');
+  const fixed = fixClassSignatures(source);
+  if (fixed === source) return false;
+  fs.writeFileSync(filePath, fixed, 'utf8');
+  return true;
+}
+
+function parseArgs(argv) {
+  const args = { input: null, scope: null };
+
+  for (let i = 2; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === '--input' || token === '-i') {
+      args.input = argv[++i];
+    } else if (token === '--scope') {
+      args.scope = argv[++i];
+    }
+  }
+
+  if (!args.input) {
+    throw new Error('Usage: node fix-class-signatures.js --input <file-or-dir> [--scope <subdir>]');
+  }
+
+  return args;
+}
+
+function runCli() {
+  const args = parseArgs(process.argv);
+  const files = collectTsFiles(args.input, args.scope);
+  let changedFiles = 0;
+
+  for (const file of files) {
+    if (processFile(file)) changedFiles += 1;
+  }
+
+  console.log(`fixed-signatures ${changedFiles}/${files.length}`);
+}
+
+module.exports = {
+  fixClassSignatures,
+  collectTsFiles,
+  processFile
+};
+
+if (require.main === module) {
+  runCli();
+}
