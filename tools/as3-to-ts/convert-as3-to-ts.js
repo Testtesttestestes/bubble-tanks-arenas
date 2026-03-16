@@ -117,13 +117,14 @@ function convertClassMembers(source, className, isDynamicClass = false) {
     /^(\s*)((?:(?:override|public|private|protected|internal|static|\w+)\s+)*)function\s+(?:this\.)?(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
     (_, indent, modifiers, fnName, params, returnType) => {
       const normalizedMods = normalizeModifiers(modifiers);
+      const effectiveMods = normalizedMods || 'public';
       const head = fnName === className ? 'constructor' : fnName;
       const paramList = convertParams(params);
       if (fnName === className) {
         return `${indent}constructor(${paramList})`;
       }
       const mappedReturn = mapType(returnType || 'void');
-      return `${indent}${normalizedMods ? `${normalizedMods} ` : ''}${head}(${paramList}): ${mappedReturn}`;
+      return `${indent}${effectiveMods} ${head}(${paramList}): ${mappedReturn}`;
     }
   );
 

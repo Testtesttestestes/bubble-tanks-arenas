@@ -32,7 +32,7 @@ function extractClassScopeMembers(source) {
   }
 
   const className = classMatch[1];
-  const memberRegex = /^[ \t]*(?:(public|private|protected)\s+)?(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)/gm;
+  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=[(<:;=!?]|$)/gm;
   let match;
   while ((match = memberRegex.exec(source)) !== null) {
     const isStatic = !!match[2];
@@ -190,13 +190,15 @@ function isTypeLikeContext(source, index) {
 function applyDiagnosticThisFixes(source, diagnostics) {
   if (!diagnostics || diagnostics.length === 0) return source;
   const importedNames = parseImportNames(source);
+  const { className } = extractClassScopeMembers(source);
   const { classRange, methods } = extractClassAndMethodRanges(source);
-  if (!classRange || methods.length === 0) return source;
+  if (!classRange || methods.length === 0 || !className) return source;
 
   const lineStarts = computeLineStarts(source);
   const edits = [];
   for (const diagnostic of diagnostics) {
-    if (!OBFUSCATED_MEMBER_WHITELIST.test(diagnostic.name)) continue;
+    const hasForcedPrefix = diagnostic.forcePrefix === 'static' || diagnostic.forcePrefix === 'instance';
+    if (!hasForcedPrefix && !OBFUSCATED_MEMBER_WHITELIST.test(diagnostic.name)) continue;
     const index = lineColToIndex(lineStarts, diagnostic.line, diagnostic.col);
     if (index < classRange.start || index >= classRange.end) continue;
     const method = methods.find((entry) => index >= entry.start && index < entry.end);
@@ -205,18 +207,19 @@ function applyDiagnosticThisFixes(source, diagnostics) {
     const locals = collectLocalsInRange(source, method);
     method.params.forEach((name) => locals.add(name));
     if (locals.has(diagnostic.name)) continue;
-    if (source.slice(Math.max(0, index - 5), index) === 'this.') continue;
+    const prefixTarget = diagnostic.forcePrefix === 'static' ? `${className}.` : 'this.';
+    if (source.slice(Math.max(0, index - prefixTarget.length), index) === prefixTarget) continue;
     if (source[index - 1] === '.') continue;
     if (!new RegExp(`^${escapeRegExp(diagnostic.name)}\\b`).test(source.slice(index))) continue;
     if (isTypeLikeContext(source, index)) continue;
-    edits.push(index);
+    edits.push({ index, prefixTarget });
   }
 
   if (edits.length === 0) return source;
-  const uniqueEdits = Array.from(new Set(edits)).sort((a, b) => b - a);
+  const uniqueEdits = Array.from(new Map(edits.map((edit) => [edit.index, edit])).values()).sort((a, b) => b.index - a.index);
   let converted = source;
-  for (const index of uniqueEdits) {
-    converted = `${converted.slice(0, index)}this.${converted.slice(index)}`;
+  for (const { index, prefixTarget } of uniqueEdits) {
+    converted = `${converted.slice(0, index)}${prefixTarget}${converted.slice(index)}`;
   }
   return converted;
 }
@@ -225,13 +228,29 @@ function parseTscLog(logPath) {
   if (!logPath || !fs.existsSync(logPath)) return new Map();
   const result = new Map();
   const content = fs.readFileSync(logPath, 'utf8');
-  const lineRegex = /^(.*)\((\d+),(\d+)\):\s*error\s*TS(2304|2663):\s*(?:Cannot find name|Cannot find name\s*'[^']+'\.\s*Did you mean the instance member)\s*'([^']+)'/gm;
+  const lineRegex = /^(.*)\((\d+),(\d+)\):\s*error\s*TS(2304|2662|2663):\s*(.+)$/gm;
   let match;
   while ((match = lineRegex.exec(content)) !== null) {
+    const message = match[5];
+    const unresolvedMatch = message.match(/Cannot find name\s*'([^']+)'/);
+    if (!unresolvedMatch) continue;
+    let name = unresolvedMatch[1];
+    let forcePrefix = null;
+    const staticSuggestion = message.match(/Did you mean the static member\s*'([^']+)\.([^'.]+)'/);
+    if (staticSuggestion) {
+      name = staticSuggestion[2];
+      forcePrefix = 'static';
+    }
+    const instanceSuggestion = message.match(/Did you mean the instance member\s*'([^']+)\.([^'.]+)'/);
+    if (instanceSuggestion) {
+      name = instanceSuggestion[2];
+      forcePrefix = 'instance';
+    }
     const filePath = path.resolve(match[1].trim());
     const diagnostic = {
       code: Number(match[4]),
-      name: match[5],
+      name,
+      forcePrefix,
       line: Number(match[2]),
       col: Number(match[3])
     };
