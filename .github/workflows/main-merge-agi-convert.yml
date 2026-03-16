@@ -11,14 +11,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Reset branches and run conversion pipeline
@@ -48,10 +48,15 @@ jobs:
 
           # 6. КОМПИЛИРУЕМ
           # Убрал --noIncremental, оставил --force (он заменяет чистку кэша)
-          npx tsc --build --force > tsc_output.log 2>&1
+          tsc_exit=0
+          npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
+          echo "TypeScript build exit code: ${tsc_exit}"
 
           # 7. Анализируем результат
           ERROR_SLICE_RADIUS=10 MAX_ERROR_CONTEXTS=5 MAX_AGI_ERROR_CONTEXTS=5 MAX_ERROR_MESSAGES_PER_CODE=5 npm run tsc:stats | tee tsc_stats.log
+
+          # 8. Завершаем job с кодом tsc, чтобы workflow оставался fail при реальных ошибках
+          exit ${tsc_exit}
 
       - name: Upload tsc stats log
         uses: actions/upload-artifact@v4
