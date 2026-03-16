@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG_FILE="${1:-tsc_output.log}"
 ERROR_SLICE_RADIUS="${ERROR_SLICE_RADIUS:-10}"
 MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-20}"
+MAX_AGI_ERROR_CONTEXTS="${MAX_AGI_ERROR_CONTEXTS:-10}"
 MAX_ERROR_MESSAGES_PER_CODE="${MAX_ERROR_MESSAGES_PER_CODE:-5}"
 
 if [[ "$LOG_FILE" != /* ]]; then
@@ -144,14 +145,27 @@ resolve_as_source() {
 
 printf '\nDetailed TS/AS error contexts (±%s lines, max %s entries):\n' "$ERROR_SLICE_RADIUS" "$MAX_ERROR_CONTEXTS"
 
-error_context_count=0
-while IFS= read -r error_line; do
+print_detailed_contexts() {
+  local filter_regex="$1"
+  local max_contexts="$2"
+  local section_title="$3"
+  local error_context_count=0
+
+  if [[ -n "$section_title" ]]; then
+    printf '\n%s\n' "$section_title"
+  fi
+
+  while IFS= read -r error_line; do
   if [[ -z "$error_line" ]]; then
     continue
   fi
 
-  if (( error_context_count >= MAX_ERROR_CONTEXTS )); then
-    printf '\nReached MAX_ERROR_CONTEXTS=%s, stopping detailed dump.\n' "$MAX_ERROR_CONTEXTS"
+  if [[ -n "$filter_regex" ]] && [[ ! "$error_line" =~ $filter_regex ]]; then
+    continue
+  fi
+
+  if (( error_context_count >= max_contexts )); then
+    printf '\nReached max contexts=%s, stopping detailed dump.\n' "$max_contexts"
     break
   fi
 
@@ -167,7 +181,7 @@ while IFS= read -r error_line; do
 
   error_context_count=$((error_context_count + 1))
   printf '\n[%s/%s] %s:%s:%s %s %s\n' \
-    "$error_context_count" "$MAX_ERROR_CONTEXTS" "$ts_file" "$err_line_no" "$err_col_no" "$err_code" "$err_message"
+    "$error_context_count" "$max_contexts" "$ts_file" "$err_line_no" "$err_col_no" "$err_code" "$err_message"
 
   ts_file_resolved="$(resolve_ts_path "$ts_file")"
   print_context_slice "$ts_file_resolved" "$err_line_no" "$ERROR_SLICE_RADIUS" "TS"
@@ -179,8 +193,18 @@ while IFS= read -r error_line; do
   else
     printf '  [AS] matching source not found for: %s\n' "$ts_file"
   fi
-done < <(error_stream)
+  done < <(error_stream)
 
-if (( error_context_count == 0 )); then
-  printf 'No file-level TypeScript errors were parsed from the log.\n'
+  if (( error_context_count == 0 )); then
+    printf 'No file-level TypeScript errors were parsed for this section.\n'
+  fi
+}
+
+print_detailed_contexts '' "$MAX_ERROR_CONTEXTS" ''
+
+agi_error_count="$(error_stream | grep -Ec '(^|/)agi/' || true)"
+if (( agi_error_count > 0 )); then
+  print_detailed_contexts '(^|/)agi/' "$MAX_AGI_ERROR_CONTEXTS" "Detailed AGI TS/AS error contexts (±${ERROR_SLICE_RADIUS} lines, max ${MAX_AGI_ERROR_CONTEXTS} entries):"
+else
+  printf '\nDetailed AGI TS/AS error contexts: no AGI errors detected in log.\n'
 fi
