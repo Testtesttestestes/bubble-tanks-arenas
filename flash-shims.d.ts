@@ -44,6 +44,7 @@ declare class DisplayObjectContainer extends InteractiveObject {
 }
 declare class Stage extends DisplayObjectContainer {}
 declare class Sprite extends DisplayObjectContainer {}
+declare class SimpleButton extends InteractiveObject {}
 declare class MovieClip extends Sprite {
   gotoAndStop(frame: any): void;
   gotoAndPlay(frame: any): void;
@@ -144,6 +145,16 @@ declare class URLRequest {
 declare class Security {
   static allowDomain(...domains: string[]): void;
   static allowInsecureDomain(...domains: string[]): void;
+}
+declare class Dictionary {
+  [key: string]: any;
+}
+declare class ExternalInterface {
+  static call(functionName: string, ...args: any[]): any;
+  static available: boolean;
+}
+declare class System {
+  [key: string]: any;
 }
 declare class Capabilities {
   static os: string;
