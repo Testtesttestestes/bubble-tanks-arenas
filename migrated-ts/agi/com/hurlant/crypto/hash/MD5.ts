@@ -6,7 +6,7 @@ export class MD5 implements IHash
       
       public static readonly HASH_SIZE: number = 16;
       constructor(){
-         super();
+
       }
       
       private ff(a: number, b: number, c: number, d: number, x: number, s: number, t: number): number
@@ -26,7 +26,7 @@ export class MD5 implements IHash
       
       public getHashSize(): number
       {
-         return this.HASH_SIZE;
+         return HASH_SIZE;
       }
       
       private ii(a: number, b: number, c: number, d: number, x: number, s: number, t: number): number
@@ -56,12 +56,12 @@ export class MD5 implements IHash
       
       public hash(src: ByteArray): ByteArray
       {
-         let len: number = 0;
-         let savedEndian: string = null;
-         let a: any[] = null;
-         let i: number = 0;
-         let h: any[] = null;
-         let out: ByteArray = null;
+         var len: number = 0;
+         var savedEndian: string = null as any;
+         var a: any[] = null as any;
+         var i: number = 0;
+         var h: any[] = null as any;
+         var out: ByteArray = null as any;
          len = src.length * 8;
          savedEndian = src.endian;
          while(src.length % 4 != 0)
@@ -89,15 +89,15 @@ export class MD5 implements IHash
       
       private core_md5(x: any[], len: number): any[]
       {
-         let a: number = 0;
-         let b: number = 0;
-         let c: number = 0;
-         let d: number = 0;
-         let i: number = 0;
-         let olda: number = 0;
-         let oldb: number = 0;
-         let oldc: number = 0;
-         let oldd: number = 0;
+         var a: number = 0;
+         var b: number = 0;
+         var c: number = 0;
+         var d: number = 0;
+         var i: number = 0;
+         var olda: number = 0;
+         var oldb: number = 0;
+         var oldc: number = 0;
+         var oldd: number = 0;
          x[len >> 5] |= 128 << len % 32;
          x[(len + 64 >>> 9 << 4) + 14] = len;
          a = 1732584193;

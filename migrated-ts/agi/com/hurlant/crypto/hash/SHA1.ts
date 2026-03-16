@@ -38,7 +38,7 @@ export class SHA1 extends SHABase implements IHash
       
       public getHashSize(): number
       {
-         return this.HASH_SIZE;
+         return HASH_SIZE;
       }
       
       private rol(num: number, cnt: number): number
@@ -48,20 +48,20 @@ export class SHA1 extends SHABase implements IHash
       
       protected core(x: any[], len: number): any[]
       {
-         let w: any[] = null;
-         let a: number = 0;
-         let b: number = 0;
-         let c: number = 0;
-         let d: number = 0;
-         let e: number = 0;
-         let i: number = 0;
-         let olda: number = 0;
-         let oldb: number = 0;
-         let oldc: number = 0;
-         let oldd: number = 0;
-         let olde: number = 0;
-         let j: number = 0;
-         let t: number = 0;
+         var w: any[] = null as any;
+         var a: number = 0;
+         var b: number = 0;
+         var c: number = 0;
+         var d: number = 0;
+         var e: number = 0;
+         var i: number = 0;
+         var olda: number = 0;
+         var oldb: number = 0;
+         var oldc: number = 0;
+         var oldd: number = 0;
+         var olde: number = 0;
+         var j: number = 0;
+         var t: number = 0;
          x[len >> 5] |= 128 << 24 - len % 32;
          x[(len + 64 >> 9 << 4) + 15] = len;
          w = [];

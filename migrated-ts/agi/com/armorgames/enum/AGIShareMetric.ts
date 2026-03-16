@@ -9,6 +9,6 @@ export class AGIShareMetric{
       public static readonly SHARES: string = "shares";
       public static readonly LIKES: string = "likes";
       constructor(){
-         super();
+
       }
    }

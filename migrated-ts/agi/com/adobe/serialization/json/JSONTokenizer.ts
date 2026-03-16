@@ -1,14 +1,19 @@
 // AUTO-GENERATED AS3 TO TS CONVERSION
 // Original Package: com.adobe.serialization.json
 
-export class JSONTokenizer{
+import { JSONToken } from "./JSONToken";
+import { JSONTokenType } from "./JSONTokenType";
+import { JSONParseError } from "./JSONParseError";
+
+
+   export class JSONTokenizer{
       
-      private obj: Record<string, any>;
-      private jsonString: string;
-      private loc: number;
-      private ch: string;
+      private obj!: any;
+      private jsonString!: string;
+      private loc!: number;
+      private ch!: string;
       constructor(param1: string){
-         super();
+
          this.jsonString = param1;
          this.loc = 0;
          this.nextChar();
@@ -16,13 +21,12 @@ export class JSONTokenizer{
       
       public getNextToken(): JSONToken
       {
-         let _loc2_: string = null;
-         let _loc3_: string = null;
-         let _loc4_: string = null;
-         let _loc1_: JSONToken = new JSONToken();
+         var _loc2_: string = null as any;
+         var _loc3_: string = null as any;
+         var _loc4_: string = null as any;
+         var _loc1_: JSONToken = new JSONToken();
          this.skipIgnored();
-         switch(this.ch)
-         {
+         switch(String(this.ch)) {
             case "{":
                _loc1_.type = JSONTokenType.LEFT_BRACE;
                _loc1_.value = "{";
@@ -80,7 +84,7 @@ export class JSONTokenizer{
                if(_loc4_ == "null")
                {
                   _loc1_.type = JSONTokenType.NULL;
-                  _loc1_.value = null;
+                  _loc1_.value = null as any;
                   this.nextChar();
                   break;
                }
@@ -90,12 +94,12 @@ export class JSONTokenizer{
                _loc1_ = this.readString();
                break;
             default:
-               if(this.isDigit(this.ch) || this.ch == "-")
+               if(this.isDigit(this.ch) || String(this.ch) == "-")
                {
                   _loc1_ = this.readNumber();
                   break;
                }
-               if(this.ch == "")
+               if(String(this.ch) == "")
                {
                   return null;
                }
@@ -106,22 +110,21 @@ export class JSONTokenizer{
       
       private readString(): JSONToken
       {
-         let _loc3_: string = null;
-         let _loc4_: number = 0;
-         let _loc1_: JSONToken = new JSONToken();
+         var _loc3_: string = null as any;
+         var _loc4_: number = 0;
+         var _loc1_: JSONToken = new JSONToken();
          _loc1_.type = JSONTokenType.STRING;
-         let _loc2_: string = "";
+         var _loc2_: string = "";
          this.nextChar();
-         for(; this.ch != "\"" && this.ch != ""; this.nextChar())
+         for(; String(this.ch) != "\"" && String(this.ch) != ""; this.nextChar())
          {
-            if(this.ch != "\\")
+            if(String(this.ch) != "\\")
             {
                _loc2_ += this.ch;
                continue;
             }
             this.nextChar();
-            switch(this.ch)
-            {
+            switch(String(this.ch)) {
                case "\"":
                   _loc2_ += "\"";
                   break;
@@ -164,7 +167,7 @@ export class JSONTokenizer{
                   _loc2_ += "\\" + this.ch;
             }
          }
-         if(this.ch == "")
+         if(String(this.ch) == "")
          {
             this.parseError("Unterminated string literal");
          }
@@ -175,10 +178,10 @@ export class JSONTokenizer{
       
       private readNumber(): JSONToken
       {
-         let _loc1_: JSONToken = new JSONToken();
+         var _loc1_: JSONToken = new JSONToken();
          _loc1_.type = JSONTokenType.NUMBER;
-         let _loc2_: string = "";
-         if(this.ch == "-")
+         var _loc2_: string = "";
+         if(String(this.ch) == "-")
          {
             _loc2_ += "-";
             this.nextChar();
@@ -187,7 +190,7 @@ export class JSONTokenizer{
          {
             this.parseError("Expecting a digit");
          }
-         if(this.ch == "0")
+         if(String(this.ch) == "0")
          {
             _loc2_ += this.ch;
             this.nextChar();
@@ -204,7 +207,7 @@ export class JSONTokenizer{
                this.nextChar();
             }
          }
-         if(this.ch == ".")
+         if(String(this.ch) == ".")
          {
             _loc2_ += ".";
             this.nextChar();
@@ -218,11 +221,11 @@ export class JSONTokenizer{
                this.nextChar();
             }
          }
-         if(this.ch == "e" || this.ch == "E")
+         if(String(this.ch) == "e" || String(this.ch) == "E")
          {
             _loc2_ += "e";
             this.nextChar();
-            if(this.ch == "+" || this.ch == "-")
+            if(String(this.ch) == "+" || String(this.ch) == "-")
             {
                _loc2_ += this.ch;
                this.nextChar();
@@ -237,7 +240,7 @@ export class JSONTokenizer{
                this.nextChar();
             }
          }
-         let _loc3_: number = Number(_loc2_);
+         var _loc3_: number = Number(_loc2_);
          if(isFinite(_loc3_) && !isNaN(_loc3_))
          {
             _loc1_.value = _loc3_;
@@ -254,7 +257,7 @@ export class JSONTokenizer{
       
       private skipIgnored(): void
       {
-         let _loc1_: number = 0;
+         var _loc1_: number = 0;
          do
          {
             _loc1_ = this.loc;
@@ -266,27 +269,26 @@ export class JSONTokenizer{
       
       private skipComments(): void
       {
-         if(this.ch == "/")
+         if(String(this.ch) == "/")
          {
             this.nextChar();
-            switch(this.ch)
-            {
+            switch(String(this.ch)) {
                case "/":
                   do
                   {
                      this.nextChar();
                   }
-                  while(this.ch != "\n" && this.ch != "");
+                  while(String(this.ch) != "\n" && String(this.ch) != "");
                   this.nextChar();
                   break;
                case "*":
                   this.nextChar();
                   while(true)
                   {
-                     if(this.ch == "*")
+                     if(String(this.ch) == "*")
                      {
                         this.nextChar();
-                        if(this.ch == "/")
+                        if(String(this.ch) == "/")
                         {
                            this.nextChar();
                            break;
@@ -296,7 +298,7 @@ export class JSONTokenizer{
                      {
                         this.nextChar();
                      }
-                     if(this.ch == "")
+                     if(String(this.ch) == "")
                      {
                         this.parseError("Multi-line comment not closed");
                      }
@@ -328,7 +330,7 @@ export class JSONTokenizer{
       
       private isHexDigit(param1: string): boolean
       {
-         let _loc2_: string = param1.toUpperCase();
+         var _loc2_: string = param1.toUpperCase();
          return this.isDigit(param1) || _loc2_ >= "A" && _loc2_ <= "F";
       }
       

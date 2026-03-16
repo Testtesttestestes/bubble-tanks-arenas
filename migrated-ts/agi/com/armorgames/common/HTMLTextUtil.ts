@@ -4,7 +4,7 @@
 export class HTMLTextUtil{
       
       constructor(){
-         super();
+
       }
       
       public static bold(param1: string): string

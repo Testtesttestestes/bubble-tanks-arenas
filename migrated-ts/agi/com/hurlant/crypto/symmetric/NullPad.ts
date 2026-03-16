@@ -5,7 +5,7 @@ export class NullPad implements IPad
    {
       
       constructor(){
-         super();
+
       }
       
       public pad(a: ByteArray): void

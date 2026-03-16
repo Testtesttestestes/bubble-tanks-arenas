@@ -15,6 +15,6 @@ export class AGUIState{
       public static readonly WAIT: string = "agui_wait";
       public static readonly ERROR: string = "agui_error";
       constructor(){
-         super();
+
       }
    }

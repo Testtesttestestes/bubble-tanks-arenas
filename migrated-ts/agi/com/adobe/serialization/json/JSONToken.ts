@@ -3,10 +3,10 @@
 
 export class JSONToken{
       
-      private _type: number;
-      private _value: Record<string, any>;
-      constructor(param1: number = -1, param2: Record<string, any> = null){
-         super();
+      private _type!: number;
+      private _value!: any;
+      constructor(param1: number = -1, param2: any = null){
+
          this._type = param1;
          this._value = param2;
       }
@@ -21,12 +21,12 @@ export class JSONToken{
          this._type = param1;
       }
       
-      public get value(): Record<string, any>
+      public get value(): any
       {
          return this._value;
       }
       
-      public set value(param1: Record<string, any>)
+      public set value(param1: any)
       {
          this._value = param1;
       }

@@ -4,14 +4,14 @@
 export class JPGEncoder{
       
       private ZigZag: any[] = [0,1,5,6,14,15,27,28,2,4,7,13,16,26,29,42,3,8,12,17,25,30,41,43,9,11,18,24,31,40,44,53,10,19,23,32,39,45,52,54,20,22,33,38,46,51,55,60,21,34,37,47,50,56,59,61,35,36,48,49,57,58,62,63];
-      private YTable: any[] = new Array(64);
-      private UVTable: any[] = new Array(64);
-      private fdtbl_Y: any[] = new Array(64);
-      private fdtbl_UV: any[] = new Array(64);
-      private YDC_HT: any[];
-      private UVDC_HT: any[];
-      private YAC_HT: any[];
-      private UVAC_HT: any[];
+      private YTable: any[] = new (64 as unknown as any[]);
+      private UVTable: any[] = new (64 as unknown as any[]);
+      private fdtbl_Y: any[] = new (64 as unknown as any[]);
+      private fdtbl_UV: any[] = new (64 as unknown as any[]);
+      private YDC_HT!: any[];
+      private UVDC_HT!: any[];
+      private YAC_HT!: any[];
+      private UVAC_HT!: any[];
       private std_dc_luminance_nrcodes: any[] = [0,0,1,5,1,1,1,1,1,1,0,0,0,0,0,0,0];
       private std_dc_luminance_values: any[] = [0,1,2,3,4,5,6,7,8,9,10,11];
       private std_ac_luminance_nrcodes: any[] = [0,0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125];
@@ -20,17 +20,17 @@ export class JPGEncoder{
       private std_dc_chrominance_values: any[] = [0,1,2,3,4,5,6,7,8,9,10,11];
       private std_ac_chrominance_nrcodes: any[] = [0,0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119];
       private std_ac_chrominance_values: any[] = [0,1,2,3,17,4,5,33,49,6,18,65,81,7,97,113,19,34,50,129,8,20,66,145,161,177,193,9,35,51,82,240,21,98,114,209,10,22,36,52,225,37,241,23,24,25,26,38,39,40,41,42,53,54,55,56,57,58,67,68,69,70,71,72,73,74,83,84,85,86,87,88,89,90,99,100,101,102,103,104,105,106,115,116,117,118,119,120,121,122,130,131,132,133,134,135,136,137,138,146,147,148,149,150,151,152,153,154,162,163,164,165,166,167,168,169,170,178,179,180,181,182,183,184,185,186,194,195,196,197,198,199,200,201,202,210,211,212,213,214,215,216,217,218,226,227,228,229,230,231,232,233,234,242,243,244,245,246,247,248,249,250];
-      private bitcode: any[] = new Array(65535);
-      private category: any[] = new Array(65535);
-      private byteout: ByteArray;
+      private bitcode: any[] = new (65535 as unknown as any[]);
+      private category: any[] = new (65535 as unknown as any[]);
+      private byteout!: ByteArray;
       private bytenew: number = 0;
       private bytepos: number = 7;
-      private DU: any[] = new Array(64);
-      private YDU: any[] = new Array(64);
-      private UDU: any[] = new Array(64);
-      private VDU: any[] = new Array(64);
+      private DU: any[] = new (64 as unknown as any[]);
+      private YDU: any[] = new (64 as unknown as any[]);
+      private UDU: any[] = new (64 as unknown as any[]);
+      private VDU: any[] = new (64 as unknown as any[]);
       constructor(param1: number = 50){
-         super();
+
          if(param1 <= 0)
          {
             param1 = 1;
@@ -39,7 +39,7 @@ export class JPGEncoder{
          {
             param1 = 100;
          }
-         let _loc2_: number = 0;
+         var _loc2_: number = 0;
          if(param1 < 50)
          {
             _loc2_ = Math.floor(5000 / param1);
@@ -55,10 +55,10 @@ export class JPGEncoder{
       
       private initQuantTables(param1: number): void
       {
-         let _loc2_: number = 0;
-         let _loc3_: number = NaN;
-         let _loc8_: number = 0;
-         let _loc4_: any[] = [16,11,10,16,24,40,51,61,12,12,14,19,26,58,60,55,14,13,16,24,40,57,69,56,14,17,22,29,51,87,80,62,18,22,37,56,68,109,103,77,24,35,55,64,81,104,113,92,49,64,78,87,103,121,120,101,72,92,95,98,112,100,103,99];
+         var _loc2_: number = 0;
+         var _loc3_: number = NaN;
+         var _loc8_: number = 0;
+         var _loc4_: any[] = [16,11,10,16,24,40,51,61,12,12,14,19,26,58,60,55,14,13,16,24,40,57,69,56,14,17,22,29,51,87,80,62,18,22,37,56,68,109,103,77,24,35,55,64,81,104,113,92,49,64,78,87,103,121,120,101,72,92,95,98,112,100,103,99];
          _loc2_ = 0;
          while(_loc2_ < 64)
          {
@@ -74,7 +74,7 @@ export class JPGEncoder{
             this.YTable[this.ZigZag[_loc2_]] = _loc3_;
             _loc2_++;
          }
-         let _loc5_: any[] = [17,18,24,47,99,99,99,99,18,21,26,66,99,99,99,99,24,26,56,99,99,99,99,99,47,66,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99];
+         var _loc5_: any[] = [17,18,24,47,99,99,99,99,18,21,26,66,99,99,99,99,24,26,56,99,99,99,99,99,47,66,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99,99];
          _loc2_ = 0;
          while(_loc2_ < 64)
          {
@@ -90,9 +90,9 @@ export class JPGEncoder{
             this.UVTable[this.ZigZag[_loc2_]] = _loc3_;
             _loc2_++;
          }
-         let _loc6_: any[] = [1,1.387039845,1.306562965,1.175875602,1,0.785694958,0.5411961,0.275899379];
+         var _loc6_: any[] = [1,1.387039845,1.306562965,1.175875602,1,0.785694958,0.5411961,0.275899379];
          _loc2_ = 0;
-         let _loc7_: number = 0;
+         var _loc7_: number = 0;
          while(_loc7_ < 8)
          {
             _loc8_ = 0;
@@ -109,11 +109,11 @@ export class JPGEncoder{
       
       private computeHuffmanTbl(param1: any[], param2: any[]): any[]
       {
-         let _loc7_: number = 0;
-         let _loc3_: number = 0;
-         let _loc4_: number = 0;
-         let _loc5_: any[] = new Array();
-         let _loc6_: number = 1;
+         var _loc7_: number = 0;
+         var _loc3_: number = 0;
+         var _loc4_: number = 0;
+         var _loc5_: any[] = new Array();
+         var _loc6_: number = 1;
          while(_loc6_ <= 16)
          {
             _loc7_ = 1;
@@ -142,10 +142,10 @@ export class JPGEncoder{
       
       private initCategoryNumber(): void
       {
-         let _loc3_: number = 0;
-         let _loc1_: number = 1;
-         let _loc2_: number = 2;
-         let _loc4_: number = 1;
+         var _loc3_: number = 0;
+         var _loc1_: number = 1;
+         var _loc2_: number = 2;
+         var _loc4_: number = 1;
          while(_loc4_ <= 15)
          {
             _loc3_ = _loc1_;
@@ -174,8 +174,8 @@ export class JPGEncoder{
       
       private writeBits(param1: BitString): void
       {
-         let _loc2_: number = param1.val;
-         let _loc3_: number = param1.len - 1;
+         var _loc2_: number = param1.val;
+         var _loc3_: number = param1.len - 1;
          while(_loc3_ >= 0)
          {
             if(Boolean(_loc2_ & Math.floor(1 << _loc3_)))
@@ -214,27 +214,27 @@ export class JPGEncoder{
       
       private fDCTQuant(param1: any[], param2: any[]): any[]
       {
-         let _loc3_: number = NaN;
-         let _loc4_: number = NaN;
-         let _loc5_: number = NaN;
-         let _loc6_: number = NaN;
-         let _loc7_: number = NaN;
-         let _loc8_: number = NaN;
-         let _loc9_: number = NaN;
-         let _loc10_: number = NaN;
-         let _loc11_: number = NaN;
-         let _loc12_: number = NaN;
-         let _loc13_: number = NaN;
-         let _loc14_: number = NaN;
-         let _loc15_: number = NaN;
-         let _loc16_: number = NaN;
-         let _loc17_: number = NaN;
-         let _loc18_: number = NaN;
-         let _loc19_: number = NaN;
-         let _loc20_: number = NaN;
-         let _loc21_: number = NaN;
-         let _loc22_: number = 0;
-         let _loc23_: number = 0;
+         var _loc3_: number = NaN;
+         var _loc4_: number = NaN;
+         var _loc5_: number = NaN;
+         var _loc6_: number = NaN;
+         var _loc7_: number = NaN;
+         var _loc8_: number = NaN;
+         var _loc9_: number = NaN;
+         var _loc10_: number = NaN;
+         var _loc11_: number = NaN;
+         var _loc12_: number = NaN;
+         var _loc13_: number = NaN;
+         var _loc14_: number = NaN;
+         var _loc15_: number = NaN;
+         var _loc16_: number = NaN;
+         var _loc17_: number = NaN;
+         var _loc18_: number = NaN;
+         var _loc19_: number = NaN;
+         var _loc20_: number = NaN;
+         var _loc21_: number = NaN;
+         var _loc22_: number = 0;
+         var _loc23_: number = 0;
          _loc22_ = 0;
          while(_loc22_ < 8)
          {
@@ -356,7 +356,7 @@ export class JPGEncoder{
       
       private writeDQT(): void
       {
-         let _loc1_: number = 0;
+         var _loc1_: number = 0;
          this.writeWord(65499);
          this.writeWord(132);
          this.writeByte(0);
@@ -377,7 +377,7 @@ export class JPGEncoder{
       
       private writeDHT(): void
       {
-         let _loc1_: number = 0;
+         var _loc1_: number = 0;
          this.writeWord(65476);
          this.writeWord(418);
          this.writeByte(0);
@@ -452,20 +452,20 @@ export class JPGEncoder{
       
       private processDU(param1: any[], param2: any[], param3: number, param4: any[], param5: any[]): number
       {
-         let _loc8_: number = 0;
-         let _loc12_: number = 0;
-         let _loc13_: number = 0;
-         let _loc14_: number = 0;
-         let _loc6_: BitString = param5[0];
-         let _loc7_: BitString = param5[240];
-         let _loc9_: any[] = this.fDCTQuant(param1,param2);
+         var _loc8_: number = 0;
+         var _loc12_: number = 0;
+         var _loc13_: number = 0;
+         var _loc14_: number = 0;
+         var _loc6_: BitString = param5[0];
+         var _loc7_: BitString = param5[240];
+         var _loc9_: any[] = this.fDCTQuant(param1,param2);
          _loc8_ = 0;
          while(_loc8_ < 64)
          {
             this.DU[this.ZigZag[_loc8_]] = _loc9_[_loc8_];
             _loc8_++;
          }
-         let _loc10_: number = this.DU[0] - param3;
+         var _loc10_: number = this.DU[0] - param3;
          param3 = Number(this.DU[0]);
          if(_loc10_ == 0)
          {
@@ -476,7 +476,7 @@ export class JPGEncoder{
             this.writeBits(param4[this.category[32767 + _loc10_]]);
             this.writeBits(this.bitcode[32767 + _loc10_]);
          }
-         let _loc11_: number = 63;
+         var _loc11_: number = 63;
          while(_loc11_ > 0 && this.DU[_loc11_] == 0)
          {
             _loc11_--;
@@ -518,13 +518,13 @@ export class JPGEncoder{
       
       private RGB2YUV(param1: BitmapData, param2: number, param3: number): void
       {
-         let _loc6_: number = 0;
-         let _loc7_: number = 0;
-         let _loc8_: number = NaN;
-         let _loc9_: number = NaN;
-         let _loc10_: number = NaN;
-         let _loc4_: number = 0;
-         let _loc5_: number = 0;
+         var _loc6_: number = 0;
+         var _loc7_: number = 0;
+         var _loc8_: number = NaN;
+         var _loc9_: number = NaN;
+         var _loc10_: number = NaN;
+         var _loc4_: number = 0;
+         var _loc5_: number = 0;
          while(_loc5_ < 8)
          {
             _loc6_ = 0;
@@ -546,8 +546,8 @@ export class JPGEncoder{
       
       public encode(param1: BitmapData): ByteArray
       {
-         let _loc6_: number = 0;
-         let _loc7_: BitString = null;
+         var _loc6_: number = 0;
+         var _loc7_: BitString = null as any;
          this.byteout = new ByteArray();
          this.bytenew = 0;
          this.bytepos = 7;
@@ -557,12 +557,12 @@ export class JPGEncoder{
          this.writeSOF0(param1.width,param1.height);
          this.writeDHT();
          this.writeSOS();
-         let _loc2_: number = 0;
-         let _loc3_: number = 0;
-         let _loc4_: number = 0;
+         var _loc2_: number = 0;
+         var _loc3_: number = 0;
+         var _loc4_: number = 0;
          this.bytenew = 0;
          this.bytepos = 7;
-         let _loc5_: number = 0;
+         var _loc5_: number = 0;
          while(_loc5_ < param1.height)
          {
             _loc6_ = 0;

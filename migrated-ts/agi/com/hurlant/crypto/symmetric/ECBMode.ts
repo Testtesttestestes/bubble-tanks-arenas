@@ -4,38 +4,38 @@
 export class ECBMode implements IMode, ICipher
    {
       
-      private key: ISymmetricKey;
-      private padding: IPad;
-      constructor(key: ISymmetricKey, padding: IPad = null as any){
-         super();
-         this.key = this.key;
-         if(this.padding == null)
+      private key!: ISymmetricKey;
+      private padding!: IPad;
+      constructor(key: ISymmetricKey, padding: IPad = null){
+
+         this.key = key;
+         if(padding == null)
          {
-            this.padding = new PKCS5(this.key.getBlockSize());
+            padding = new PKCS5(key.getBlockSize());
          }
          else
          {
-            this.padding.setBlockSize(this.key.getBlockSize());
+            padding.setBlockSize(key.getBlockSize());
          }
-         this.padding = this.padding;
+         this.padding = padding;
       }
       
       public encrypt(src: ByteArray): void
       {
-         let blockSize: number = 0;
-         let tmp: ByteArray = null;
-         let dst: ByteArray = null;
-         let i: number = 0;
-         this.padding.pad(src);
+         var blockSize: number = 0;
+         var tmp: ByteArray = null as any;
+         var dst: ByteArray = null as any;
+         var i: number = 0;
+         padding.pad(src);
          src.position = 0;
-         blockSize = this.key.getBlockSize();
+         blockSize = key.getBlockSize();
          tmp = new ByteArray();
          dst = new ByteArray();
          for(i = 0; i < src.length; i += blockSize)
          {
             tmp.length = 0;
             src.readBytes(tmp,0,blockSize);
-            this.key.encrypt(tmp);
+            key.encrypt(tmp);
             dst.writeBytes(tmp);
          }
          src.length = 0;
@@ -44,12 +44,12 @@ export class ECBMode implements IMode, ICipher
       
       public decrypt(src: ByteArray): void
       {
-         let blockSize: number = 0;
-         let tmp: ByteArray = null;
-         let dst: ByteArray = null;
-         let i: number = 0;
+         var blockSize: number = 0;
+         var tmp: ByteArray = null as any;
+         var dst: ByteArray = null as any;
+         var i: number = 0;
          src.position = 0;
-         blockSize = this.key.getBlockSize();
+         blockSize = key.getBlockSize();
          if(src.length % blockSize != 0)
          {
             throw new Error("ECB mode cipher length must be a multiple of blocksize " + blockSize);
@@ -60,29 +60,29 @@ export class ECBMode implements IMode, ICipher
          {
             tmp.length = 0;
             src.readBytes(tmp,0,blockSize);
-            this.key.decrypt(tmp);
+            key.decrypt(tmp);
             dst.writeBytes(tmp);
          }
-         this.padding.unpad(dst);
+         padding.unpad(dst);
          src.length = 0;
          src.writeBytes(dst);
       }
       
       public dispose(): void
       {
-         this.key.dispose();
-         this.key = null;
-         this.padding = null;
+         key.dispose();
+         key = null as any;
+         padding = null as any;
          Memory.gc();
       }
       
       public getBlockSize(): number
       {
-         return this.key.getBlockSize();
+         return key.getBlockSize();
       }
       
       public toString(): string
       {
-         return this.key.toString() + "-ecb";
+         return key.toString() + "-ecb";
       }
    }

@@ -27,40 +27,40 @@ export class SHA256 extends SHABase implements IHash
       
       protected core(x: any[], len: number): any[]
       {
-         let w: any[] = null;
-         let a: number = 0;
-         let b: number = 0;
-         let c: number = 0;
-         let d: number = 0;
-         let e: number = 0;
-         let f: number = 0;
-         let g: number = 0;
-         let h: number = 0;
-         let i: number = 0;
-         let olda: number = 0;
-         let oldb: number = 0;
-         let oldc: number = 0;
-         let oldd: number = 0;
-         let olde: number = 0;
-         let oldf: number = 0;
-         let oldg: number = 0;
-         let oldh: number = 0;
-         let j: number = 0;
-         let t2: number = 0;
-         let t1: number = 0;
-         let s0: number = 0;
-         let s1: number = 0;
+         var w: any[] = null as any;
+         var a: number = 0;
+         var b: number = 0;
+         var c: number = 0;
+         var d: number = 0;
+         var e: number = 0;
+         var f: number = 0;
+         var g: number = 0;
+         var h: number = 0;
+         var i: number = 0;
+         var olda: number = 0;
+         var oldb: number = 0;
+         var oldc: number = 0;
+         var oldd: number = 0;
+         var olde: number = 0;
+         var oldf: number = 0;
+         var oldg: number = 0;
+         var oldh: number = 0;
+         var j: number = 0;
+         var t2: number = 0;
+         var t1: number = 0;
+         var s0: number = 0;
+         var s1: number = 0;
          x[len >> 5] |= 128 << 24 - len % 32;
          x[(len + 64 >> 9 << 4) + 15] = len;
          w = [];
-         a = Math.floor(this.h[0]);
-         b = Math.floor(this.h[1]);
-         c = Math.floor(this.h[2]);
-         d = Math.floor(this.h[3]);
-         e = Math.floor(this.h[4]);
-         f = Math.floor(this.h[5]);
-         g = Math.floor(this.h[6]);
-         this.h = Math.floor(this.h[7]);
+         a = Math.floor(h[0]);
+         b = Math.floor(h[1]);
+         c = Math.floor(h[2]);
+         d = Math.floor(h[3]);
+         e = Math.floor(h[4]);
+         f = Math.floor(h[5]);
+         g = Math.floor(h[6]);
+         h = Math.floor(h[7]);
          for(i = 0; i < x.length; i += 16)
          {
             olda = a;
@@ -70,7 +70,7 @@ export class SHA256 extends SHABase implements IHash
             olde = e;
             oldf = f;
             oldg = g;
-            oldh = this.h;
+            oldh = h;
             for(j = 0; j < 64; j++)
             {
                if(j < 16)
@@ -84,8 +84,8 @@ export class SHA256 extends SHABase implements IHash
                   w[j] = w[j - 16] + s0 + w[j - 7] + s1;
                }
                t2 = (rrol(a,2) ^ rrol(a,13) ^ rrol(a,22)) + (a & b ^ a & c ^ b & c);
-               t1 = this.h + (rrol(e,6) ^ rrol(e,11) ^ rrol(e,25)) + (e & f ^ g & ~e) + this.k[j] + w[j];
-               this.h = g;
+               t1 = h + (rrol(e,6) ^ rrol(e,11) ^ rrol(e,25)) + (e & f ^ g & ~e) + k[j] + w[j];
+               h = g;
                g = f;
                f = e;
                e = d + t1;
@@ -101,8 +101,8 @@ export class SHA256 extends SHABase implements IHash
             e += olde;
             f += oldf;
             g += oldg;
-            this.h += oldh;
+            h += oldh;
          }
-         return [a,b,c,d,e,f,g,this.h];
+         return [a,b,c,d,e,f,g,h];
       }
    }

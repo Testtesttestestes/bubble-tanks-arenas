@@ -4,20 +4,20 @@
 export class MontgomeryReduction implements IReduction
    {
       
-      private um: number;
-      private mp: number;
-      private mph: number;
-      private mpl: number;
-      private mt2: number;
-      private m: BigInteger;
+      private um!: number;
+      private mp!: number;
+      private mph!: number;
+      private mpl!: number;
+      private mt2!: number;
+      private m!: BigInteger;
       constructor(m: BigInteger){
-         super();
-         this.m = this.m;
-         this.mp = this.m.invDigit();
-         this.mpl = this.mp & 0x7FFF;
-         this.mph = this.mp >> 15;
-         this.um = (1 << BigInteger.DB - 15) - 1;
-         this.mt2 = 2 * this.m.t;
+
+         this.m = m;
+         mp = m.invDigit();
+         mpl = mp & 0x7FFF;
+         mph = mp >> 15;
+         um = (1 << BigInteger.DB - 15) - 1;
+         mt2 = 2 * m.t;
       }
       
       public mulTo(x: BigInteger, y: BigInteger, r: BigInteger): void
@@ -28,7 +28,7 @@ export class MontgomeryReduction implements IReduction
       
       public revert(x: BigInteger): BigInteger
       {
-         let r: BigInteger = null;
+         var r: BigInteger = null as any;
          r = new BigInteger();
          x.copyTo(r);
          reduce(r);
@@ -37,32 +37,32 @@ export class MontgomeryReduction implements IReduction
       
       public convert(x: BigInteger): BigInteger
       {
-         let r: BigInteger = null;
+         var r: BigInteger = null as any;
          r = new BigInteger();
-         x.abs().dlShiftTo(this.m.t,r);
-         r.divRemTo(this.m,null,r);
+         x.abs().dlShiftTo(m.t,r);
+         r.divRemTo(m,null,r);
          if(x.s < 0 && r.compareTo(BigInteger.ZERO) > 0)
          {
-            this.m.subTo(r,r);
+            m.subTo(r,r);
          }
          return r;
       }
       
       public reduce(x: BigInteger): void
       {
-         let i: number = 0;
-         let j: number = 0;
-         let u0: number = 0;
-         while(x.t <= this.mt2)
+         var i: number = 0;
+         var j: number = 0;
+         var u0: number = 0;
+         while(x.t <= mt2)
          {
             x.a[x.t++] = 0;
          }
-         for(i = 0; i < this.m.t; i++)
+         for(i = 0; i < m.t; i++)
          {
             j = x.a[i] & 0x7FFF;
-            u0 = j * this.mpl + ((j * this.mph + (x.a[i] >> 15) * this.mpl & this.um) << 15) & BigInteger.DM;
-            j = i + this.m.t;
-            x.a[j] += this.m.am(0,u0,x,i,0,this.m.t);
+            u0 = j * mpl + ((j * mph + (x.a[i] >> 15) * mpl & um) << 15) & BigInteger.DM;
+            j = i + m.t;
+            x.a[j] += m.am(0,u0,x,i,0,m.t);
             while(x.a[j] >= BigInteger.DV)
             {
                x.a[j] -= BigInteger.DV;
@@ -70,10 +70,10 @@ export class MontgomeryReduction implements IReduction
             }
          }
          x.clamp();
-         x.drShiftTo(this.m.t,x);
-         if(x.compareTo(this.m) >= 0)
+         x.drShiftTo(m.t,x);
+         if(x.compareTo(m) >= 0)
          {
-            x.subTo(this.m,x);
+            x.subTo(m,x);
          }
       }
       

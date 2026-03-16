@@ -4,7 +4,7 @@
 export class CFBMode extends IVMode implements IMode
    {
       
-      constructor(key: ISymmetricKey, padding: IPad = null as any){
+      constructor(key: ISymmetricKey, padding: IPad = null){
          super(key,null);
       }
       
@@ -15,12 +15,12 @@ export class CFBMode extends IVMode implements IMode
       
       public decrypt(src: ByteArray): void
       {
-         let l: number = 0;
-         let vector: ByteArray = null;
-         let tmp: ByteArray = null;
-         let i: number = 0;
-         let chunk: number = 0;
-         let j: number = 0;
+         var l: number = 0;
+         var vector: ByteArray = null as any;
+         var tmp: ByteArray = null as any;
+         var i: number = 0;
+         var chunk: number = 0;
+         var j: number = 0;
          l = src.length;
          vector = getIV4d();
          tmp = new ByteArray();
@@ -41,11 +41,11 @@ export class CFBMode extends IVMode implements IMode
       
       public encrypt(src: ByteArray): void
       {
-         let l: number = 0;
-         let vector: ByteArray = null;
-         let i: number = 0;
-         let chunk: number = 0;
-         let j: number = 0;
+         var l: number = 0;
+         var vector: ByteArray = null as any;
+         var i: number = 0;
+         var chunk: number = 0;
+         var j: number = 0;
          l = src.length;
          vector = getIV4e();
          for(i = 0; i < src.length; i += blockSize)

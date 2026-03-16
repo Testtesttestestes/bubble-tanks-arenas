@@ -4,21 +4,21 @@
 export class PKCS5 implements IPad
    {
       
-      private blockSize: number;
+      private blockSize!: number;
       constructor(blockSize: number = 0){
-         super();
-         this.blockSize = this.blockSize;
+
+         this.blockSize = blockSize;
       }
       
       public unpad(a: ByteArray): void
       {
-         let c: number = 0;
-         let i: number = 0;
-         let v: number = 0;
-         c = a.length % this.blockSize;
+         var c: number = 0;
+         var i: number = 0;
+         var v: number = 0;
+         c = a.length % blockSize;
          if(c != 0)
          {
-            throw new Error("PKCS#5::unpad: ByteArray.length isn\'t a multiple of the this.blockSize");
+            throw new Error("PKCS#5::unpad: ByteArray.length isn\'t a multiple of the blockSize");
          }
          c = Math.floor(a[a.length - 1]);
          for(i = c; i > 0; i--)
@@ -34,9 +34,9 @@ export class PKCS5 implements IPad
       
       public pad(a: ByteArray): void
       {
-         let c: number = 0;
-         let i: number = 0;
-         c = this.blockSize - a.length % this.blockSize;
+         var c: number = 0;
+         var i: number = 0;
+         c = blockSize - a.length % blockSize;
          for(i = 0; i < c; i++)
          {
             a[a.length] = c;
@@ -45,6 +45,6 @@ export class PKCS5 implements IPad
       
       public setBlockSize(bs: number): void
       {
-         this.blockSize = bs;
+         blockSize = bs;
       }
    }

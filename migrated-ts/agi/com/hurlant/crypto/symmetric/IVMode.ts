@@ -3,102 +3,102 @@
 
 export class IVMode{
       
-      protected lastIV: ByteArray;
-      protected iv: ByteArray;
-      protected blockSize: number;
-      protected padding: IPad;
-      protected prng: Random;
-      protected key: ISymmetricKey;
-      constructor(key: ISymmetricKey, padding: IPad = null as any){
-         super();
-         this.key = this.key;
-         this.blockSize = this.key.getBlockSize();
-         if(this.padding == null)
+      protected lastIV!: ByteArray;
+      protected iv!: ByteArray;
+      protected blockSize!: number;
+      protected padding!: IPad;
+      protected prng!: Random;
+      protected key!: ISymmetricKey;
+      constructor(key: ISymmetricKey, padding: IPad = null){
+
+         this.key = key;
+         blockSize = key.getBlockSize();
+         if(padding == null)
          {
-            this.padding = new PKCS5(this.blockSize);
+            padding = new PKCS5(blockSize);
          }
          else
          {
-            this.padding.setBlockSize(this.blockSize);
+            padding.setBlockSize(blockSize);
          }
-         this.padding = this.padding;
-         this.prng = new Random();
-         this.iv = null;
-         this.lastIV = new ByteArray();
+         this.padding = padding;
+         prng = new Random();
+         iv = null as any;
+         lastIV = new ByteArray();
       }
       
-      public set(value: ByteArray as unknown as IV): void
+      public set IV(value: ByteArray)
       {
-         this.iv = value;
-         this.lastIV.length = 0;
-         this.lastIV.writeBytes(this.iv);
+         iv = value;
+         lastIV.length = 0;
+         lastIV.writeBytes(iv);
       }
       
       protected getIV4d(): ByteArray
       {
-         let vec: ByteArray = null;
+         var vec: ByteArray = null as any;
          vec = new ByteArray();
-         if(Boolean(this.iv))
+         if(Boolean(iv))
          {
-            vec.writeBytes(this.iv);
+            vec.writeBytes(iv);
             return vec;
          }
-         throw new Error("an IV must be set before calling decrypt()");
+         throw new Error("an this.IV must be set before calling decrypt()");
       }
       
       protected getIV4e(): ByteArray
       {
-         let vec: ByteArray = null;
+         var vec: ByteArray = null as any;
          vec = new ByteArray();
-         if(Boolean(this.iv))
+         if(Boolean(iv))
          {
-            vec.writeBytes(this.iv);
+            vec.writeBytes(iv);
          }
          else
          {
-            this.prng.nextBytes(vec,this.blockSize);
+            prng.nextBytes(vec,blockSize);
          }
-         this.lastIV.length = 0;
-         this.lastIV.writeBytes(vec);
+         lastIV.length = 0;
+         lastIV.writeBytes(vec);
          return vec;
       }
       
       public get IV(): ByteArray
       {
-         return this.lastIV;
+         return lastIV;
       }
       
       public dispose(): void
       {
-         let i: number = 0;
-         if(this.iv != null)
+         var i: number = 0;
+         if(iv != null)
          {
-            for(i = 0; i < this.iv.length; i++)
+            for(i = 0; i < iv.length; i++)
             {
-               this.iv[i] = this.prng.nextByte();
+               iv[i] = prng.nextByte();
             }
-            this.iv.length = 0;
-            this.iv = null;
+            iv.length = 0;
+            iv = null as any;
          }
-         if(this.lastIV != null)
+         if(lastIV != null)
          {
-            for(i = 0; i < this.iv.length; i++)
+            for(i = 0; i < iv.length; i++)
             {
-               this.lastIV[i] = this.prng.nextByte();
+               lastIV[i] = prng.nextByte();
             }
-            this.lastIV.length = 0;
-            this.lastIV = null;
+            lastIV.length = 0;
+            lastIV = null as any;
          }
-         this.key.dispose();
-         this.key = null;
-         this.padding = null;
-         this.prng.dispose();
-         this.prng = null;
+         key.dispose();
+         key = null as any;
+         padding = null as any;
+         prng.dispose();
+         prng = null as any;
          Memory.gc();
       }
       
       public getBlockSize(): number
       {
-         return this.key.getBlockSize();
+         return key.getBlockSize();
       }
    }

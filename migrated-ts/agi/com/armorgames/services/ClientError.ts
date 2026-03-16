@@ -15,11 +15,11 @@ export class ClientError{
       public static readonly IO_ERROR: number = 109;
       public static readonly CLIENT_CONNECT_ERROR: number = 110;
       public static readonly CLIENT_TIMEOUT_ERROR: number = 111;
-      protected code: number;
-      protected message: string;
-      protected data: Record<string, any>;
+      protected code!: number;
+      protected message!: string;
+      protected data!: Record<string, any>;
       constructor(param1: string, param2: number, param3: Record<string, any> = null){
-         super();
+
          this.code = param2;
          this.message = param1;
          this.data = param3;

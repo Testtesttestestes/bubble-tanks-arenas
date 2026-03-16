@@ -4,39 +4,39 @@
 export class BarrettReduction implements IReduction
    {
       
-      private r2: BigInteger;
-      private q3: BigInteger;
-      private mu: BigInteger;
-      private m: BigInteger;
+      private r2!: BigInteger;
+      private q3!: BigInteger;
+      private mu!: BigInteger;
+      private m!: BigInteger;
       constructor(m: BigInteger){
-         super();
-         this.r2 = new BigInteger();
-         this.q3 = new BigInteger();
-         BigInteger.ONE.dlShiftTo(2 * this.m.t,this.r2);
-         this.mu = this.r2.divide(this.m);
-         this.m = this.m;
+
+         r2 = new BigInteger();
+         q3 = new BigInteger();
+         BigInteger.ONE.dlShiftTo(2 * m.t,r2);
+         mu = r2.divide(m);
+         this.m = m;
       }
       
       public reduce(lx: BigInteger): void
       {
-         let x: BigInteger = null;
+         var x: BigInteger = null as any;
          x = lx  as unknown as BigInteger;
-         x.drShiftTo(this.m.t - 1,this.r2);
-         if(x.t > this.m.t + 1)
+         x.drShiftTo(m.t - 1,r2);
+         if(x.t > m.t + 1)
          {
-            x.t = this.m.t + 1;
+            x.t = m.t + 1;
             x.clamp();
          }
-         this.mu.multiplyUpperTo(this.r2,this.m.t + 1,this.q3);
-         this.m.multiplyLowerTo(this.q3,this.m.t + 1,this.r2);
-         while(x.compareTo(this.r2) < 0)
+         mu.multiplyUpperTo(r2,m.t + 1,q3);
+         m.multiplyLowerTo(q3,m.t + 1,r2);
+         while(x.compareTo(r2) < 0)
          {
-            x.dAddOffset(1,this.m.t + 1);
+            x.dAddOffset(1,m.t + 1);
          }
-         x.subTo(this.r2,x);
-         while(x.compareTo(this.m) >= 0)
+         x.subTo(r2,x);
+         while(x.compareTo(m) >= 0)
          {
-            x.subTo(this.m,x);
+            x.subTo(m,x);
          }
       }
       
@@ -47,12 +47,12 @@ export class BarrettReduction implements IReduction
       
       public convert(x: BigInteger): BigInteger
       {
-         let r: BigInteger = null;
-         if(x.s < 0 || x.t > 2 * this.m.t)
+         var r: BigInteger = null as any;
+         if(x.s < 0 || x.t > 2 * m.t)
          {
-            return x.mod(this.m);
+            return x.mod(m);
          }
-         if(x.compareTo(this.m) < 0)
+         if(x.compareTo(m) < 0)
          {
             return x;
          }

@@ -3,14 +3,14 @@
 
 export class AGUser{
       
-      public user_id: string;
-      public username: string;
-      public avatar_url: string;
-      private profile_url: string;
-      public countryCode: string;
-      private countryName: string;
+      public user_id!: string;
+      public username!: string;
+      public avatar_url!: string;
+      private profile_url!: string;
+      public countryCode!: string;
+      private countryName!: string;
       constructor(){
-         super();
+
       }
       
       public fromObject(param1: Record<string, any>): void
@@ -25,7 +25,7 @@ export class AGUser{
       
       public toObject(): Record<string, any>
       {
-         let _loc1_: Record<string, any> = new Object();
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.username = this.username;
          _loc1_.avatar_url = this.avatar_url;
          _loc1_.profile_url = this.profile_url;

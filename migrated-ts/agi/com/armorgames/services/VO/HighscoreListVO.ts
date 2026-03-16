@@ -3,18 +3,18 @@
 
 export class HighscoreListVO{
       
-      public isOk: boolean;
-      public status: string;
-      public value: any;
+      public isOk!: boolean;
+      public status!: string;
+      public value!: any;
       constructor(){
-         super();
+
       }
       
       public toObject(): Record<string, any>
       {
-         let _loc2_: HighscoreVO = null;
-         let _loc3_: number = 0;
-         let _loc1_: Record<string, any> = new Object();
+         var _loc2_: HighscoreVO = null as any;
+         var _loc3_: number = 0;
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.success = this.isOk;
          if(!this.isOk)
          {
@@ -66,8 +66,8 @@ export class HighscoreListVO{
       
       public toScoreTypeObject(): Record<string, any>
       {
-         let _loc2_: number = 0;
-         let _loc1_: Record<string, any> = new Object();
+         var _loc2_: number = 0;
+         var _loc1_: Record<string, any> = new Object();
          _loc1_.success = this.isOk;
          _loc1_.error = this.status;
          if(Boolean(this.value))

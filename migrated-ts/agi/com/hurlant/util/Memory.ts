@@ -4,7 +4,7 @@
 export class Memory{
       
       constructor(){
-         super();
+
       }
       
       public static gc(): void

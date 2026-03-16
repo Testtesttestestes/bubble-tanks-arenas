@@ -432,6 +432,11 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Number\b/g, 'as number');
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Boolean\b/g, 'as boolean');
 
+  // JSON objects as primitives
+  if (converted.includes('JSONToken') || converted.includes('JSONTokenType') || converted.includes('JSONParseError')) {
+    converted = converted.replace(/Record<string,\s*any>/g, 'any');
+  }
+
   // Убиваем TS2322: жесткое приведение ВСЕХ null-инициализаций
   converted = converted.replace(/=\s*null\s*([,;])/g, '= null as any$1');
 
@@ -442,7 +447,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/public\s+a\s*:\s*any(?:\[\])?;/g, 'public a: number[];');
 
   // Лечим switch-касты в JSONTokenizer
-  converted = converted.replace(/switch\s*\(([^)]+)\)\s*\{/g, 'switch(String($1)) {');
+  converted = converted.replace(/switch\s*\(this\.ch\)\s*\{/g, 'switch(String(this.ch)) {');
 
   // Лечим if-касты в JSONTokenizer (TS2367 narrow type inference bug)
   converted = converted.replace(/this\.ch\s*(==|!=)\s*/g, 'String(this.ch) $1 ');
@@ -482,7 +487,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*name\s*=\s*(["'].*?["']);/gm, 'this.name = $1;');
 
   // Устраняем внутрипакетные проблемы импортов com.adobe.serialization.json
-  const jsonClasses = ['JSONEncoder', 'JSONDecoder', 'JSONTokenizer', 'JSONToken', 'JSONTokenType'];
+  const jsonClasses = ['JSONEncoder', 'JSONDecoder', 'JSONTokenizer', 'JSONToken', 'JSONTokenType', 'JSONParseError'];
   const missingImports = [];
   for (const cls of jsonClasses) {
     if (new RegExp(`\\b${cls}\\b`).test(converted) && !new RegExp(`class\\s+${cls}\\b`).test(converted)) {

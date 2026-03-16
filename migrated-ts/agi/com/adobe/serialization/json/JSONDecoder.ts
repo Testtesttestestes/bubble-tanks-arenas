@@ -1,13 +1,18 @@
 // AUTO-GENERATED AS3 TO TS CONVERSION
 // Original Package: com.adobe.serialization.json
 
-export class JSONDecoder{
+import { JSONTokenizer } from "./JSONTokenizer";
+import { JSONToken } from "./JSONToken";
+import { JSONTokenType } from "./JSONTokenType";
+
+
+   export class JSONDecoder{
       
-      private value: any;
-      private tokenizer: JSONTokenizer;
-      private token: JSONToken;
+      private value!: any;
+      private tokenizer!: JSONTokenizer;
+      private token!: JSONToken;
       constructor(param1: string){
-         super();
+
          this.tokenizer = new JSONTokenizer(param1);
          this.nextToken();
          this.value = this.parseValue();
@@ -25,7 +30,7 @@ export class JSONDecoder{
       
       private parseArray(): any[]
       {
-         let _loc1_: any[] = new Array();
+         var _loc1_: any[] = new Array();
          this.nextToken();
          if(this.token.type == JSONTokenType.RIGHT_BRACKET)
          {
@@ -51,10 +56,10 @@ export class JSONDecoder{
          return null;
       }
       
-      private parseObject(): Record<string, any>
+      private parseObject(): any
       {
-         let _loc2_: string = null;
-         let _loc1_: Record<string, any> = new Object();
+         var _loc2_: string = null as any;
+         var _loc1_: any = new Object();
          this.nextToken();
          if(this.token.type == JSONTokenType.RIGHT_BRACE)
          {
@@ -97,7 +102,7 @@ export class JSONDecoder{
          return null;
       }
       
-      private parseValue(): Record<string, any>
+      private parseValue(): any
       {
          if(this.token == null)
          {
