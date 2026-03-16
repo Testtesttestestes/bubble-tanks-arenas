@@ -45,9 +45,12 @@ function extractClassScopeMembers(source) {
   return { className, instanceMembers, staticMembers };
 }
 
-function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
+function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options = {}) {
   if (memberNames.size === 0) return source;
-  const names = Array.from(memberNames).map(escapeRegExp).join('|');
+  const { excludedNames = new Set() } = options;
+  const eligibleNames = Array.from(memberNames).filter((name) => !excludedNames.has(name));
+  if (eligibleNames.length === 0) return source;
+  const names = eligibleNames.map(escapeRegExp).join('|');
   const regex = new RegExp(`\\b(${names})\\b(?!\\s*:)`, 'g');
   const blockedPrefix = /(?:function|var|let|const|get|set|public|private|protected|static|readonly|catch|as|instanceof)\s+$/;
 
@@ -58,9 +61,16 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget) {
     const lineStart = whole.lastIndexOf('\n', offset - 1) + 1;
     const lineLeft = whole.slice(lineStart, offset);
     const right = whole.slice(offset + token.length, Math.min(whole.length, offset + token.length + 20));
+    const leftWithSpace = whole.slice(Math.max(0, offset - 80), offset);
+    const leftTrimmed = leftWithSpace.trimEnd();
+    const prevTypeToken = leftTrimmed[leftTrimmed.length - 1];
+    const rightTrimmed = right.trimStart();
+    if ([':', '<', '|', '&', ','].includes(prevTypeToken)) return token;
+    if (/^(?:>|\[\]|\||&|,|;)/.test(rightTrimmed)) return token;
     if (blockedPrefix.test(left)) return token;
     const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
     if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;
+    if (isTypeLikeContext(whole, offset)) return token;
     return `${prefixTarget}.${name}`;
   });
 }
@@ -235,14 +245,15 @@ function processFile(filePath, options = {}) {
   const source = fs.readFileSync(filePath, 'utf8');
   const resolvedFilePath = path.resolve(filePath);
   const { diagnosticsByFile = new Map() } = options;
+  const importedNames = parseImportNames(source);
   const { className, instanceMembers, staticMembers } = extractClassScopeMembers(source);
   if (!className || (instanceMembers.size === 0 && staticMembers.size === 0)) {
     return { changed: false, replacements: 0 };
   }
 
   let converted = source;
-  converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this');
-  converted = addClassPrefixToMemberUsage(converted, staticMembers, className);
+  converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this', { excludedNames: importedNames });
+  converted = addClassPrefixToMemberUsage(converted, staticMembers, className, { excludedNames: importedNames });
 
   staticMembers.forEach((name) => {
     const staticMistakeRegex = new RegExp(`\\bthis\\.${escapeRegExp(name)}\\b`, 'g');
