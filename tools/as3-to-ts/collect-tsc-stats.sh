@@ -7,6 +7,7 @@ ERROR_SLICE_RADIUS="${ERROR_SLICE_RADIUS:-10}"
 MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-20}"
 MAX_ERROR_MESSAGES_PER_CODE="${MAX_ERROR_MESSAGES_PER_CODE:-5}"
 PRINT_ALL_ERRORS="${PRINT_ALL_ERRORS:-1}"
+ALL_ERRORS_FILE="${ALL_ERRORS_FILE:-}"
 
 if [[ "$LOG_FILE" != /* ]]; then
   LOG_FILE="$ROOT_DIR/$LOG_FILE"
@@ -40,6 +41,15 @@ error_stream | sed -E 's#^(.+)\([0-9]+,[0-9]+\): error (TS[0-9]+):.*$#\1 :: \2#'
 if [[ "$PRINT_ALL_ERRORS" == "1" ]]; then
   printf '\nAll TypeScript errors:\n'
   error_stream || true
+
+  if [[ -n "$ALL_ERRORS_FILE" ]]; then
+    if [[ "$ALL_ERRORS_FILE" != /* ]]; then
+      ALL_ERRORS_FILE="$ROOT_DIR/$ALL_ERRORS_FILE"
+    fi
+
+    error_stream > "$ALL_ERRORS_FILE" || true
+    printf 'Saved all TypeScript errors to: %s\n' "$ALL_ERRORS_FILE"
+  fi
 fi
 
 printf '\nError code details (top messages per code, max %s):\n' "$MAX_ERROR_MESSAGES_PER_CODE"
@@ -156,7 +166,7 @@ while IFS= read -r error_line; do
     continue
   fi
 
-  if (( error_context_count >= MAX_ERROR_CONTEXTS )); then
+  if (( MAX_ERROR_CONTEXTS > 0 && error_context_count >= MAX_ERROR_CONTEXTS )); then
     printf '\nReached MAX_ERROR_CONTEXTS=%s, stopping detailed dump.\n' "$MAX_ERROR_CONTEXTS"
     break
   fi
