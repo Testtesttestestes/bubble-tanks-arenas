@@ -34,13 +34,7 @@ const FLASH_STUB_CLASSES = [
   'ApplicationDomain',
   'ContextMenu',
   'ContextMenuItem',
-  'Dictionary',
-  'DebugUtil',
-  'AGUIState',
-  'ClientError',
-  'AGITimeFrame',
-  'ISymmetricKey',
-  'Client'
+  'Dictionary'
 ];
 
 const FLASH_STUB_HEADER = [
