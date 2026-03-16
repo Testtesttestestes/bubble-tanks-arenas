@@ -5,12 +5,17 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG_FILE="${1:-tsc_output.log}"
 ERROR_SLICE_RADIUS="${ERROR_SLICE_RADIUS:-10}"
 MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-20}"
+MAX_ERROR_MESSAGES_PER_CODE="${MAX_ERROR_MESSAGES_PER_CODE:-5}"
 
 if [[ "$LOG_FILE" != /* ]]; then
   LOG_FILE="$ROOT_DIR/$LOG_FILE"
 fi
 
 cd "$ROOT_DIR"
+
+error_stream() {
+  grep "error TS" "$LOG_FILE" || true
+}
 
 if [[ -f "$LOG_FILE" ]]; then
   printf 'Using existing log: %s\n' "$LOG_FILE"
@@ -19,18 +24,26 @@ else
   npx tsc --pretty false > "$LOG_FILE" 2>&1 || true
 fi
 
-total_errors="$( (grep "error TS" "$LOG_FILE" || true) | wc -l | tr -d ' ')"
+total_errors="$(error_stream | wc -l | tr -d ' ')"
 printf 'Total errors: %s\n' "$total_errors"
 
 printf 'Top-10 files:\n'
-(grep "error TS" "$LOG_FILE" || true) | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 10 || true
+error_stream | cut -d'(' -f1 | sort | uniq -c | sort -nr | head -n 10 || true
 
 printf '\nTop error codes:\n'
-(grep -o "TS[0-9]\+" "$LOG_FILE" || true) | sort | uniq -c | sort -nr | head -n 15 || true
+(error_stream | grep -o "TS[0-9]\+" || true) | sort | uniq -c | sort -nr | head -n 15 || true
 
 printf '\nTop file+code pairs:\n'
-(grep "error TS" "$LOG_FILE" || true) | sed -E 's#^(.+)\([0-9]+,[0-9]+\): error (TS[0-9]+):.*$#\1 :: \2#' | sort | uniq -c | sort -nr | head -n 20 || true
+error_stream | sed -E 's#^(.+)\([0-9]+,[0-9]+\): error (TS[0-9]+):.*$#\1 :: \2#' | sort | uniq -c | sort -nr | head -n 20 || true
 
+printf '\nError code details (top messages per code, max %s):\n' "$MAX_ERROR_MESSAGES_PER_CODE"
+for code in $( (error_stream | grep -o "TS[0-9]\+" || true) | sort -u ); do
+  total_for_code="$(error_stream | grep -c "error ${code}:" || true)"
+  printf '%s total=%s\n' "$code" "$total_for_code"
+  (error_stream | awk -v code="$code" 'index($0, "error " code ":") { sub(/^.*error [A-Z0-9]+: /, "", $0); print }' || true) | \
+    sort | uniq -c | sort -nr | head -n "$MAX_ERROR_MESSAGES_PER_CODE" | sed -E 's/^/      /' || true
+  printf '\n'
+done
 
 resolve_ts_path() {
   local ts_path="$1"
@@ -84,6 +97,17 @@ print_context_slice() {
       printf("%s %6d | %s\n", marker, NR, $0)
     }
   ' "$file_path"
+}
+
+print_error_pointer() {
+  local line_number="$1"
+  local col_number="$2"
+
+  if (( col_number < 1 )); then
+    col_number=1
+  fi
+
+  printf '  [TS] %6s | %*s^\n' "$line_number" "$col_number" ''
 }
 
 resolve_as_source() {
@@ -147,6 +171,7 @@ while IFS= read -r error_line; do
 
   ts_file_resolved="$(resolve_ts_path "$ts_file")"
   print_context_slice "$ts_file_resolved" "$err_line_no" "$ERROR_SLICE_RADIUS" "TS"
+  print_error_pointer "$err_line_no" "$err_col_no"
 
   as_source_path="$(resolve_as_source "$ts_file")"
   if [[ -n "$as_source_path" ]]; then
@@ -154,7 +179,7 @@ while IFS= read -r error_line; do
   else
     printf '  [AS] matching source not found for: %s\n' "$ts_file"
   fi
-done < <(grep "error TS" "$LOG_FILE" || true)
+done < <(error_stream)
 
 if (( error_context_count == 0 )); then
   printf 'No file-level TypeScript errors were parsed from the log.\n'
