@@ -215,7 +215,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\b(?:public|private|protected|internal)::([a-zA-Z0-9_]+)/g, 'this.$1');
 
   // BigInteger/decompiler artifacts: normalize malformed this.-prefixed locals/accessors.
-  converted = converted.replace(/var\s+this\.([a-zA-Z0-9_]+)/g, 'let $1');
+  converted = converted.replace(/var\s+this\.([a-zA-Z0-9_]+)/g, 'var $1');
   converted = converted.replace(/function\s+(get|set)\s+this\.([a-zA-Z0-9_]+)/g, '$1 $2');
   converted = converted.replace(/^\s*(true|false);\s*$/gm, '');
   converted = converted.replace(/\(\s*this\s*:\s*[^,)]+\s*,\s*/g, '(');
@@ -261,9 +261,10 @@ function convertAs3ToTs(source) {
 
   // Keep casting rewrites narrow: broad `ClassName(x)` rewrites break legitimate
   // crypto/math calls such as `F(xl)` or `MontgomeryReduction(...)`.
-  converted = converted.replace(/\b(String|Number|Boolean|Array)\(([^)]+)\)/g, (match, type, inner) => {
+  converted = converted.replace(/\b(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event)\(([^)]+)\)/g, (match, type, inner) => {
     if (type === 'Array') return `(${inner} as unknown as any[])`;
-    return `${type}(${inner})`;
+    if (type === 'String' || type === 'Number' || type === 'Boolean') return `${type}(${inner})`;
+    return `(${inner} as unknown as ${type})`;
   });
 
   converted = converted.replace(/\b(?:int|uint)\(([^)]+)\)/g, 'Math.floor($1)');
@@ -339,7 +340,7 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(
     /^(\s*)var\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
-    (_, indent, name, type, init) => `${indent}let ${name}: ${mapType(type)}${init || ''};`
+    (_, indent, name, type, init) => `${indent}var ${name}: ${mapType(type)}${init || ''};`
   );
   converted = converted.replace(/\b(let|const)\s+this\./g, '$1 ');
 
@@ -362,7 +363,7 @@ function convertAs3ToTs(source) {
       const undeclaredLocs = uniqueLocs.filter((loc) => !declaredLocs.has(loc));
       if (undeclaredLocs.length === 0) return match;
 
-      const declarations = `let ${undeclaredLocs.map((loc) => `${loc}: any`).join(', ')};`;
+      const declarations = `var ${undeclaredLocs.map((loc) => `${loc}: any`).join(', ')};`;
       const bodyWithDeclarations = body.replace(/^(\s*)/, `$1${declarations}\n$1`);
       return match.replace(body, bodyWithDeclarations);
     }
@@ -370,6 +371,10 @@ function convertAs3ToTs(source) {
 
   // Repair malformed switch labels produced by downstream rewrites.
   converted = converted.replace(/\bthis\.default\s*:/g, 'default:');
+
+  // Treat decompiler garbage member-access chains as `any` to keep TS parser/type-checker moving.
+  converted = converted.replace(/\bnull\.([a-zA-Z0-9_]+)/g, '(null as any).$1');
+  converted = converted.replace(/\bundefined\.([a-zA-Z0-9_]+)/g, '(undefined as any).$1');
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',

@@ -111,12 +111,19 @@ declare class KeyboardEvent extends Event {
 declare class TextEvent extends Event { static TEXT_INPUT: string; text: string; }
 declare class FocusEvent extends Event { static FOCUS_IN: string; static FOCUS_OUT: string; relatedObject: InteractiveObject; }
 declare class TimerEvent extends Event { static TIMER: string; static TIMER_COMPLETE: string; }
-declare class HTTPStatusEvent extends Event { status: number; }
-declare class IOErrorEvent extends Event { text: string; }
-declare class SecurityErrorEvent extends Event { text: string; }
+declare class HTTPStatusEvent extends Event { static HTTP_STATUS: string; status: number; }
+declare class IOErrorEvent extends Event { static IO_ERROR: string; text: string; }
+declare class SecurityErrorEvent extends Event { static SECURITY_ERROR: string; text: string; }
 declare class ProgressEvent extends Event { bytesLoaded: number; bytesTotal: number; }
 
-declare class URLLoader extends EventTarget { data: any; dataFormat: string; load(request: URLRequest): void; }
+declare class URLLoaderDataFormat { static TEXT: string; static BINARY: string; static VARIABLES: string; }
+declare class URLRequestMethod { static POST: string; static GET: string; }
+declare class URLLoader extends EventTarget {
+  data: any;
+  dataFormat: string;
+  addEventListener(type: string, listener: Function): void;
+  load(request: URLRequest): void;
+}
 declare class URLRequest { url: string; method: string; data: any; constructor(url?: string); }
 declare class URLVariables { [key: string]: any; }
 declare class SharedObject { static getLocal(name: string): SharedObject; data: any; flush(): void; clear(): void; }
