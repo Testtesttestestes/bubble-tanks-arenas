@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG_FILE="${1:-tsc_output.log}"
 ERROR_SLICE_RADIUS="${ERROR_SLICE_RADIUS:-10}"
-MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-50}"
+MAX_ERROR_CONTEXTS="${MAX_ERROR_CONTEXTS:-20}"
 
 if [[ "$LOG_FILE" != /* ]]; then
   LOG_FILE="$ROOT_DIR/$LOG_FILE"
