@@ -6,7 +6,7 @@ export class SimpleIVMode implements IMode, ICipher
       
       protected mode: IVMode;
       protected cipher: ICipher;
-      constructor(this.mode: IVMode){
+      constructor(mode: IVMode){
          super();
          this.mode = this.mode;
          this.cipher = this.mode  as unknown as ICipher;

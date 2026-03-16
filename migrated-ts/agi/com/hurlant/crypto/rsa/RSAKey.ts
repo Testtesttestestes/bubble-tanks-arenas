@@ -221,7 +221,7 @@ export class RSAKey{
          }
       }
       
-      private rawpad(src: ByteArray, end: number, this.n: number): ByteArray
+      private rawpad(src: ByteArray, end: number, n: number): ByteArray
       {
          return src;
       }
@@ -231,7 +231,7 @@ export class RSAKey{
          _encrypt(doPublic,src,dst,length,pad,2);
       }
       
-      private pkcs1pad(src: ByteArray, end: number, this.n: number, type: number = 2): ByteArray
+      private pkcs1pad(src: ByteArray, end: number, n: number, type: number = 2): ByteArray
       {
          let out: ByteArray = null;
          let p: number = 0;
@@ -262,7 +262,7 @@ export class RSAKey{
          return out;
       }
       
-      private pkcs1unpad(src: BigInteger, this.n: number, type: number = 2): ByteArray
+      private pkcs1unpad(src: BigInteger, n: number, type: number = 2): ByteArray
       {
          let b: ByteArray = null;
          let out: ByteArray = null;
@@ -298,7 +298,7 @@ export class RSAKey{
       
       public getBlockSize(): number
       {
-         return (this.n.bitLength() + 7) / 8;
+         return(n.bitLength() + 7) / 8;
       }
       
       public toString(): string

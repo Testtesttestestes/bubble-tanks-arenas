@@ -21,14 +21,14 @@ export class DESKey implements ISymmetricKey
       protected encKey: any[];
       protected key: ByteArray;
       protected decKey: any[];
-      constructor(this.key: ByteArray){
+      constructor(key: ByteArray){
          super();
          this.key = this.key;
          this.encKey = generateWorkingKey(true,this.key,0);
          this.decKey = generateWorkingKey(false,this.key,0);
       }
       
-      protected generateWorkingKey(encrypting: boolean, this.key: ByteArray, off: number): any[]
+      protected generateWorkingKey(encrypting: boolean, key: ByteArray, off: number): any[]
       {
          let newKey: any[] = null;
          let pc1m: ByteArray = null;
@@ -108,12 +108,12 @@ export class DESKey implements ISymmetricKey
       
       public encrypt(block: ByteArray, index: number = 0): void
       {
-         desFunc(this.encKey,block,index,block,index);
+         desFunc(encKey,block,index,block,index);
       }
       
       public decrypt(block: ByteArray, index: number = 0): void
       {
-         desFunc(this.decKey,block,index,block,index);
+         desFunc(decKey,block,index,block,index);
       }
       
       public dispose(): void

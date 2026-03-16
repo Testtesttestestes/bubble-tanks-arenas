@@ -10,7 +10,7 @@ export class MontgomeryReduction implements IReduction
       private mpl: number;
       private mt2: number;
       private m: BigInteger;
-      constructor(this.m: BigInteger){
+      constructor(m: BigInteger){
          super();
          this.m = this.m;
          this.mp = this.m.invDigit();

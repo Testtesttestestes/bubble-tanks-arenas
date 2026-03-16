@@ -14,7 +14,7 @@ export class NumberUtil{
       
       public static scalar(param1: number, param2: number = 0, param3: number = 100): number
       {
-         return (param1 - param2) / (param3 - param2);
+         return(param1 - param2) / (param3 - param2);
       }
       
       public static pad(param1: number, param2: string = "0", param3: number = 5): string
