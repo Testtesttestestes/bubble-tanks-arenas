@@ -190,11 +190,8 @@ function convertClassMembers(source, className, isDynamicClass = false) {
   // Keep migrated classes "dynamic"-friendly: timeline/decompiler code often writes
   // undeclared fields directly on `this` (e.g. `this.var_3`, `this.btnX_mc`).
   // Inject a permissive index signature once per class body to avoid TS2339 floods.
-  const classHeaderMatch = out.match(/export\s+class\s+\w+[^\{]*\{/);
-  const hasParsedClassMembers = /(^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?\w+[!?]?\s*:\s*[^;]+;\s*$)|(^\s*(?:(?:public|private|protected|static|readonly)\s+)*(?:constructor|\w+)\s*\([^)]*\)\s*(?::\s*[^\s{]+)?\s*\{)/m.test(
-    out
-  );
-  if (classHeaderMatch && hasParsedClassMembers && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
+  const classHeaderMatch = out.match(/^\s*export\s+class\s+\w+[^\{]*\{/m);
+  if (classHeaderMatch && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
     out = out.replace(classHeaderMatch[0], `${classHeaderMatch[0]}\n  [key: string]: any;`);
   }
 
