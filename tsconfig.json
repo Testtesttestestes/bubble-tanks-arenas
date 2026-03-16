@@ -10,7 +10,8 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts"
+    "migrated-ts/**/*.ts",
+    "migrated-ts/**/*.d.ts",
+    "flash-shims.d.ts"
   ]
 }
