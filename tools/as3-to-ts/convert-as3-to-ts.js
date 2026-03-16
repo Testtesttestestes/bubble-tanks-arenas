@@ -57,9 +57,10 @@ function convertClassMembers(source, className) {
   let out = source;
 
   const normalizeModifiers = (modifiers) => {
-    const allowed = new Set(['public', 'private', 'protected', 'static']);
+    const allowed = new Set(['public', 'private', 'protected', 'static', 'readonly']);
     return (modifiers || '')
       .replace(/\binternal\b/g, 'public')
+      .replace(/\boverride\b/g, '')
       .split(/\s+/)
       .filter(Boolean)
       .filter((token) => allowed.has(token))
@@ -98,7 +99,7 @@ function convertClassMembers(source, className) {
   out = normalizedHead + classTail;
 
   out = out.replace(
-    /^(\s*)((?:(?:override|public|private|protected|internal|\w+)\s+)*(?:static\s+)?)function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
+    /^(\s*)((?:(?:override|public|private|protected|internal|static|\w+)\s+)*)function\s+(?:this\.)?(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
     (_, indent, modifiers, fnName, params, returnType) => {
       const normalizedMods = normalizeModifiers(modifiers);
       const head = fnName === className ? 'constructor' : fnName;
@@ -112,7 +113,7 @@ function convertClassMembers(source, className) {
   );
 
   out = out.replace(
-    /^(\s*)((?:(?:override|public|private|protected|internal|\w+)\s+)*(?:static\s+)?)function\s+(get|set)\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
+    /^(\s*)((?:(?:override|public|private|protected|internal|static|\w+)\s+)*)function\s+(get|set)\s+(?:this\.)?(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s{]+))?/gm,
     (_, indent, modifiers, accessorKind, name, params, returnType) => {
       const normalizedMods = normalizeModifiers(modifiers);
       const paramList = convertParams(params);
@@ -329,6 +330,7 @@ function convertAs3ToTs(source) {
     /^(\s*)var\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, name, type, init) => `${indent}let ${name}: ${mapType(type)}${init || ''};`
   );
+  converted = converted.replace(/\b(let|const)\s+this\./g, '$1 ');
 
   if (classMatch && className && hasExtends) {
     const constructorRegex = /(constructor\s*\([^)]*\)\s*\{)(?!\s*super\s*\()/g;

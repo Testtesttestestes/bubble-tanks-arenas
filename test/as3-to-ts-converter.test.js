@@ -18,6 +18,11 @@ test('convertParams converts typed and default params with null coercion', () =>
   assert.equal(converted, 'param1: string, param2: number = 5, optional: MovieClip = null as any, ...rest: any');
 });
 
+test('convertParams strips decompiler this. prefixes from parameter names', () => {
+  const converted = convertParams('this.hash:IHash, this.bits:uint = 0');
+  assert.equal(converted, 'hash: IHash, bits: number = 0');
+});
+
 test('convertAs3ToTs converts EnemyAI-style class shape', () => {
   const input = `package\n{\n   public class EnemyAI extends class_113\n   {\n      internal var var_435:Number;\n\n      public function EnemyAI(param1:TankData)\n      {\n         super(param1);\n      }\n\n      override public function Move() : void\n      {\n         var _loc1_:Number = 10;\n      }\n   }\n}`;
 
@@ -45,6 +50,29 @@ test('convertAs3ToTs strips imports and emits constructor without access modifie
   assert.doesNotMatch(output, /^import\s+/m);
   assert.match(output, /constructor\(\)/);
   assert.doesNotMatch(output, /public constructor\(\)/);
+});
+
+test('convertAs3ToTs strips this. prefixes from function declarations and constructor params', () => {
+  const input = `package
+{
+   public class HMAC
+   {
+      public function this.HMAC(this.hash:IHash, this.bits:uint = 0)
+      {
+      }
+
+      override public function this.compute(this.value:String) : String
+      {
+         return this.value;
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /constructor\(hash: IHash, bits: number = 0\)/);
+  assert.match(output, /public compute\(value: string\): string/);
+  assert.doesNotMatch(output, /constructor\(this\./);
+  assert.doesNotMatch(output, /function this\./);
 });
 
 test('convertAs3ToTs prefixes frequent Flash API calls with this', () => {
