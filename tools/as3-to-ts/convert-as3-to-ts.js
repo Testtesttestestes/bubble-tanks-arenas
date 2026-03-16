@@ -76,11 +76,12 @@ function convertClassMembers(source, className) {
       const vis = visibility !== 'internal' ? `${visibility} ` : 'public ';
       const staticPart = isStatic ? 'static ' : '';
       const readonly = kind === 'const' ? 'readonly ' : '';
+      const bang = init ? '' : '!';
       const mappedTypeBase = mapType(type);
       const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
       if (initializer.includes('null') && mappedType !== 'any') initializer = ' = null as any';
-      return `${indent}${vis}${staticPart}${readonly}${name}: ${mappedType}${initializer};`;
+      return `${indent}${vis}${staticPart}${readonly}${name}${bang}: ${mappedType}${initializer};`;
     }
   );
 
@@ -93,11 +94,12 @@ function convertClassMembers(source, className) {
     /^(\s*)(static\s+)?(?:const|var)\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, isStatic, name, type, init) => {
       const staticPart = isStatic ? 'static ' : '';
+      const bang = init ? '' : '!';
       const mappedTypeBase = mapType(type);
       const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
       if (initializer.includes('null') && mappedType !== 'any') initializer = ' = null as any';
-      return `${indent}public ${staticPart}${name}: ${mappedType}${initializer};`;
+      return `${indent}public ${staticPart}${name}${bang}: ${mappedType}${initializer};`;
     }
   );
   out = normalizedHead + classTail;

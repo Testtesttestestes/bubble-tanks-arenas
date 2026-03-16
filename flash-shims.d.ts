@@ -77,9 +77,12 @@ declare class Rectangle {
 }
 
 declare class ByteArray {
+  [key: number]: number;
   length: number; position: number; bytesAvailable: number;
   clear(): void; readByte(): number; readBytes(bytes: ByteArray, offset?: number, length?: number): void;
   writeByte(value: number): void; writeBytes(bytes: ByteArray, offset?: number, length?: number): void;
+  writeUnsignedInt(val: number): void;
+  readUnsignedInt(): number;
 }
 
 declare class Dictionary { [key: string]: any; }
@@ -103,6 +106,7 @@ declare class Stage extends DisplayObjectContainer {
 declare class Event {
   static ENTER_FRAME: string; static ADDED_TO_STAGE: string; static REMOVED_FROM_STAGE: string;
   static CHANGE: string; static COMPLETE: string; static CLOSE: string;
+  static SOUND_COMPLETE: string;
   type: string; target: any; currentTarget: any;
   constructor(type: string, bubbles?: boolean, cancelable?: boolean);
   preventDefault(): void;
@@ -139,8 +143,17 @@ declare class URLVariables { [key: string]: any; }
 declare class SharedObject { static getLocal(name: string): SharedObject; data: any; flush(): void; clear(): void; }
 
 declare class Sound { load(stream: URLRequest): void; play(startTime?: number, loops?: number, sndTransform?: SoundTransform): SoundChannel; }
-declare class SoundChannel { stop(): void; soundTransform: SoundTransform; }
-declare class SoundTransform { volume: number; panning: number; constructor(vol?: number, pan?: number); }
+declare class SoundChannel {
+  stop(): void;
+  soundTransform: SoundTransform;
+  addEventListener(type: string, listener: Function): void;
+}
+declare class SoundTransform {
+  volume: number;
+  panning: number;
+  pan: number;
+  constructor(vol?: number, pan?: number);
+}
 declare class ColorTransform { constructor(rm?: number, gm?: number, bm?: number, am?: number, ro?: number, go?: number, bo?: number, ao?: number); }
 declare class Graphics { clear(): void; beginFill(color: number, alpha?: number): void; endFill(): void; drawRect(x: number, y: number, w: number, h: number): void; }
 declare class TextFormat { constructor(font?: string, size?: number, color?: number, bold?: boolean, italic?: boolean, underline?: boolean, url?: string, target?: string, align?: string); }
