@@ -143,6 +143,36 @@ test('TS2662/TS2663 forced prefixes are applied outside methods (e.g. static blo
   assert.match(updated, /BigInteger\.t = 52;/);
 });
 
+test('TS2304 obfuscated members are fixed inside getter methods', () => {
+  const source = [
+    'export class BigInteger {',
+    '  public var_3: number = 0;',
+    '  public get value(): number {',
+    '    return var_3;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'BigInteger.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const tPos = lineColAt(source, 'var_3;');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    `${samplePath}(${tPos.line},${tPos.col}): error TS2304: Cannot find name 'var_3'.`,
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const result = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /return this\.var_3;/);
+});
+
 
 test('does not prefix type keyword in type alias declarations but prefixes member usage named type', () => {
   const source = [

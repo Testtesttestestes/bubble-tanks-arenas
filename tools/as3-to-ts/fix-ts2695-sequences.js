@@ -151,7 +151,34 @@ function transformTs2695Sequences(source) {
     replacements += 1;
   }
 
-  return { content: output, replacements };
+  let normalizedOutput = output;
+  normalizedOutput = normalizedOutput.replace(/(=\s*)\(([^;\n]+)\)(\s*;)/g, (match, left, inner, right) => {
+    const expressions = splitTopLevelComma(inner);
+    if (expressions.length < 2) return match;
+    const tempName = `__ts2695Tmp${tempCounter++}`;
+    const lines = ['(() => {', `  let ${tempName}: any;`];
+    for (const expression of expressions) {
+      lines.push(`  ${tempName} = ${expression};`);
+    }
+    lines.push(`  return ${tempName};`, '})()');
+    replacements += 1;
+    return `${left}${lines.join('\n')}${right}`;
+  });
+
+  normalizedOutput = normalizedOutput.replace(/(return\s+)\(([^;\n]+)\)(\s*;)/g, (match, left, inner, right) => {
+    const expressions = splitTopLevelComma(inner);
+    if (expressions.length < 2) return match;
+    const tempName = `__ts2695Tmp${tempCounter++}`;
+    const lines = ['(() => {', `  let ${tempName}: any;`];
+    for (const expression of expressions) {
+      lines.push(`  ${tempName} = ${expression};`);
+    }
+    lines.push(`  return ${tempName};`, '})()');
+    replacements += 1;
+    return `${left}${lines.join('\n')}${right}`;
+  });
+
+  return { content: normalizedOutput, replacements };
 }
 
 function collectTsFiles(inputPath) {

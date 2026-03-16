@@ -151,7 +151,8 @@ function extractClassAndMethodRanges(source) {
 
   const classRange = { start: classOpen + 1, end: classClose };
   const methods = [];
-  const methodRegex = /^[ \t]*(?:public|private|protected)?\s*(?:static\s+)?(?:readonly\s+)?([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*[:\w<>, \[\]\|?]*\{/gm;
+  const methodRegex =
+    /^[ \t]*(?:(?:public|private|protected)\s+)?(?:(?:static|override|readonly|async)\s+)*(?:function\s+)?(?:(?:get|set)\s+)?([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*(?::\s*[^\{]+)?\{/gm;
   let match;
   while ((match = methodRegex.exec(source)) !== null) {
     const open = methodRegex.lastIndex - 1;
