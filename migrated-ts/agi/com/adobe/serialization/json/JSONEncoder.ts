@@ -131,7 +131,7 @@ export class JSONEncoder{
          }
          else
          {
-            for (let v of classInfo.._star._missingMethod(name() == "variable" || name() == "accessor"))
+            for (let v of classInfo._descendants_star_filter(name() == "variable" || name() == "accessor"))
             {
                if(s.length > 0)
                {

@@ -38,7 +38,7 @@ export class class_32 implements class_18
          this.var_88[this.i] = this.const_20[this.i];
          this.var_85[this.i] = this.const_17[this.i];
          ++this.i;
-    }
+      }
   }
 
   private static Rcon: ByteArray = new ByteArray();
@@ -48,7 +48,7 @@ export class class_32 implements class_18
     while(this.i < this._Rcon.length) {
          this.Rcon[this.i] = this._Rcon[this.i];
          ++this.i;
-    }
+      }
   }
 
   private state: ByteArray;
