@@ -105,17 +105,14 @@ function runCli() {
   const args = parseArgs(process.argv);
   const files = collectTsFiles(args.input);
   let changedFiles = 0;
-  let totalReplacements = 0;
 
   for (const file of files) {
     const result = processFile(file);
     if (!result.changed) continue;
     changedFiles += 1;
-    totalReplacements += result.replacements;
-    console.log(`Updated: ${file} (+${result.replacements} this.)`);
   }
 
-  console.log(`Done. Files changed: ${changedFiles}, replacements: ${totalReplacements}`);
+  console.log(`updated ${changedFiles}/${files.length}`);
 }
 
 module.exports = {
