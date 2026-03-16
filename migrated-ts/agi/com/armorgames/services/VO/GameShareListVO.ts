@@ -1,0 +1,47 @@
+// AUTO-GENERATED AS3 TO TS CONVERSION
+// Original Package: com.armorgames.services.VO
+
+export class GameShareListVO{
+      
+      public isOk: boolean;
+      public status: string;
+      public value: Record<string, any>;
+      constructor(){
+         super();
+      }
+      
+      public toObject(): Record<string, any>
+      {
+         let _loc2_: GameShareVO = null;
+         let _loc3_: number = 0;
+         let _loc1_: Record<string, any> = new Object();
+         _loc1_.success = this.isOk;
+         if(!this.isOk)
+         {
+            _loc1_.error = this.status;
+         }
+         if(Boolean(this.value))
+         {
+            _loc1_.metric = this.value["metric"];
+            _loc1_.timeFrame = this.value["interval"];
+            _loc1_.total = this.value["total"];
+            _loc1_.page = this.value["page"];
+            _loc1_.averageFunFactor = this.value["avg_fun_factor"];
+            _loc1_.totalViews = this.value["my_total_plays"];
+            _loc1_.totalLikes = this.value["my_total_likes"];
+            _loc1_.totalStaffPicks = this.value["my_total_staff_picks"];
+            _loc1_.list = new Array();
+            if(Boolean(this.value["list"]))
+            {
+               _loc3_ = 0;
+               while(_loc3_ < this.value["list"].length)
+               {
+                  _loc2_ = this.value["list"][_loc3_];
+                  _loc1_.list.push(_loc2_.toObject());
+                  _loc3_++;
+               }
+            }
+         }
+         return _loc1_;
+      }
+   }

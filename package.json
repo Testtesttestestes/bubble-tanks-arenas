@@ -13,7 +13,8 @@
     "dev": "npm run build:migrated-manifest && vite",
     "build": "npm run build:migrated-manifest && vite build",
     "preview": "vite preview",
-    "build:migrated-manifest": "node tools/phaser-pipeline/build-migrated-manifest.js"
+    "build:migrated-manifest": "node tools/phaser-pipeline/build-migrated-manifest.js",
+    "convert:agi": "node tools/as3-to-ts/convert-as3-to-ts.js --input \"binaryData/AGI decomp/scripts\" --output migrated-ts/agi && node tools/as3-to-ts/fix-implicit-this.js --input migrated-ts/agi"
   },
   "dependencies": {
     "phaser": "^3.90.0"

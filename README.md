@@ -16,6 +16,18 @@ node tools/as3-to-ts/convert-as3-to-ts.js --input scripts --output migrated-ts
 cp flash-shims.d.ts migrated-ts/flash-shims.d.ts
 ```
 
+## Конвертация AGI decomp (без SWF `loadBytes`)
+
+AGI теперь можно конвертировать напрямую из декомпилированного дерева
+`binaryData/AGI decomp/scripts` в отдельный TS-модуль внутри `migrated-ts/agi`:
+
+```bash
+npm run convert:agi
+```
+
+После этого `class_79.ts` инициализирует AGI как обычный TS-класс (`new AGI()`),
+без загрузки старого SWF-бинарника через `loadBytes(new AgiClass())`.
+
 ## Что делает конвертер
 
 - Удаляет `package`, `import`, метаданные и `use namespace`.

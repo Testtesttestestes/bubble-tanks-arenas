@@ -53,7 +53,15 @@ function toUnixPath(filePath) {
 }
 
 function buildAssetIndex() {
-  const roots = ['images', 'sprites', 'frames'];
+  const roots = [
+    'images',
+    'sprites',
+    'frames',
+    path.join('binaryData', 'AGI decomp', 'images'),
+    path.join('binaryData', 'AGI decomp', 'sprites'),
+    path.join('binaryData', 'AGI decomp', 'frames'),
+    path.join('binaryData', 'AGI decomp', 'buttons'),
+  ];
   const assets = [];
   for (const root of roots) {
     const fullRoot = path.join(repoRoot, root);
