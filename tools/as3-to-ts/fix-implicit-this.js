@@ -187,34 +187,54 @@ function isTypeLikeContext(source, index) {
   return false;
 }
 
+function findUnprefixedNameIndexInLine(line, name, source, lineStartIndex) {
+  const tokenRegex = new RegExp(`\b${escapeRegExp(name)}\b`, 'g');
+  let match;
+  while ((match = tokenRegex.exec(line)) !== null) {
+    const tokenIndex = match.index;
+    const prevChar = tokenIndex > 0 ? line[tokenIndex - 1] : '';
+    if (prevChar === '.') continue;
+
+    const absoluteIndex = lineStartIndex + tokenIndex;
+    if (isTypeLikeContext(source, absoluteIndex)) continue;
+
+    return tokenIndex;
+  }
+  return -1;
+}
+
 function applyDiagnosticThisFixes(source, diagnostics) {
   if (!diagnostics || diagnostics.length === 0) return source;
   const importedNames = parseImportNames(source);
   const { className } = extractClassScopeMembers(source);
-  const { classRange } = extractClassAndMethodRanges(source);
-  if (!classRange || !className) return source;
+  if (!className) return source;
 
   const lineStarts = computeLineStarts(source);
-  const edits = [];
+  const lines = source.split('\n');
+
   for (const diagnostic of diagnostics) {
-    const index = lineColToIndex(lineStarts, diagnostic.line, diagnostic.col);
-    if (index < classRange.start || index >= classRange.end) continue;
     if (importedNames.has(diagnostic.name)) continue;
+    if (diagnostic.line <= 0 || diagnostic.line > lines.length) continue;
+
+    const lineIndex = diagnostic.line - 1;
+    const lineStartIndex = lineStarts[lineIndex];
+    const line = lines[lineIndex];
     const prefixTarget = diagnostic.forcePrefix === 'static' ? `${className}.` : 'this.';
-    if (source.slice(Math.max(0, index - prefixTarget.length), index) === prefixTarget) continue;
-    if (source[index - 1] === '.') continue;
-    if (!new RegExp(`^${escapeRegExp(diagnostic.name)}\\b`).test(source.slice(index))) continue;
-    if (isTypeLikeContext(source, index)) continue;
-    edits.push({ index, prefixTarget });
+
+    const tokenIndex = findUnprefixedNameIndexInLine(line, diagnostic.name, source, lineStartIndex);
+    if (tokenIndex === -1) continue;
+
+    lines[lineIndex] = `${line.slice(0, tokenIndex)}${prefixTarget}${line.slice(tokenIndex)}`;
+    source = lines.join('\n');
+
+    // Поддерживаем абсолютные индексы после редактирования текущей строки.
+    const delta = prefixTarget.length;
+    for (let i = lineIndex + 1; i < lineStarts.length; i += 1) {
+      lineStarts[i] += delta;
+    }
   }
 
-  if (edits.length === 0) return source;
-  const uniqueEdits = Array.from(new Map(edits.map((edit) => [edit.index, edit])).values()).sort((a, b) => b.index - a.index);
-  let converted = source;
-  for (const { index, prefixTarget } of uniqueEdits) {
-    converted = `${converted.slice(0, index)}${prefixTarget}${converted.slice(index)}`;
-  }
-  return converted;
+  return source;
 }
 
 function parseTscLog(logPath) {
