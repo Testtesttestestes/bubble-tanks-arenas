@@ -140,6 +140,14 @@ function convertClassMembers(source, className) {
     }
   );
 
+  // Keep migrated classes "dynamic"-friendly: timeline/decompiler code often writes
+  // undeclared fields directly on `this` (e.g. `this.var_3`, `this.btnX_mc`).
+  // Inject a permissive index signature once per class body to avoid TS2339 floods.
+  const classBodyMatch = out.match(/export\s+class\s+\w+[^\{]*\{/);
+  if (classBodyMatch && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
+    out = out.replace(classBodyMatch[0], `${classBodyMatch[0]}\n  [key: string]: any;`);
+  }
+
   return out;
 }
 
@@ -490,6 +498,9 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bthis\.catch\b/g, 'catch');
   converted = converted.replace(/\bthis\.return\b/g, 'return');
   converted = converted.replace(/\bthis\.super\b/g, 'super');
+  converted = converted.replace(/\bthis\.public\b/g, 'public');
+  converted = converted.replace(/\bthis\.private\b/g, 'private');
+  converted = converted.replace(/\bthis\.protected\b/g, 'protected');
 
   // Лечим баг декомпилятора с пустыми/мусорными стейтментами
   converted = converted.replace(/^\s*undefined\s*;\s*$/gm, '');

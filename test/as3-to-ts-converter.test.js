@@ -224,6 +224,38 @@ test('convertAs3ToTs repairs accidental this.default switch labels', () => {
   assert.doesNotMatch(output, /this\.default:/);
 });
 
+test('convertAs3ToTs injects dynamic index signature for converted classes', () => {
+  const input = `package
+{
+   public class DynamicLike extends MovieClip
+   {
+      public function DynamicLike()
+      {
+         this.var_3 = 1;
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /export class DynamicLike extends MovieClip[\s\S]*\{\n  \[key: string\]: any;/);
+});
+
+test('convertAs3ToTs strips this. from reserved visibility keywords', () => {
+  const input = `package
+{
+   public class Weird
+   {
+      public function f() : void
+      {
+         this.public var x:int;
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.doesNotMatch(output, /this\.public/);
+});
+
 test('fix-implicit-this extracts class properties and prefixes usages', () => {
   const input = `export class ArenaData extends MovieClip {\n  public x: number = 0;\n  private alpha: number = 1;\n\n  public move(): void {\n    x += 10;\n    alpha = 0.5;\n  }\n}`;
 
