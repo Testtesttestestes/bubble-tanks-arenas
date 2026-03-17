@@ -88,6 +88,36 @@ test('member extraction ignores local variables without visibility modifiers', (
   assert.equal(staticMembers.size, 0);
 });
 
+
+test('prefixes static members in boolean expressions with || and &&', () => {
+  const source = [
+    'export class DebugUtil {',
+    '  public static ON: boolean = true;',
+    '  public static EXTERN: boolean = false;',
+    '  public static _filters: any[] = [];',
+    '  public static output(param1: string): void {',
+    '    if (!ON || _filters.indexOf(param1) === -1) {',
+    '      return;',
+    '    }',
+    '    if (EXTERN && ON) {',
+    '      return;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'DebugUtil.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const result = processFile(samplePath);
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /!DebugUtil\.ON \|\| DebugUtil\._filters\.indexOf\(param1\) === -1/);
+  assert.match(updated, /DebugUtil\.EXTERN && DebugUtil\.ON/);
+});
+
 test('parseTscLog captures TS2662/TS2663 suggestions and applies forced prefixes', () => {
   const source = [
     'export class BigInteger {',

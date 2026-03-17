@@ -62,8 +62,17 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const leftTrimmed = leftWithSpace.trimEnd();
     const prevTypeToken = leftTrimmed[leftTrimmed.length - 1];
     const rightTrimmed = right.trimStart();
-    if (['<', '|', '&'].includes(prevTypeToken)) return token;
-    if (/^(?:>|\[\]|\||&|,)/.test(rightTrimmed)) return token;
+    const isTypePipePrefix = prevTypeToken === '|' && !leftTrimmed.endsWith('||');
+    const isTypeAmpPrefix = prevTypeToken === '&' && !leftTrimmed.endsWith('&&');
+    if (prevTypeToken === '<' || isTypePipePrefix || isTypeAmpPrefix) return token;
+
+    const startsWithTypeDelimiter =
+      rightTrimmed.startsWith('>') ||
+      rightTrimmed.startsWith('[]') ||
+      rightTrimmed.startsWith(',') ||
+      (rightTrimmed.startsWith('|') && !rightTrimmed.startsWith('||')) ||
+      (rightTrimmed.startsWith('&') && !rightTrimmed.startsWith('&&'));
+    if (startsWithTypeDelimiter) return token;
     if (name === 'type' && /^\s+[A-Za-z_$]/.test(right)) return token;
     if (rightTrimmed.startsWith(':') && !lineLeft.includes('?')) return token;
     if (blockedPrefix.test(left)) return token;
