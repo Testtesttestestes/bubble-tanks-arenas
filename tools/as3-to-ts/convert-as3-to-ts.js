@@ -137,7 +137,7 @@ function convertClassMembers(source, className, isDynamicClass = false) {
       const vis = visibility !== 'internal' ? `${visibility} ` : 'public ';
       const staticPart = isStatic ? 'static ' : '';
       const readonly = kind === 'const' ? 'readonly ' : '';
-      const bang = init || readonly ? '' : '!';
+      const bang = init || readonly || isStatic ? '' : '!';
       const mappedTypeBase = mapType(type);
       const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
@@ -155,7 +155,7 @@ function convertClassMembers(source, className, isDynamicClass = false) {
     /^(\s*)(static\s+)?(?:const|var)\s+(?:this\.)?(\w+)\s*:\s*([^=;]+?)(\s*=\s*[^;]+)?;\s*$/gm,
     (_, indent, isStatic, name, type, init) => {
       const staticPart = isStatic ? 'static ' : '';
-      const bang = init ? '' : '!';
+      const bang = init || isStatic ? '' : '!';
       const mappedTypeBase = mapType(type);
       const mappedType = mappedTypeBase === 'MovieClip' ? 'MovieClip & Record<string, any>' : mappedTypeBase;
       let initializer = init ? init : '';
