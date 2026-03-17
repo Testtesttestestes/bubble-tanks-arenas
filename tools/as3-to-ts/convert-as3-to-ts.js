@@ -370,7 +370,11 @@ function convertAs3ToTs(source) {
     return `(${inner} as unknown as ${type})`;
   });
 
-  converted = converted.replace(/\b(?:int|uint)\(([^)]+)\)/g, 'Math.floor($1)');
+  // Replace AS3 int/uint static constants with hardcoded 32-bit integer limits
+  converted = converted.replace(/\bint\.MAX_VALUE\b/g, '2147483647');
+  converted = converted.replace(/\bint\.MIN_VALUE\b/g, '-2147483648');
+  converted = converted.replace(/\buint\.MAX_VALUE\b/g, '4294967295');
+  converted = converted.replace(/\buint\.MIN_VALUE\b/g, '0');
 
   // Some decompiled casts arrive as empty constructor/call args: `foo( as T)`.
   // Normalize them after all cast rewrites so TS parser remains valid.
