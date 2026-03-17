@@ -63,7 +63,7 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const leftTrimmed = leftWithSpace.trimEnd();
     const prevTypeToken = leftTrimmed[leftTrimmed.length - 1];
     const rightTrimmed = right.trimStart();
-    if ([':', '<', '|', '&', ','].includes(prevTypeToken)) return token;
+    if (['<', '|', '&'].includes(prevTypeToken)) return token;
     if (/^(?:>|\[\]|\||&|,|;)/.test(rightTrimmed)) return token;
     if (name === 'type' && /^\s+[A-Za-z_$]/.test(right)) return token;
     if (blockedPrefix.test(left)) return token;
@@ -181,8 +181,17 @@ function collectLocalsInRange(source, range) {
 function isTypeLikeContext(source, index) {
   const left = source.slice(Math.max(0, index - 40), index);
   const right = source.slice(index, Math.min(source.length, index + 40));
+  
   if (/\b(?:class|interface|type|extends|implements|import|export|new)\s*$/.test(left)) return true;
-  if (/:\s*$/.test(left)) return true;
+  
+  if (/:\s*$/.test(left)) {
+    // Allows quoted keys ("id": ids) OR unquoted keys that are preceded by { or , (like { id: ids, other: val })
+    if (/(['"`])\s*:\s*$/.test(left) || /(?:[{,]\s*[a-zA-Z0-9_$]+)\s*:\s*$/.test(left)) {
+        return false; 
+    }
+    return true; 
+  }
+  
   if (/^\s*<[^>]*>/.test(right)) return true;
   return false;
 }
