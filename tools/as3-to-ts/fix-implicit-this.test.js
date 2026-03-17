@@ -428,3 +428,40 @@ test('does not prefix shadowed locals or params that match class member names', 
   assert.match(updated, /let p = n;/);
   assert.match(updated, /return p \+ n;/);
 });
+
+test('member extraction supports static readonly TS fields and static methods', () => {
+  const source = [
+    'export class AESKey {',
+    '  public static readonly Nb: number = 4;',
+    '  private static readonly ROUNDS: number = 14;',
+    '  public static getTables(): any {',
+    '    return null;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const { staticMembers } = extractClassScopeMembers(source);
+  assert.equal(staticMembers.has('Nb'), true);
+  assert.equal(staticMembers.has('ROUNDS'), true);
+  assert.equal(staticMembers.has('getTables'), true);
+});
+
+test('known inherited members are prefixed as instance usage', () => {
+  const source = [
+    'export class CBCMode {',
+    '  public run(): number {',
+    '    return blockSize;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'CBCMode.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const result = processFile(samplePath);
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /return this\.blockSize;/);
+});
