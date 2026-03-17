@@ -38,7 +38,9 @@ const FLASH_STUB_CLASSES = [
   'Security',
   'ExternalInterface',
   'System',
-  'LoaderContext'
+  'LoaderContext',
+  'Transform',
+  'ColorTransform'
 ];
 
 const FLASH_STUB_HEADER = [
@@ -563,6 +565,11 @@ function convertAs3ToTs(source) {
   // Перевод AS3 JSON API в нативный JS/TS
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
   converted = converted.replace(/\bJSON\.decode\s*\(/g, 'JSON.parse(');
+  
+  // Лечим TS2536: Использование объектов в качестве ключей Dictionary (Caller.as)
+  converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
+  converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
+  converted = converted.replace(/\bCaller\.calls\[([^\]]+)\]/g, '(Caller.calls as any)[$1 as any]');
 
   // --- ТЕРМИНАТОР СИНТАКСИСА ---
   // Лечим дикие подстановки 'this.' к зарезервированным словам, которые могли проскочить
