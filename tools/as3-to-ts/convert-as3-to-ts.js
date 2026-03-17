@@ -95,18 +95,24 @@ function convertParams(paramString) {
     .map((part) => part.trim())
     .filter(Boolean)
     .map((param) => {
-      // Aggressively consume `this.` prefixes from decompiled AS3 parameter names.
       const match = param.match(/^(\.{3})?(?:this\.)?([a-zA-Z0-9_]+)\s*(?::\s*([^=]+))?(?:\s*=\s*(.+))?$/);
       if (!match) return param;
       const [, rest, name, type, defaultValue] = match;
-      const mapped = type ? mapType(type) : 'any';
+      
+      let mapped = type ? mapType(type) : 'any';
       const spread = rest ? '...' : '';
+      
+      // FIX: Ensure rest parameters are strictly typed as arrays
+      if (spread && !mapped.endsWith('[]') && mapped !== 'any[]') {
+        mapped = mapped === 'any' ? 'any[]' : `${mapped}[]`;
+      }
+
       let suffix = '';
       if (defaultValue) {
         let dv = defaultValue.trim();
         if (dv === 'null' && (mapped === 'number' || mapped === 'boolean')) {
           dv = '0 /* null */';
-        } else if (dv === 'null' && mapped !== 'any') {
+        } else if (dv === 'null' && mapped !== 'any' && mapped !== 'any[]') {
           dv = 'null as any';
         }
         suffix = ` = ${dv}`;
@@ -561,7 +567,8 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bauthenticationFailed\(error\)/g, 'authenticationFailed(clientErr)');
   
   // Исправляем баг декомпилятора: потерянный 'each' в циклах (актуально для Caller.as)
-  converted = converted.replace(/for\s*\(\s*(?:var\s+|let\s+)?([a-zA-Z0-9_]+)\s+in\s+calls\s*\)/g, 'for (let $1 of calls)');
+  converted = converted.replace(
+  /for\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)\s+in\s+(Caller\.calls|calls)\s*\)/g, 'for (let $1 of Object.values($2 as any))');
   
   // Перевод AS3 JSON API в нативный JS/TS
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
