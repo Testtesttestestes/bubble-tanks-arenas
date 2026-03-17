@@ -383,6 +383,15 @@ function convertAs3ToTs(source) {
 
     converted = convertClassMembers(converted, className, isDynamicClass);
 
+    // Convert anonymous functions to arrow functions to bind lexical `this` properly
+    converted = converted.replace(
+      /\bfunction\s*\(([^)]*)\)\s*(?::\s*([a-zA-Z0-9_<>\[\]]+))?\s*\{/g,
+      (match, params, retType) => {
+        const returnType = retType ? `: ${retType}` : '';
+        return `(${params})${returnType} => {`;
+      }
+    );
+
     converted = converted.replace(
       /private static i\s*:\s*[^;]+;\s*while\s*\(\s*(?:this\.)?i\s*<\s*256\s*\)\s*\{([\s\S]*?)\}\s*((?:(?:public|private|protected|internal)\s+)?static\s+Rcon\b)/m,
       (_, body, rconDecl) => `private static i: number = 0;\n  static {\n    while(this.i < 256) {${body}}\n  }\n  ${rconDecl}`
@@ -506,6 +515,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
   converted = converted.replace(/\bJSON\.decode\s*\(/g, 'JSON.parse(');
   converted = converted.replace(/\bgetTimer\s*\(\s*\)/g, 'Date.now()');
+  converted = converted.replace(/\bExternalInterface\.call\s*\(/g, '(ExternalInterface.call as any)(');
   
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
@@ -545,9 +555,11 @@ function convertAs3ToTs(source) {
       .join('\n');
 
     converted = converted.replace(/\bBigInteger\.BigInteger\./g, 'BigInteger.');
-    converted = converted.replace(/\bthis\.this\./g, 'this.');
     converted = converted.replace(/\breturn\s+([^;]+);/g, 'return $1 as any;');
   }
+
+  // Global cleanup for duplicate this-prefix from implicit-this rewrites.
+  converted = converted.replace(/\bthis\.this\./g, 'this.');
 
   converted = converted.replace(/\bthis\.if\b/g, 'if');
   converted = converted.replace(/\bthis\.while\b/g, 'while');
