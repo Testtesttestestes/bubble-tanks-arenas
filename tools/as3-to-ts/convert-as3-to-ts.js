@@ -551,11 +551,14 @@ function convertAs3ToTs(source) {
   );
   converted = converted.replace(/\bvar\s+v\s*:\s*XML\s*=\s*.*?;\n?/g, '');
   
-  // Защита локальной переменной 'error' от наглого fix-implicit-this (TS2345)
+  // Защита локальной переменной 'error' от наглого fix-implicit-this (перехватываем ДО его запуска)
   converted = converted.replace(/\bvar\s+error\s*:\s*ClientError\b/g, 'var clientErr: ClientError');
-  converted = converted.replace(/\bthis\.error\.getCode\b/g, 'clientErr.getCode');
-  converted = converted.replace(/\bhandleConnectionFailed\(this\.error\)/g, 'handleConnectionFailed(clientErr)');
-  converted = converted.replace(/\bauthenticationFailed\(this\.error\)/g, 'authenticationFailed(clientErr)');
+  converted = converted.replace(/\berror\.getCode\b/g, 'clientErr.getCode');
+  converted = converted.replace(/\bhandleConnectionFailed\(error\)/g, 'handleConnectionFailed(clientErr)');
+  converted = converted.replace(/\bauthenticationFailed\(error\)/g, 'authenticationFailed(clientErr)');
+  
+  // Исправляем баг декомпилятора: потерянный 'each' в циклах (актуально для Caller.as)
+  converted = converted.replace(/for\s*\(\s*(?:var\s+|let\s+)?([a-zA-Z0-9_]+)\s+in\s+calls\s*\)/g, 'for (let $1 of calls)');
   
   // Перевод AS3 JSON API в нативный JS/TS
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
