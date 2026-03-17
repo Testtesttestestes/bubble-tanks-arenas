@@ -310,6 +310,12 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/new\s+<[\w\.]+>\s*\[/g, '[');
   converted = converted.replace(/:\s*Object\b/g, ': Record<string, any>');
   converted = converted.replace(/(?<!function\s+|new\s+)\bArray\(([^)]+)\)/g, '($1 as unknown as any[])');
+  
+  // Map ActionScript's `*` type in inline parameter definitions to `any`
+  converted = converted.replace(/:\s*\*/g, ': any');
+  
+  // Map AS3 Error's getStackTrace to JS stack
+  converted = converted.replace(/\.getStackTrace\s*\(\s*\)/g, '.stack');
 
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
   converted = converted.replace(/\b([\w\.\]\)]+)\s+is\s+([A-Za-z_][\w\.]*)/g, '$1 instanceof $2');
