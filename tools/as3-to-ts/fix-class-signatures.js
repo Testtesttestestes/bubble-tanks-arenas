@@ -26,6 +26,13 @@ function fixClassSignatures(source) {
   // Converts `h[...]` array accesses back to `this.h[...]`, while ignoring already prefixed cases.
   content = content.replace(/(?<!\.)\bh\[([^\]]+)\]/g, 'this.h[$1]');
 
+  // Heal ISymmetricKey-like signatures missing optional second parameter modifiers.
+  // Converts `encrypt(block: ByteArray, index: number)` -> `encrypt(block: ByteArray, index?: number)`.
+  content = content.replace(
+    /(\b(?:encrypt|decrypt)\s*\(\s*[a-zA-Z0-9_$]+\s*:\s*ByteArray\s*,\s*[a-zA-Z0-9_$]+)\s*:\s*number(\s*(?:=\s*0\s*)?\))/g,
+    '$1?: number$2'
+  );
+
   return content;
 }
 
