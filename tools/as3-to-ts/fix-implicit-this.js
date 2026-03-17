@@ -239,12 +239,13 @@ function findDiagnosticTokenIndex(source, diagnostic, lineStarts) {
 function applyDiagnosticThisFixes(source, diagnostics) {
   if (!diagnostics || diagnostics.length === 0) return source;
   const importedNames = parseImportNames(source);
-  const { className } = extractClassScopeMembers(source);
+  const { className, instanceMembers } = extractClassScopeMembers(source);
 
   const edits = [];
   const lineStarts = computeLineStarts(source);
   for (const diagnostic of diagnostics) {
     if (importedNames.has(diagnostic.name)) continue;
+    if (/^[A-Z]/.test(diagnostic.name) && !instanceMembers.has(diagnostic.name)) continue;
     if (diagnostic.line <= 0 || diagnostic.line > lineStarts.length) continue;
     
     let prefixTarget = 'this.';
@@ -266,7 +267,6 @@ function applyDiagnosticThisFixes(source, diagnostics) {
       if (isTypeLikeContext(source, matchIndex)) continue;
 
       edits.push({ index: matchIndex, prefixTarget });
-      break;
     }
   }
 
