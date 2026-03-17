@@ -118,6 +118,7 @@ function getUsedIdentifiers(source) {
   const re = /\b([A-Za-z_$][\w$]*)\b/g;
   for (const m of stripped.matchAll(re)) {
     const id = m[1];
+    if (id.length <= 1) continue; // FIX: ignore single-letter identifiers for imports
     const startIndex = m.index ?? 0;
     const prevChar = stripped[startIndex - 1];
     if (prevChar === '.') continue;

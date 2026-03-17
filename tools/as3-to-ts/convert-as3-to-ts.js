@@ -88,27 +88,27 @@ function mapType(asType) {
   return raw;
 }
 
-function convertParams(paramString) {
+function convertParams(paramString, isInterface = false) {
   if (!paramString.trim()) return '';
   return paramString
     .split(',')
     .map((part) => part.trim())
     .filter(Boolean)
     .map((param) => {
-      const match = param.match(/^(\.{3})?(?:this\.)?([a-zA-Z0-9_]+)\s*(?::\s*([^=]+))?(?:\s*=\s*(.+))?$/);
+      // FIX: allow optional space after spread operator
+      const match = param.match(/^(\.{3}\s*)?(?:this\.)?([a-zA-Z0-9_]+)\s*(?::\s*([^=]+))?(?:\s*=\s*(.+))?$/);
       if (!match) return param;
       const [, rest, name, type, defaultValue] = match;
       
       let mapped = type ? mapType(type) : 'any';
       const spread = rest ? '...' : '';
       
-      // FIX: Ensure rest parameters are strictly typed as arrays
       if (spread && !mapped.endsWith('[]') && mapped !== 'any[]') {
         mapped = mapped === 'any' ? 'any[]' : `${mapped}[]`;
       }
 
       let suffix = '';
-      if (defaultValue) {
+      if (defaultValue && !isInterface) {
         let dv = defaultValue.trim();
         if (dv === 'null' && (mapped === 'number' || mapped === 'boolean')) {
           dv = '0 /* null */';
@@ -153,8 +153,6 @@ function convertClassMembers(source, className, isDynamicClass = false) {
     }
   );
 
-  // Fix class fields without explicit access modifier (var a:Array -> public a: any[]).
-  // Limit scope to class-header section before first method to avoid rewriting local vars.
   const firstFunctionIndex = out.search(/^\s*(?:(?:override|public|private|protected|internal|static|\w+)\s+)*function\b/m);
   const classHead = firstFunctionIndex === -1 ? out : out.slice(0, firstFunctionIndex);
   const classTail = firstFunctionIndex === -1 ? '' : out.slice(firstFunctionIndex);
@@ -193,7 +191,7 @@ function convertClassMembers(source, className, isDynamicClass = false) {
       const normalizedMods = normalizeModifiers(modifiers);
       const paramList = convertParams(params);
       const mappedReturn = returnType ? mapType(returnType) : 'any';
-      const tsIgnore = FLASH_DISPLAY_ACCESSORS.has(name) ? `${indent}// @ts-ignore - AS3 override of Flash display property accessor\n` : '';
+      const tsIgnore = FLASH_DISPLAY_ACCESSORS.has(name) ? `${indent}// @ts-ignore\n` : '';
       if (accessorKind === 'get') {
         return `${tsIgnore}${indent}${normalizedMods ? `${normalizedMods} ` : ''}get ${name}(): ${mappedReturn}`;
       }
@@ -201,9 +199,6 @@ function convertClassMembers(source, className, isDynamicClass = false) {
     }
   );
 
-  // Keep migrated classes "dynamic"-friendly: timeline/decompiler code often writes
-  // undeclared fields directly on `this` (e.g. `this.var_3`, `this.btnX_mc`).
-  // Inject a permissive index signature once per class body to avoid TS2339 floods.
   const classHeaderMatch = out.match(/^\s*(?:export\s+)?class\s+\w+[^\{]*\{/m);
   if (classHeaderMatch && !/\[\s*key\s*:\s*string\s*\]\s*:\s*any\s*;/.test(out)) {
     out = out.replace(classHeaderMatch[0], `${classHeaderMatch[0]}\n  [key: string]: any;`);
@@ -249,7 +244,6 @@ function convertAs3ToTs(source) {
   const hasExtends = Boolean(classMatch && classMatch[5]);
   let converted = stripped.source;
 
-  // Превращаем константы событий в строковые литералы
   const eventMap = {
     'MouseEvent.CLICK': '"click"',
     'MouseEvent.DOUBLE_CLICK': '"dblclick"',
@@ -274,8 +268,6 @@ function convertAs3ToTs(source) {
   for (const [as3Event, tsEvent] of Object.entries(eventMap)) {
     const [, eventClass, eventConst] = as3Event.match(/^(\w+)\.(\w+)$/) || [];
     if (!eventClass || !eventConst) continue;
-    // Handle both short and fully-qualified forms, including optional spacing around dots.
-    // Examples: MouseEvent.CLICK, flash.events.MouseEvent.CLICK, flash.events.MouseEvent . CLICK.
     const fqPrefix = '(?:\\bflash\\s*\\.\\s*events\\s*\\.\\s*)?';
     const regex = new RegExp(`${fqPrefix}${eventClass}\\s*\\.\\s*${eventConst}\\b`, 'g');
     converted = converted.replace(regex, tsEvent);
@@ -294,7 +286,6 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*_temp_\d+;\s*$/gm, '');
   converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
 
-  // E4X parsing stabilization. Safely transform node selection properties into explicit functions
   converted = converted.replace(/\.\.\*\.\s*\(/g, '._descendants_star_filter(');
   converted = converted.replace(/\.\.\*/g, '._descendants_star');
   converted = converted.replace(/\.\.([a-zA-Z_]\w*)\.\s*\(/g, '._descendants_filter_$1(');
@@ -327,39 +318,23 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\btrace\(/g, 'console.log(');
   converted = converted.replace(/\b(?:public|private|protected|internal)::([a-zA-Z0-9_]+)/g, 'this.$1');
 
-  // BigInteger/decompiler artifacts: normalize malformed this.-prefixed locals/accessors.
   converted = converted.replace(/var\s+this\.([a-zA-Z0-9_]+)/g, 'var $1');
   converted = converted.replace(/function\s+(get|set)\s+this\.([a-zA-Z0-9_]+)/g, '$1 $2');
   converted = converted.replace(/^\s*(true|false);\s*$/gm, '');
   converted = converted.replace(/\(\s*this\s*:\s*[^,)]+\s*,\s*/g, '(');
   converted = converted.replace(/\(\s*this\s*:\s*[^,)]+\s*\)/g, '()');
 
-  // Some decompiled casts arrive as empty constructor/call args: `foo( as T)`.
-  // Normalize them after cast expansion so TS parser remains valid.
   converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
   converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
 
   const flashMethods = [
-    'addChild',
-    'addChildAt',
-    'removeChild',
-    'removeChildAt',
-    'gotoAndStop',
-    'gotoAndPlay',
-    'play',
-    'stop',
-    'addEventListener',
-    'removeEventListener',
-    'dispatchEvent',
-    'setChildIndex',
-    'getChildIndex',
-    'contains',
-    'addFrameScript'
+    'addChild', 'addChildAt', 'removeChild', 'removeChildAt', 'gotoAndStop', 'gotoAndPlay',
+    'play', 'stop', 'addEventListener', 'removeEventListener', 'dispatchEvent',
+    'setChildIndex', 'getChildIndex', 'contains', 'addFrameScript'
   ];
   const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
   converted = converted.replace(methodsRegex, '$1this.$2(');
 
-  // Remove accidentally-prefixed declarations (e.g. `private function this.foo(...)`).
   converted = converted.replace(/\b(function|get|set|public|private|protected|static|override)\s+this\./g, '$1 ');
 
   converted = converted.replace(
@@ -372,22 +347,17 @@ function convertAs3ToTs(source) {
     }
   );
 
-  // Keep casting rewrites narrow: broad `ClassName(x)` rewrites break legitimate
-  // crypto/math calls such as `F(xl)` or `MontgomeryReduction(...)`.
   converted = converted.replace(/\b(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader)\(([^)]+)\)/g, (match, type, inner) => {
     if (type === 'Array') return `(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${type}(${inner})`;
     return `(${inner} as unknown as ${type})`;
   });
 
-  // Replace AS3 int/uint static constants with hardcoded 32-bit integer limits
   converted = converted.replace(/\bint\.MAX_VALUE\b/g, '2147483647');
   converted = converted.replace(/\bint\.MIN_VALUE\b/g, '-2147483648');
   converted = converted.replace(/\buint\.MAX_VALUE\b/g, '4294967295');
   converted = converted.replace(/\buint\.MIN_VALUE\b/g, '0');
 
-  // Some decompiled casts arrive as empty constructor/call args: `foo( as T)`.
-  // Normalize them after all cast rewrites so TS parser remains valid.
   converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
   converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
 
@@ -407,28 +377,14 @@ function convertAs3ToTs(source) {
 
     converted = convertClassMembers(converted, className, isDynamicClass);
 
-    // Provide robust handling for generic class-level static initialization loops (found in AESKey)
     converted = converted.replace(
       /private static i\s*:\s*[^;]+;\s*while\s*\(\s*(?:this\.)?i\s*<\s*256\s*\)\s*\{([\s\S]*?)\}\s*((?:(?:public|private|protected|internal)\s+)?static\s+Rcon\b)/m,
-      (_, body, rconDecl) => `private static i: number = 0;
-
-  static {
-    while(this.i < 256) {${body}}
-  }
-
-  ${rconDecl}`
+      (_, body, rconDecl) => `private static i: number = 0;\n  static {\n    while(this.i < 256) {${body}}\n  }\n  ${rconDecl}`
     );
 
     converted = converted.replace(
       /((?:(?:public|private|protected|internal)\s+)?static\s+Rcon\s*:\s*[^;]+;)\s*(?:this\.)?i\s*=\s*0;\s*while\s*\(\s*(?:this\.)?i\s*<\s*(?:this\.)?_Rcon\.length\s*\)\s*\{([\s\S]*?)\}\s*((?:public|private|protected|internal)?\s*state\b)/m,
-      (_, rconDecl, body, stateDecl) => `${rconDecl}
-
-  static {
-    this.i = 0;
-    while(this.i < this._Rcon.length) {${body}}
-  }
-
-  ${stateDecl}`
+      (_, rconDecl, body, stateDecl) => `${rconDecl}\n  static {\n    this.i = 0;\n    while(this.i < this._Rcon.length) {${body}}\n  }\n  ${stateDecl}`
     );
   }
 
@@ -443,7 +399,7 @@ function convertAs3ToTs(source) {
     );
     converted = converted.replace(
       /^\s*(?:public\s+)?function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^\s;{]+))?\s*;/gm,
-      (_, name, params, ret) => `    ${name}(${convertParams(params)}): ${mapType(ret || 'void')};`
+      (_, name, params, ret) => `    ${name}(${convertParams(params, true)}): ${mapType(ret || 'void')};`
     );
     converted = converted.replace(
       /(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/,
@@ -477,7 +433,6 @@ function convertAs3ToTs(source) {
     converted = converted.replace(constructorRegex, '$1\n    super(); // AUTO-INJECTED');
   }
 
-  // Inject undeclared local variables produced by AS3 decompilers (_loc1_, _loc2_, ...).
   converted = converted.replace(
     /^(\s*)(?:(?:override|public|private|protected|static|internal|readonly|async)\s+)*(?:function\s+)?(?!if\b|for\b|while\b|switch\b|catch\b|do\b|else\b|try\b)\w+\s*\([^)]*\)\s*(?::\s*[^\{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
     (match, fnIndent, body) => {
@@ -497,96 +452,65 @@ function convertAs3ToTs(source) {
     }
   );
 
-  // Repair malformed switch labels produced by downstream rewrites.
   converted = converted.replace(/\bthis\.default\s*:/g, 'default:');
 
-  // Treat decompiler garbage member-access chains as `any` to keep TS parser/type-checker moving.
   converted = converted.replace(/\bnull\.([a-zA-Z0-9_]+)/g, '(null as any).$1');
   converted = converted.replace(/\bundefined\.([a-zA-Z0-9_]+)/g, '(undefined as any).$1');
-
-  // Чиним null.property и undefined.property (Ошибки декомпилятора)
   converted = converted.replace(/\bnull\s*\.\s*([a-zA-Z0-9_$]+)/g, '(null as any).$1');
   converted = converted.replace(/\bundefined\s*\.\s*([a-zA-Z0-9_$]+)/g, '(undefined as any).$1');
 
-  // Убиваем TS2314: Array без типов
   converted = converted.replace(/:\s*Array\b(?!\s*<)/g, ': any[]');
-
-  // Лечим TS2314: Array без типов в as-кастах
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Array\b/g, 'as any[]');
 
-  // Лечим typeof касты для примитивов (исправляем instanceof String/Number/Boolean)
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+String\b/g, 'typeof $1 === "string"');
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Number\b/g, 'typeof $1 === "number"');
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Boolean\b/g, 'typeof $1 === "boolean"');
 
-  // Лечим as-касты для примитивов (исправляем TS2345 Argument of type 'String' is not assignable to 'string')
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?String\b/g, 'as string');
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Number\b/g, 'as number');
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Boolean\b/g, 'as boolean');
 
-  // JSON objects as primitives
+  // Лечим TS2322: неявный never[]
+  converted = converted.replace(/\b(var|let)\s+([a-zA-Z0-9_$]+)\s*=\s*\[\]/g, '$1 $2: any[] = []');
+
   if (converted.includes('JSONToken') || converted.includes('JSONTokenType') || converted.includes('JSONParseError')) {
     converted = converted.replace(/Record<string,\s*any>/g, 'any');
   }
 
-  // Убиваем TS2322: жесткое приведение ВСЕХ null-инициализаций
   converted = converted.replace(/=\s*null\s*([,;])/g, '= null as any$1');
-
-  // Раскрываем внутренние неймспейсы (актуально для BigInteger/bi_internal)
   converted = converted.replace(/^(?:override\s+)?(?:public\s+|private\s+|protected\s+)?\w+_internal\s+(var|const|function|get|set)\b/gm, 'public $1');
-
-  // Принудительно задаем тип для массива 'a' в BigInteger, чтобы TS понимал индексацию
   converted = converted.replace(/public\s+a\s*:\s*any(?:\[\])?;/g, 'public a: number[];');
 
-  // Лечим switch-касты в JSONTokenizer
   converted = converted.replace(/switch\s*\(this\.ch\)\s*\{/g, 'switch(String(this.ch)) {');
-
-  // Лечим if-касты в JSONTokenizer (TS2367 narrow type inference bug)
   converted = converted.replace(/this\.ch\s*(==|!=)\s*/g, 'String(this.ch) $1 ');
 
-  // Полностью переписываем objectToString в JSONEncoder, чтобы убрать E4X, XML и describeType (TS2304 / TS2349)
   converted = converted.replace(
     /var\s+classInfo\s*:\s*(?:XML|any)\s*=\s*describeType\(o\);[\s\S]*?return\s+"\{"\s*\+\s*s\s*\+\s*"\}";/,
-    `for (let key in o) {
-            value = o[key];
-            if (!(value instanceof Function)) {
-               if (s.length > 0) {
-                  s += ",";
-               }
-               s += this.escapeString(key) + ":" + this.convertToString(value);
-            }
-         }
-         return "{" + s + "}";`
+    `for (let key in o) { value = o[key]; if (!(value instanceof Function)) { if (s.length > 0) { s += ","; } s += this.escapeString(key) + ":" + this.convertToString(value); } } return "{" + s + "}";`
   );
   converted = converted.replace(/\bvar\s+v\s*:\s*XML\s*=\s*.*?;\n?/g, '');
   
-  // Защита локальной переменной 'error' от наглого fix-implicit-this (перехватываем ДО его запуска)
   converted = converted.replace(/\bvar\s+error\s*:\s*ClientError\b/g, 'var clientErr: ClientError');
   converted = converted.replace(/\berror\.getCode\b/g, 'clientErr.getCode');
   converted = converted.replace(/\bhandleConnectionFailed\(error\)/g, 'handleConnectionFailed(clientErr)');
   converted = converted.replace(/\bauthenticationFailed\(error\)/g, 'authenticationFailed(clientErr)');
   
-  // Исправляем баг декомпилятора: потерянный 'each' в циклах (актуально для Caller.as)
   converted = converted.replace(/for\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)\s+in\s+(Caller\.calls|calls)\s*\)/g, 'for (let $1 of (Object.values($2 as any) as any[]))');
   
-  // Перевод AS3 JSON API в нативный JS/TS
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
   converted = converted.replace(/\bJSON\.decode\s*\(/g, 'JSON.parse(');
-  
-  // Перевод flash.utils.getTimer() в нативный JS
   converted = converted.replace(/\bgetTimer\s*\(\s*\)/g, 'Date.now()');
   
-  // Лечим TS2536: Использование объектов в качестве ключей Dictionary (Caller.as)
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
   converted = converted.replace(/\bCaller\.calls\[([^\]]+)\]/g, '(Caller.calls as any)[$1 as any]');
 
-  // --- ПАТЧИ ДЛЯ КРИПТОГРАФИИ (com.hurlant, Base64, BigInteger) ---
-  // Лечим TS2584: Глобальный объект console
   converted = converted.replace(/declare const flash: any;/g, 'declare const flash: any;\ndeclare const console: any;');
 
+  // TS2351: смягчаем проверки конструкторов (new <symbol>) через any-каст (ГЛОБАЛЬНО)
+  converted = converted.replace(/\bnew\s+([A-Za-z0-9_.]+)\s*\(/g, 'new ($1 as any)(');
+
   if (className === 'Base64') {
-    // Восстанавливаем статический контекст, не затрагивая объявления полей класса
     converted = converted
       .split('\n')
       .map((line) => {
@@ -598,15 +522,10 @@ function convertAs3ToTs(source) {
           .replace(/(?<!\.)\b_linebreaks\b/g, 'Base64._linebreaks');
       })
       .join('\n');
-    // Очищаем дубли, если они вдруг возникли
     converted = converted.replace(/\bBase64\.Base64\./g, 'Base64.');
-
-    // TS2351: смягчаем проверки конструкторов (new <symbol>) через any-каст
-    converted = converted.replace(/\bnew\s+([A-Za-z0-9_]+)\s*\(/g, 'new ($1 as any)(');
   }
 
   if (className === 'BigInteger') {
-    // Восстанавливаем статический/инстанс контекст без ломки объявлений членов класса
     converted = converted
       .split('\n')
       .map((line) => {
@@ -619,16 +538,11 @@ function convertAs3ToTs(source) {
       })
       .join('\n');
 
-    // Очищаем возможные двойные префиксы
     converted = converted.replace(/\bBigInteger\.BigInteger\./g, 'BigInteger.');
     converted = converted.replace(/\bthis\.this\./g, 'this.');
-
-    // Лечим TS2322: ослабляем типизацию return в математических методах
     converted = converted.replace(/\breturn\s+([^;]+);/g, 'return $1 as any;');
   }
 
-  // --- ТЕРМИНАТОР СИНТАКСИСА ---
-  // Лечим дикие подстановки 'this.' к зарезервированным словам, которые могли проскочить
   converted = converted.replace(/\bthis\.if\b/g, 'if');
   converted = converted.replace(/\bthis\.while\b/g, 'while');
   converted = converted.replace(/\bthis\.switch\b/g, 'switch');
@@ -640,15 +554,12 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bthis\.private\b/g, 'private');
   converted = converted.replace(/\bthis\.protected\b/g, 'protected');
 
-  // Лечим баг декомпилятора с пустыми/мусорными стейтментами
   converted = converted.replace(/^\s*undefined\s*;\s*$/gm, '');
   converted = converted.replace(/^\s*null\s*;\s*$/gm, '');
   converted = converted.replace(/^\s*NaN\s*;\s*$/gm, '');
 
-  // Защита от Error.name (TS2588)
   converted = converted.replace(/^\s*name\s*=\s*(["'].*?["']);/gm, 'this.name = $1;');
 
-  // Устраняем внутрипакетные проблемы импортов com.adobe.serialization.json
   const jsonClasses = ['JSONEncoder', 'JSONDecoder', 'JSONTokenizer', 'JSONToken', 'JSONTokenType', 'JSONParseError'];
   const missingImports = [];
   for (const cls of jsonClasses) {
@@ -657,6 +568,11 @@ function convertAs3ToTs(source) {
     }
   }
   if (missingImports.length > 0) converted = `${missingImports.join('\n')}\n\n${converted}`;
+
+  // Strip JSDoc tags to prevent TS8020
+  converted = converted.replace(/\/\*\*[\s\S]*?\*\//g, (match) => {
+    return match.replace(/@(?:type|param|return|private|public|see)\b/g, '');
+  });
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',

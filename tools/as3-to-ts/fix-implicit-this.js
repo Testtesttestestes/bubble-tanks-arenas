@@ -15,7 +15,6 @@ const RESERVED_WORDS = new Set([
   'super', 'typeof', 'instanceof', 'in', 'delete', 'void', 'yield',
   'await', 'async', 'true', 'false', 'null', 'undefined', 'NaN', 'Infinity',
   'constructor',
-  // Built-in globals/types that often appear in casts and should never be prefixed.
   'String', 'Number', 'Boolean', 'Object', 'Array', 'Function', 'Promise', 'RegExp',
   'Date', 'Math', 'JSON', 'Error', 'TypeError', 'Map', 'Set', 'WeakMap', 'WeakSet',
   'Symbol', 'BigInt', 'Uint8Array', 'Int8Array', 'Float32Array', 'Float64Array'
@@ -73,7 +72,6 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     return `${prefixTarget}.${name}`;
   });
 }
-
 
 function extractClassScopePropertyNames(source) {
   const { instanceMembers } = extractClassScopeMembers(source);
@@ -185,7 +183,6 @@ function isTypeLikeContext(source, index) {
   if (/\b(?:class|interface|type|extends|implements|import|export|new)\s*$/.test(left)) return true;
   
   if (/:\s*$/.test(left)) {
-    // Allows quoted keys ("id": ids) OR unquoted keys that are preceded by { or , (like { id: ids, other: val })
     if (/(['"`])\s*:\s*$/.test(left) || /(?:[{,]\s*[a-zA-Z0-9_$]+)\s*:\s*$/.test(left)) {
         return false; 
     }
@@ -195,7 +192,6 @@ function isTypeLikeContext(source, index) {
   if (/^\s*<[^>]*>/.test(right)) return true;
   return false;
 }
-
 
 function isIdentifierChar(ch) {
   return /[A-Za-z0-9_$]/.test(ch || '');
@@ -235,17 +231,17 @@ function applyDiagnosticThisFixes(source, diagnostics) {
   if (!diagnostics || diagnostics.length === 0) return source;
   const importedNames = parseImportNames(source);
   const { className } = extractClassScopeMembers(source);
-  if (!className) return source;
-
-  const { classRange } = extractClassAndMethodRanges(source);
-  if (!classRange) return source;
 
   const edits = [];
   const lineStarts = computeLineStarts(source);
   for (const diagnostic of diagnostics) {
     if (importedNames.has(diagnostic.name)) continue;
     if (diagnostic.line <= 0 || diagnostic.line > lineStarts.length) continue;
-    const prefixTarget = diagnostic.forcePrefix === 'static' ? `${className}.` : 'this.';
+    
+    let prefixTarget = 'this.';
+    if (diagnostic.forcePrefix === 'static' && className) {
+      prefixTarget = `${className}.`;
+    }
 
     const lineStartIndex = lineStarts[diagnostic.line - 1];
     const lineEndIndex = lineStarts[diagnostic.line] || source.length;
@@ -255,8 +251,7 @@ function applyDiagnosticThisFixes(source, diagnostics) {
     let match;
     while ((match = regex.exec(lineText)) !== null) {
       const matchIndex = lineStartIndex + match.index + match[1].length;
-      if (matchIndex < classRange.start || matchIndex >= classRange.end) continue;
-
+      
       const leftContext = source.slice(Math.max(0, matchIndex - prefixTarget.length), matchIndex);
       if (leftContext === prefixTarget || source[matchIndex - 1] === '.') continue;
       if (isTypeLikeContext(source, matchIndex)) continue;
@@ -316,20 +311,19 @@ function processFile(filePath, options = {}) {
   const { diagnosticsByFile = new Map() } = options;
   const importedNames = parseImportNames(source);
   const { className, instanceMembers, staticMembers } = extractClassScopeMembers(source);
-  if (!className || (instanceMembers.size === 0 && staticMembers.size === 0)) {
-    return { changed: false, replacements: 0 };
-  }
 
   let converted = source;
-  converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this', { excludedNames: importedNames });
-  converted = addClassPrefixToMemberUsage(converted, staticMembers, className, { excludedNames: importedNames });
+  
+  if (className && (instanceMembers.size > 0 || staticMembers.size > 0)) {
+    converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this', { excludedNames: importedNames });
+    converted = addClassPrefixToMemberUsage(converted, staticMembers, className, { excludedNames: importedNames });
 
-  staticMembers.forEach((name) => {
-    const staticMistakeRegex = new RegExp(`\\bthis\\.${escapeRegExp(name)}\\b`, 'g');
-    converted = converted.replace(staticMistakeRegex, `${className}.${name}`);
-  });
+    staticMembers.forEach((name) => {
+      const staticMistakeRegex = new RegExp(`\\bthis\\.${escapeRegExp(name)}\\b`, 'g');
+      converted = converted.replace(staticMistakeRegex, `${className}.${name}`);
+    });
+  }
 
-  // Лечим наследуемые обфусцированные переменные на основе tsc-диагностик (2-й проход).
   const diagnostics = diagnosticsByFile.get(resolvedFilePath) || [];
   converted = applyDiagnosticThisFixes(converted, diagnostics);
 
