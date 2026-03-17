@@ -26,11 +26,15 @@ function fixClassSignatures(source) {
   // Converts `h[...]` array accesses back to `this.h[...]`, while ignoring already prefixed cases.
   content = content.replace(/(?<!\.)\bh\[([^\]]+)\]/g, 'this.h[$1]');
 
-  // Heal ISymmetricKey-like signatures missing optional second parameter modifiers.
-  // Converts `encrypt(block: ByteArray, index: number)` -> `encrypt(block: ByteArray, index?: number)`.
+  // Heal ISymmetricKey (and similar interfaces) missing optional parameter modifiers.
+  // Enforces `?: number` for interfaces (ending in ;) and `: number = 0` for class methods (ending in {).
   content = content.replace(
-    /(\b(?:encrypt|decrypt)\s*\(\s*[a-zA-Z0-9_$]+\s*:\s*ByteArray\s*,\s*[a-zA-Z0-9_$]+)\s*:\s*number(\s*(?:=\s*0\s*)?\))/g,
-    '$1?: number$2'
+    /(\b(?:encrypt|decrypt)\s*\(\s*[a-zA-Z0-9_$]+\s*:\s*ByteArray\s*,\s*[a-zA-Z0-9_$]+)\s*[!?]?\s*:\s*number\s*(?:=\s*0\s*)?\)(\s*(?::\s*[A-Za-z0-9_$]+\s*)?;)/g,
+    '$1?: number)$2'
+  );
+  content = content.replace(
+    /(\b(?:encrypt|decrypt)\s*\(\s*[a-zA-Z0-9_$]+\s*:\s*ByteArray\s*,\s*[a-zA-Z0-9_$]+)\s*[!?]?\s*:\s*number\s*(?:=\s*0\s*)?\)(\s*(?::\s*[A-Za-z0-9_$]+\s*)?\{)/g,
+    '$1: number = 0)$2'
   );
 
   return content;
