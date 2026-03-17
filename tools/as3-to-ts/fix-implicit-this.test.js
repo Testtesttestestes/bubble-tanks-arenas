@@ -281,6 +281,66 @@ test('does not treat ternary colon as a type annotation context for diagnostic f
   const updated = fs.readFileSync(samplePath, 'utf8');
   assert.match(updated, /return v \? this\.client : this\.agUser;/);
 });
+
+
+test('diagnostic fixes all occurrences of the same identifier on one line', () => {
+  const source = [
+    'export class HMAC {',
+    '  public bits: number = 0;',
+    '  public check(outerHash: number[]): boolean {',
+    '    return bits > 0 && bits < 8 * outerHash.length;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'HMAC.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const bitsPos = lineColAt(source, 'bits > 0');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    `${samplePath}(${bitsPos.line},${bitsPos.col}): error TS2663: Cannot find name 'bits'. Did you mean the instance member 'HMAC.bits'?`,
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const result = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /return this\.bits > 0 && this\.bits < 8 \* outerHash\.length;/);
+});
+
+test('diagnostic pass does not prefix PascalCase unresolved names that are not instance members', () => {
+  const source = [
+    'export class Client {',
+    '  public run(): void {',
+    '    DebugUtil.error(DebugUtil.getDebugInfo(), "boom");',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'Client.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const debugPos = lineColAt(source, 'DebugUtil.error');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    `${samplePath}(${debugPos.line},${debugPos.col}): error TS2304: Cannot find name 'DebugUtil'.`,
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const result = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(result.changed, false);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.doesNotMatch(updated, /this\.DebugUtil/);
+});
 test('diagnostic column targeting fixes the intended token in dense expressions', () => {
   const source = [
     'export class MontgomeryReduction {',
