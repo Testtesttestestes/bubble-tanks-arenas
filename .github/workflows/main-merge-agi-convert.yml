@@ -46,16 +46,24 @@ jobs:
           # Если конвертация упадет, скрипт не пойдет дальше
           npm run convert:agi || { echo "Конвертация провалилась"; exit 1; }
 
-          # 6. КОМПИЛИРУЕМ
+          # 6. КОМПИЛИРУЕМ (первый проход)
           # Убрал --noIncremental, оставил --force (он заменяет чистку кэша)
           tsc_exit=0
           npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
-          echo "TypeScript build exit code: ${tsc_exit}"
+          echo "TypeScript build exit code (first pass): ${tsc_exit}"
 
-          # 7. Анализируем результат
+          # 7. Чиним implicit this по точным координатам из tsc_output.log
+          node tools/as3-to-ts/fix-implicit-this.js --input migrated-ts --tsc-log tsc_output.log
+
+          # 8. КОМПИЛИРУЕМ повторно после автоправок, чтобы анализ шел по актуальному логу
+          tsc_exit=0
+          npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
+          echo "TypeScript build exit code (after fix-implicit-this): ${tsc_exit}"
+
+          # 9. Анализируем результат уже после автоправок
           ERROR_SLICE_RADIUS=10 MAX_ERROR_CONTEXTS=5 MAX_AGI_ERROR_CONTEXTS=5 MAX_ERROR_MESSAGES_PER_CODE=5 npm run tsc:stats | tee tsc_stats.log
 
-          # 8. Завершаем job с кодом tsc, чтобы workflow оставался fail при реальных ошибках
+          # 10. Завершаем job с кодом tsc, чтобы workflow оставался fail при реальных ошибках
           exit ${tsc_exit}
 
       - name: Upload tsc stats log
