@@ -331,6 +331,9 @@ function processFile(filePath, options = {}) {
     return { changed: false, replacements: 0 };
   }
 
+  // Cleanup any accidentally doubled prefixes
+  converted = converted.replace(/\bthis\.this\./g, 'this.');
+
   const replacementCount = (converted.match(/\bthis\./g) || []).length - (source.match(/\bthis\./g) || []).length;
   fs.writeFileSync(filePath, converted, 'utf8');
   return { changed: true, replacements: replacementCount };

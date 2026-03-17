@@ -353,10 +353,13 @@ function convertAs3ToTs(source) {
     }
   );
 
-  converted = converted.replace(/\b(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader)\(([^)]+)\)/g, (match, type, inner) => {
-    if (type === 'Array') return `(${inner} as unknown as any[])`;
-    if (type === 'String' || type === 'Number' || type === 'Boolean') return `${type}(${inner})`;
-    return `(${inner} as unknown as ${type})`;
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
+    // If it's a constructor call (e.g., 'new Array(...)'), leave it completely untouched
+    if (isNew) return match;
+
+    if (type === 'Array') return `${prev}(${inner} as unknown as any[])`;
+    if (type === 'String' || type === 'Number' || type === 'Boolean') return `${prev}${type}(${inner})`;
+    return `${prev}(${inner} as unknown as ${type})`;
   });
 
   converted = converted.replace(/\bint\.MAX_VALUE\b/g, '2147483647');
