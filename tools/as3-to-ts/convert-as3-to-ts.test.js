@@ -30,9 +30,26 @@ test('injects Flash built-in stubs into each converted file', () => {
   const output = convertAs3ToTs(input);
   assert.match(output, /declare const ByteArray:/);
   assert.match(output, /declare const Sprite:/);
-  assert.match(output, /declare const flash: any;/);
 });
 
+
+
+test('does not inject global hacks for flash/console/MD5 reflection helpers', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f():void {}',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.doesNotMatch(output, /declare const flash: any;/);
+  assert.doesNotMatch(output, /declare const console: any;/);
+  assert.doesNotMatch(output, /declare const getDefinitionByName: any;/);
+  assert.doesNotMatch(output, /declare const describeType: any;/);
+  assert.doesNotMatch(output, /declare const MD5: any;/);
+});
 test('maps AS3 Array types to any to support dynamic property access patterns', () => {
   const input = [
     'package {',
