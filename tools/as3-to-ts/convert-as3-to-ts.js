@@ -50,6 +50,7 @@ const FLASH_STUB_HEADER = [
     `declare const ${className}: { new(...args: any[]): ${className}; [key: string]: any; };`
   ]),
   'declare const flash: any;',
+  'declare const console: any;',
   'declare const getDefinitionByName: any;',
   'declare const describeType: any;'
 ].join('\n');
@@ -573,6 +574,52 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
   converted = converted.replace(/\bCaller\.calls\[([^\]]+)\]/g, '(Caller.calls as any)[$1 as any]');
+
+  // --- ПАТЧИ ДЛЯ КРИПТОГРАФИИ (com.hurlant, Base64, BigInteger) ---
+  // Лечим TS2584: Глобальный объект console
+  converted = converted.replace(/declare const flash: any;/g, 'declare const flash: any;\ndeclare const console: any;');
+
+  if (className === 'Base64') {
+    // Восстанавливаем статический контекст, не затрагивая объявления полей класса
+    converted = converted
+      .split('\n')
+      .map((line) => {
+        if (/^\s*(public|private|protected)\s+static\s+(readonly\s+)?(_b64Chars|_linebreaks)\b/.test(line)) {
+          return line;
+        }
+        return line
+          .replace(/(?<!\.)\b_b64Chars\b/g, 'Base64._b64Chars')
+          .replace(/(?<!\.)\b_linebreaks\b/g, 'Base64._linebreaks');
+      })
+      .join('\n');
+    // Очищаем дубли, если они вдруг возникли
+    converted = converted.replace(/\bBase64\.Base64\./g, 'Base64.');
+
+    // TS2351: смягчаем проверки конструкторов (new <symbol>) через any-каст
+    converted = converted.replace(/\bnew\s+([A-Za-z0-9_]+)\s*\(/g, 'new ($1 as any)(');
+  }
+
+  if (className === 'BigInteger') {
+    // Восстанавливаем статический/инстанс контекст без ломки объявлений членов класса
+    converted = converted
+      .split('\n')
+      .map((line) => {
+        if (/^\s*(public|private|protected)\s+(static\s+)?(readonly\s+)?(DB|BI_FP|DM|lowprimes|lplim|op_andnot|t)\b/.test(line)) {
+          return line;
+        }
+        return line
+          .replace(/(?<!\.)\b(DB|BI_FP|DM|lowprimes|lplim)\b/g, 'BigInteger.$1')
+          .replace(/(?<!\.)\bop_andnot\b/g, 'this.op_andnot');
+      })
+      .join('\n');
+
+    // Очищаем возможные двойные префиксы
+    converted = converted.replace(/\bBigInteger\.BigInteger\./g, 'BigInteger.');
+    converted = converted.replace(/\bthis\.this\./g, 'this.');
+
+    // Лечим TS2322: ослабляем типизацию return в математических методах
+    converted = converted.replace(/\breturn\s+([^;]+);/g, 'return $1 as any;');
+  }
 
   // --- ТЕРМИНАТОР СИНТАКСИСА ---
   // Лечим дикие подстановки 'this.' к зарезервированным словам, которые могли проскочить
