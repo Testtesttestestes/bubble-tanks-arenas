@@ -90,7 +90,10 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const rightTrimmed = right.trimStart();
     const isTypePipePrefix = prevTypeToken === '|' && !leftTrimmed.endsWith('||');
     const isTypeAmpPrefix = prevTypeToken === '&' && !leftTrimmed.endsWith('&&');
-    if (prevTypeToken === '<' || isTypePipePrefix || isTypeAmpPrefix) return token;
+    const isGenericBracket =
+      prevTypeToken === '<' &&
+      /(?:[A-Z]\w*|any|unknown|string|number|boolean|void)\s*<$/.test(leftTrimmed);
+    if (isGenericBracket || isTypePipePrefix || isTypeAmpPrefix) return token;
 
     const startsWithTypeDelimiter =
       rightTrimmed.startsWith('>') ||
