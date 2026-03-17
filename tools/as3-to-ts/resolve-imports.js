@@ -137,7 +137,9 @@ function normalizeLineEndings(source) {
 
 function collectKnownMembers(source) {
   const known = new Set();
-  for (const m of source.matchAll(/\b(?:this|[A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\b/g)) {
+  // Only treat properties starting with lowercase or underscore as members
+  // to avoid masking static Class names (like DebugUtil) from being imported.
+  for (const m of source.matchAll(/\b(?:this|[A-Za-z_$][\w$]*)\.([a-z_][\w$]*)\b/g)) {
     known.add(m[1]);
   }
   return known;
