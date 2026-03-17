@@ -63,8 +63,9 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const prevTypeToken = leftTrimmed[leftTrimmed.length - 1];
     const rightTrimmed = right.trimStart();
     if (['<', '|', '&'].includes(prevTypeToken)) return token;
-    if (/^(?:>|\[\]|\||&|,|;)/.test(rightTrimmed)) return token;
+    if (/^(?:>|\[\]|\||&|,)/.test(rightTrimmed)) return token;
     if (name === 'type' && /^\s+[A-Za-z_$]/.test(right)) return token;
+    if (rightTrimmed.startsWith(':') && !lineLeft.includes('?')) return token;
     if (blockedPrefix.test(left)) return token;
     const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
     if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;
@@ -177,7 +178,7 @@ function collectLocalsInRange(source, range) {
 }
 
 function isTypeLikeContext(source, index) {
-  const left = source.slice(Math.max(0, index - 40), index);
+  const left = source.slice(Math.max(0, index - 80), index);
   const right = source.slice(index, Math.min(source.length, index + 40));
   
   if (/\b(?:class|interface|type|extends|implements|import|export|new)\s*$/.test(left)) return true;
@@ -185,6 +186,14 @@ function isTypeLikeContext(source, index) {
   if (/:\s*$/.test(left)) {
     if (/(['"`])\s*:\s*$/.test(left) || /(?:[{,]\s*[a-zA-Z0-9_$]+)\s*:\s*$/.test(left)) {
         return false; 
+    }
+    if (/\b(?:default|case\s+[^:]+)\s*:\s*$/.test(left)) {
+      return false;
+    }
+    const lineStart = left.lastIndexOf('\n');
+    const currentLine = lineStart === -1 ? left : left.slice(lineStart);
+    if (currentLine.includes('?') && !/\b(?:function|get|set)\b/.test(currentLine)) {
+      return false;
     }
     return true; 
   }

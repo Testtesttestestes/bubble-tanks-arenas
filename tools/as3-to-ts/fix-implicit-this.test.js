@@ -218,6 +218,69 @@ test('does not prefix type keyword in type alias declarations but prefixes membe
 });
 
 
+
+
+test('does not treat switch case/default labels as type contexts', () => {
+  const source = [
+    'export class Sample {',
+    '  public tokenizer: number = 1;',
+    '  public pick(value: number): number {',
+    '    switch (value) {',
+    '      case 0:',
+    '        return tokenizer;',
+    '      default:',
+    '        return tokenizer + 1;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'Sample.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const result = processFile(samplePath);
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /return this\.tokenizer;/);
+  assert.match(updated, /return this\.tokenizer \+ 1;/);
+});
+
+test('does not treat ternary colon as a type annotation context for diagnostic fixes', () => {
+  const source = [
+    'export class Sample {',
+    '  public client: number = 1;',
+    '  public agUser: number = 2;',
+    '  public flag(v: boolean): number {',
+    '    return v ? client : agUser;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'Sample.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const clientPos = lineColAt(source, 'client :');
+  const agUserPos = lineColAt(source, 'agUser;');
+  const logPath = path.join(tempDir, 'tsc.log');
+  fs.writeFileSync(
+    logPath,
+    [
+      `${samplePath}(${clientPos.line},${clientPos.col}): error TS2304: Cannot find name 'client'.`,
+      `${samplePath}(${agUserPos.line},${agUserPos.col}): error TS2304: Cannot find name 'agUser'.`
+    ].join('\n'),
+    'utf8'
+  );
+
+  const diagnosticsByFile = parseTscLog(logPath);
+  const result = processFile(samplePath, { diagnosticsByFile });
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /return v \? this\.client : this\.agUser;/);
+});
 test('diagnostic column targeting fixes the intended token in dense expressions', () => {
   const source = [
     'export class MontgomeryReduction {',
