@@ -49,11 +49,7 @@ const FLASH_STUB_HEADER = [
     `declare interface ${className} { [key: string]: any; }`,
     `declare const ${className}: { new(...args: any[]): ${className}; [key: string]: any; };`
   ]),
-  'declare const flash: any;',
-  'declare const console: any;',
-  'declare const getDefinitionByName: any;',
-  'declare const describeType: any;',
-  'declare const MD5: any;'
+  // Runtime/global hacks removed: these should be linked via proper imports.
 ].join('\n');
 
 function mapType(asType) {
@@ -524,8 +520,6 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
   converted = converted.replace(/\bCaller\.calls\[([^\]]+)\]/g, '(Caller.calls as any)[$1 as any]');
-
-  converted = converted.replace(/declare const flash: any;/g, 'declare const flash: any;\ndeclare const console: any;');
 
   // TS2351: смягчаем проверки конструкторов (new <symbol>) через any-каст (ГЛОБАЛЬНО)
   converted = converted.replace(/\bnew\s+([A-Za-z0-9_.]+)\s*\(/g, 'new ($1 as any)(');

@@ -6,7 +6,7 @@ const path = require('node:path');
 const BUILTIN_GLOBALS = new Set([
   'Array', 'Boolean', 'Date', 'Error', 'Function', 'JSON', 'Math', 'Number', 'Object', 'Promise', 'RegExp', 'String',
   'Map', 'Set', 'WeakMap', 'WeakSet', 'Symbol', 'console', 'window', 'document', 'globalThis', 'parseInt', 'parseFloat',
-  'isNaN', 'undefined', 'Infinity', 'NaN', 'MD5'
+  'isNaN', 'undefined', 'Infinity', 'NaN'
 ]);
 
 const TS_KEYWORDS = new Set([
