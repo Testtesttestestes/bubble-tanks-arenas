@@ -191,6 +191,68 @@ print_error_pointer() {
   printf '  [TS] %6s | %*s^\n' "$line_number" "$col_number" ''
 }
 
+
+count_lines() {
+  local file_path="$1"
+  if [[ ! -f "$file_path" ]]; then
+    printf '0\n'
+    return
+  fi
+  wc -l < "$file_path" | tr -d ' '
+}
+
+find_first_line_matching() {
+  local file_path="$1"
+  local pattern="$2"
+  if [[ ! -f "$file_path" ]]; then
+    printf '\n'
+    return
+  fi
+  awk -v pat="$pattern" 'match($0, pat) { print NR; exit }' "$file_path"
+}
+
+map_ts_line_to_as_line() {
+  local ts_file="$1"
+  local as_file="$2"
+  local ts_line="$3"
+
+  if [[ ! -f "$ts_file" || ! -f "$as_file" ]]; then
+    printf '%s\n' "$ts_line"
+    return
+  fi
+
+  local ts_line_text normalized_ts_line exact_match_line
+  ts_line_text="$(get_ts_line "$ts_file" "$ts_line")"
+  normalized_ts_line="$(printf '%s' "$ts_line_text" | sed -E 's/\b[A-Z][A-Za-z0-9_$]*\.//g; s/\bthis\.//g; s/===/==/g; s/!==/!=/g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
+  if [[ -n "$normalized_ts_line" ]]; then
+    exact_match_line="$(awk -v needle="$normalized_ts_line" 'index($0, needle) { print NR; exit }' "$as_file")"
+    if [[ -n "$exact_match_line" ]]; then
+      printf '%s\n' "$exact_match_line"
+      return
+    fi
+  fi
+
+  local ts_anchor as_anchor mapped as_total
+  ts_anchor="$(find_first_line_matching "$ts_file" '^[[:space:]]*export[[:space:]]+(class|interface)([[:space:]]|$)')"
+  as_anchor="$(find_first_line_matching "$as_file" '^[[:space:]]*(public[[:space:]]+)?(dynamic[[:space:]]+|final[[:space:]]+)?(class|interface)([[:space:]]|$)')"
+
+  if [[ -n "$ts_anchor" && -n "$as_anchor" ]]; then
+    mapped=$((ts_line - (ts_anchor - as_anchor)))
+  else
+    mapped="$ts_line"
+  fi
+
+  as_total="$(count_lines "$as_file")"
+  if (( mapped < 1 )); then
+    mapped=1
+  fi
+  if (( as_total > 0 && mapped > as_total )); then
+    mapped="$as_total"
+  fi
+
+  printf '%s\n' "$mapped"
+}
+
 resolve_as_source() {
   local ts_path="$1"
   local rel candidate
@@ -272,7 +334,8 @@ print_detailed_contexts() {
 
   as_source_path="$(resolve_as_source "$ts_file")"
   if [[ -n "$as_source_path" ]]; then
-    print_context_slice "$as_source_path" "$err_line_no" "$ERROR_SLICE_RADIUS" "AS"
+    as_line_no="$(map_ts_line_to_as_line "$ts_file_resolved" "$as_source_path" "$err_line_no")"
+    print_context_slice "$as_source_path" "$as_line_no" "$ERROR_SLICE_RADIUS" "AS"
   else
     printf '  [AS] matching source not found for: %s\n' "$ts_file"
   fi
