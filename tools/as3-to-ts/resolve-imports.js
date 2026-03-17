@@ -13,7 +13,8 @@ const TS_KEYWORDS = new Set([
   'export', 'default', 'class', 'interface', 'type', 'extends', 'implements', 'new', 'return', 'if', 'else', 'for', 'while',
   'switch', 'case', 'break', 'continue', 'throw', 'try', 'catch', 'finally', 'const', 'let', 'var', 'function', 'constructor',
   'public', 'private', 'protected', 'static', 'readonly', 'get', 'set', 'in', 'of', 'as', 'unknown', 'any', 'void', 'null',
-  'true', 'false', 'this', 'super', 'typeof', 'instanceof', 'delete', 'await', 'async', 'from', 'import', 'declare'
+  'true', 'false', 'this', 'super', 'typeof', 'instanceof', 'delete', 'await', 'async', 'from', 'import', 'declare',
+  'string', 'number', 'boolean', 'symbol', 'object', 'never', 'undefined'
 ]);
 
 const FLASH_TYPES = new Set([
@@ -101,10 +102,7 @@ function getDeclaredNames(source) {
 }
 
 function getUsedIdentifiers(source) {
-  const stripped = source
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/\/\/.*$/gm, ' ')
-    .replace(/(['"`])(?:\\.|(?!\1)[^\\])*\1/g, ' ');
+  const stripped = source.replace(/\/\*[\s\S]*?\*\/|\/\/.*|(['"`])(?:\\.|(?!\1)[^\\])*\1/g, ' ');
 
   const used = new Set();
 
