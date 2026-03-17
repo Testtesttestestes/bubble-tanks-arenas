@@ -567,8 +567,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bauthenticationFailed\(error\)/g, 'authenticationFailed(clientErr)');
   
   // Исправляем баг декомпилятора: потерянный 'each' в циклах (актуально для Caller.as)
-  converted = converted.replace(
-  /for\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)\s+in\s+(Caller\.calls|calls)\s*\)/g, 'for (let $1 of Object.values($2 as any))');
+  converted = converted.replace(/for\s*\(\s*(?:var\s+|let\s+)?(?:this\.)?([a-zA-Z0-9_]+)\s+in\s+(Caller\.calls|calls)\s*\)/g, 'for (let $1 of (Object.values($2 as any) as any[]))');
   
   // Перевод AS3 JSON API в нативный JS/TS
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
