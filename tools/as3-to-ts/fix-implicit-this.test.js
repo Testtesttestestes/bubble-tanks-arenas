@@ -400,3 +400,31 @@ test('diagnostic column targeting fixes the intended token in dense expressions'
   const updated = fs.readFileSync(samplePath, 'utf8');
   assert.match(updated, /\(\(this\.mp = \(v \+ 1\)\), this\.mp\)/);
 });
+
+
+test('does not prefix shadowed locals or params that match class member names', () => {
+  const source = [
+    'export class RSAKey {',
+    '  public n: number = 0;',
+    '  public p: number = 0;',
+    '  public pkcs1pad(n: number): number {',
+    '    let p = n;',
+    '    p = p + 1;',
+    '    return p + n;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'RSAKey.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const result = processFile(samplePath);
+  assert.equal(result.changed, false);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.doesNotMatch(updated, /this\.p = this\.p \+ 1;/);
+  assert.doesNotMatch(updated, /return this\.p \+ this\.n;/);
+  assert.match(updated, /let p = n;/);
+  assert.match(updated, /return p \+ n;/);
+});

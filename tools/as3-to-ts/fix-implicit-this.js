@@ -50,6 +50,10 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
   const names = eligibleNames.map(escapeRegExp).join('|');
   const regex = new RegExp(`\\b(${names})\\b(?!\\s*:)`, 'g');
   const blockedPrefix = /(?:function|var|let|const|get|set|public|private|protected|static|readonly|catch|as|instanceof)\s+$/;
+  const { methods } = extractClassAndMethodRanges(source);
+  methods.forEach((method) => {
+    method.locals = collectLocalsInRange(source, method);
+  });
 
   return source.replace(regex, (token, name, offset, whole) => {
     const prev = whole[offset - 1];
@@ -79,6 +83,13 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
     if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;
     if (isTypeLikeContext(whole, offset)) return token;
+
+    for (const method of methods) {
+      if (offset < method.start || offset > method.end) continue;
+      if (method.params.has(name) || method.locals.has(name)) return token;
+      break;
+    }
+
     return `${prefixTarget}.${name}`;
   });
 }
