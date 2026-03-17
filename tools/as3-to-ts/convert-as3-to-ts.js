@@ -566,6 +566,9 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
   converted = converted.replace(/\bJSON\.decode\s*\(/g, 'JSON.parse(');
   
+  // Перевод flash.utils.getTimer() в нативный JS
+  converted = converted.replace(/\bgetTimer\s*\(\s*\)/g, 'Date.now()');
+  
   // Лечим TS2536: Использование объектов в качестве ключей Dictionary (Caller.as)
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
