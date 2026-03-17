@@ -464,6 +464,47 @@ test('member extraction supports static readonly TS fields and static methods', 
   assert.equal(staticMembers.has('getTables'), true);
 });
 
+test('member extraction supports untyped static/instance fields initialized with =', () => {
+  const source = [
+    'export class AESKey {',
+    '  private Nr = 10;',
+    '  private static readonly Nb = 4;',
+    '  private static P_SZ = 18;',
+    '}'
+  ].join('\n');
+
+  const { instanceMembers, staticMembers } = extractClassScopeMembers(source);
+  assert.equal(instanceMembers.has('Nr'), true);
+  assert.equal(staticMembers.has('Nb'), true);
+  assert.equal(staticMembers.has('P_SZ'), true);
+});
+
+test('prefixes PascalCase static members in math and array expressions', () => {
+  const source = [
+    'export class AESKey {',
+    '  private Nr: number = 10;',
+    '  public static readonly Nb = 4;',
+    '  public static readonly P: number[] = [1,2,3,4];',
+    '  public static readonly P_SZ = 4;',
+    '  public run(): number {',
+    '    const words = Nb * (this.Nr + 1);',
+    '    return P[0] + P_SZ + words;',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fix-implicit-this-'));
+  const samplePath = path.join(tempDir, 'AESKey.ts');
+  fs.writeFileSync(samplePath, source, 'utf8');
+
+  const result = processFile(samplePath);
+  assert.equal(result.changed, true);
+
+  const updated = fs.readFileSync(samplePath, 'utf8');
+  assert.match(updated, /const words = AESKey\.Nb \* \(this\.Nr \+ 1\);/);
+  assert.match(updated, /return AESKey\.P\[0\] \+ AESKey\.P_SZ \+ words;/);
+});
+
 test('known inherited members are prefixed as instance usage', () => {
   const source = [
     'export class CBCMode {',

@@ -33,8 +33,8 @@ function extractClassScopeMembers(source) {
     return { className, instanceMembers, staticMembers };
   }
 
-  // 2. TS instance properties (e.g. public foo: Type, private S!: ByteArray)
-  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?\s*:/g)) {
+  // 2. TS instance properties (e.g. public foo: Type, private S!: ByteArray, private size = 0)
+  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?(?:\s*[:=])/g)) {
     const name = match[1];
     if (name === className || RESERVED_WORDS.has(name)) continue;
     instanceMembers.add(name);
@@ -47,8 +47,8 @@ function extractClassScopeMembers(source) {
     instanceMembers.add(name);
   }
 
-  // 4. TS static properties (e.g. public static readonly Nb: number)
-  for (const match of source.matchAll(/(?:public|private|protected)\s+static(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?\s*:/g)) {
+  // 4. TS static properties (e.g. public static readonly Nb: number, private static readonly Nb = 4)
+  for (const match of source.matchAll(/(?:(?:public|private|protected)\s+)?static(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?(?:\s*[:=])/g)) {
     const name = match[1];
     if (name === className || RESERVED_WORDS.has(name)) continue;
     staticMembers.add(name);
@@ -104,7 +104,9 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     if (blockedPrefix.test(left)) return token;
     const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
     if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;
-    if (isTypeLikeContext(whole, offset)) return token;
+    const isProbablyType = isTypeLikeContext(whole, offset);
+    const isMathOrArrayAccess = /^[-+*/%^&|[\]();,><=]/.test(rightTrimmed);
+    if (isProbablyType && !isMathOrArrayAccess) return token;
 
     for (const method of methods) {
       if (offset < method.start || offset > method.end) continue;
