@@ -33,8 +33,8 @@ function extractClassScopeMembers(source) {
     return { className, instanceMembers, staticMembers };
   }
 
-  // 2. TS instance properties (e.g. public foo: Type)
-  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*:/g)) {
+  // 2. TS instance properties (e.g. public foo: Type, private S!: ByteArray)
+  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?\s*:/g)) {
     const name = match[1];
     if (name === className || RESERVED_WORDS.has(name)) continue;
     instanceMembers.add(name);
@@ -48,7 +48,7 @@ function extractClassScopeMembers(source) {
   }
 
   // 4. TS static properties (e.g. public static readonly Nb: number)
-  for (const match of source.matchAll(/(?:public|private|protected)\s+static(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*:/g)) {
+  for (const match of source.matchAll(/(?:public|private|protected)\s+static(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?\s*:/g)) {
     const name = match[1];
     if (name === className || RESERVED_WORDS.has(name)) continue;
     staticMembers.add(name);

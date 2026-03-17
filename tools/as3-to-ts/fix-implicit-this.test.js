@@ -429,6 +429,24 @@ test('does not prefix shadowed locals or params that match class member names', 
   assert.match(updated, /return p \+ n;/);
 });
 
+
+test('member extraction supports definite and optional TS property assertions', () => {
+  const source = [
+    'export class ARC4 {',
+    '  private S!: ByteArray;',
+    '  protected i?: number;',
+    '  public static TABLE?: number[];',
+    '  public static CACHE!: Map<string, number>;',
+    '}'
+  ].join('\n');
+
+  const { instanceMembers, staticMembers } = extractClassScopeMembers(source);
+  assert.equal(instanceMembers.has('S'), true);
+  assert.equal(instanceMembers.has('i'), true);
+  assert.equal(staticMembers.has('TABLE'), true);
+  assert.equal(staticMembers.has('CACHE'), true);
+});
+
 test('member extraction supports static readonly TS fields and static methods', () => {
   const source = [
     'export class AESKey {',
