@@ -22,6 +22,10 @@ function fixClassSignatures(source) {
     '$1$2 __fixedSignature(): any {'
   );
 
+  // Heal SHA256 specific naming collision where local scalar `h` shadows class array `this.h`.
+  // Converts `h[...]` array accesses back to `this.h[...]`, while ignoring already prefixed cases.
+  content = content.replace(/(?<!\.)\bh\[([^\]]+)\]/g, 'this.h[$1]');
+
   return content;
 }
 
