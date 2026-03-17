@@ -52,7 +52,8 @@ const FLASH_STUB_HEADER = [
   'declare const flash: any;',
   'declare const console: any;',
   'declare const getDefinitionByName: any;',
-  'declare const describeType: any;'
+  'declare const describeType: any;',
+  'declare const MD5: any;'
 ].join('\n');
 
 function mapType(asType) {
