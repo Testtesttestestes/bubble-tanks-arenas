@@ -22,21 +22,43 @@ const RESERVED_WORDS = new Set([
 
 function extractClassScopeMembers(source) {
   const classMatch = source.match(/class\s+(\w+)/);
-  const instanceMembers = new Set();
+  const className = classMatch ? classMatch[1] : 'Unknown';
+
+  // 1. Pre-fill known inherited members (crypto/base class hierarchy).
+  const instanceMembers = new Set([
+    'blockSize', 'padding', 'key', 'iv', 'lastIV', 'core', 'rng'
+  ]);
   const staticMembers = new Set();
   if (!classMatch) {
-    return { className: null, instanceMembers, staticMembers };
+    return { className, instanceMembers, staticMembers };
   }
 
-  const className = classMatch[1];
-  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=[(<:;=!?]|$)/gm;
-  let match;
-  while ((match = memberRegex.exec(source)) !== null) {
-    const isStatic = !!match[2];
-    const name = match[3];
+  // 2. TS instance properties (e.g. public foo: Type)
+  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*:/g)) {
+    const name = match[1];
     if (name === className || RESERVED_WORDS.has(name)) continue;
-    if (isStatic) staticMembers.add(name);
-    else instanceMembers.add(name);
+    instanceMembers.add(name);
+  }
+
+  // 3. TS instance methods (e.g. public async foo())
+  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+override)?(?:\s+(?:async|get|set))?\s+([a-zA-Z0-9_$]+)\s*\(/g)) {
+    const name = match[1];
+    if (name === className || RESERVED_WORDS.has(name)) continue;
+    instanceMembers.add(name);
+  }
+
+  // 4. TS static properties (e.g. public static readonly Nb: number)
+  for (const match of source.matchAll(/(?:public|private|protected)\s+static(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*:/g)) {
+    const name = match[1];
+    if (name === className || RESERVED_WORDS.has(name)) continue;
+    staticMembers.add(name);
+  }
+
+  // 5. TS static methods (e.g. private static getSBox())
+  for (const match of source.matchAll(/(?:public|private|protected)\s+static(?:\s+(?:async|get|set))?\s+([a-zA-Z0-9_$]+)\s*\(/g)) {
+    const name = match[1];
+    if (name === className || RESERVED_WORDS.has(name)) continue;
+    staticMembers.add(name);
   }
 
   return { className, instanceMembers, staticMembers };
