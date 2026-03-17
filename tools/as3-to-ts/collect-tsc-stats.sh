@@ -223,9 +223,22 @@ map_ts_line_to_as_line() {
 
   local ts_line_text normalized_ts_line exact_match_line
   ts_line_text="$(get_ts_line "$ts_file" "$ts_line")"
-  normalized_ts_line="$(printf '%s' "$ts_line_text" | sed -E 's/\b[A-Z][A-Za-z0-9_$]*\.//g; s/\bthis\.//g; s/===/==/g; s/!==/!=/g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
+  normalized_ts_line="$(normalize_line_for_matching "$ts_line_text")"
   if [[ -n "$normalized_ts_line" ]]; then
-    exact_match_line="$(awk -v needle="$normalized_ts_line" 'index($0, needle) { print NR; exit }' "$as_file")"
+    exact_match_line="$(awk -v needle="$normalized_ts_line" '
+      function normalize(line, normalized) {
+        normalized = line
+        gsub(/\<[A-Z][A-Za-z0-9_$]*\./, "", normalized)
+        gsub(/\<this\./, "", normalized)
+        gsub(/\(Date as any\)\(\)/, "Date()", normalized)
+        gsub(/===/, "==", normalized)
+        gsub(/!==/, "!=", normalized)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", normalized)
+        return normalized
+      }
+
+      normalize($0) == needle { print NR; exit }
+    ' "$as_file")"
     if [[ -n "$exact_match_line" ]]; then
       printf '%s\n' "$exact_match_line"
       return
@@ -251,6 +264,17 @@ map_ts_line_to_as_line() {
   fi
 
   printf '%s\n' "$mapped"
+}
+
+normalize_line_for_matching() {
+  local line="$1"
+  printf '%s' "$line" | sed -E \
+    -e 's/\b[A-Z][A-Za-z0-9_$]*\.//g' \
+    -e 's/\bthis\.//g' \
+    -e 's/\(Date as any\)\(\)/Date()/g' \
+    -e 's/===/==/g' \
+    -e 's/!==/!=/g' \
+    -e 's/^[[:space:]]+//; s/[[:space:]]+$//'
 }
 
 resolve_as_source() {
