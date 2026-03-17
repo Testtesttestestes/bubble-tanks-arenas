@@ -55,8 +55,17 @@ jobs:
           # 7. Чиним implicit this по точным координатам из tsc_output.log
           node tools/as3-to-ts/fix-implicit-this.js --input migrated-ts --tsc-log tsc_output.log
 
-          # 7.5. Распутываем адские запятые декомпилятора (TS2695/TS2351) в Base64 и BigInteger
+          # 7.2. Лечим сигнатуры параметров, сломанные декомпиляцией/конвертером
+          node tools/as3-to-ts/heal-signature-params.js --input migrated-ts
+
+          # 7.3. Чиним class-signatures в AGI-поддереве
+          node tools/as3-to-ts/fix-class-signatures.js --input migrated-ts --scope agi
+
+          # 7.4. Распутываем адские запятые декомпилятора (TS2695/TS2351) в Base64 и BigInteger
           node tools/as3-to-ts/fix-ts2695-sequences.js --input migrated-ts
+
+          # 7.5. Пересобираем импорты после автоправок
+          node tools/as3-to-ts/resolve-imports.js --input migrated-ts
 
           # 8. КОМПИЛИРУЕМ повторно после автоправок, чтобы анализ шел по актуальному логу
           tsc_exit=0
