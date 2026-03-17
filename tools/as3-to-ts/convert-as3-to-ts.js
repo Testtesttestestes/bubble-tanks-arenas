@@ -37,7 +37,8 @@ const FLASH_STUB_CLASSES = [
   'Dictionary',
   'Security',
   'ExternalInterface',
-  'System'
+  'System',
+  'LoaderContext'
 ];
 
 const FLASH_STUB_HEADER = [
@@ -549,6 +550,16 @@ function convertAs3ToTs(source) {
          return "{" + s + "}";`
   );
   converted = converted.replace(/\bvar\s+v\s*:\s*XML\s*=\s*.*?;\n?/g, '');
+  
+  // Защита локальной переменной 'error' от наглого fix-implicit-this (TS2345)
+  converted = converted.replace(/\bvar\s+error\s*:\s*ClientError\b/g, 'var clientErr: ClientError');
+  converted = converted.replace(/\bthis\.error\.getCode\b/g, 'clientErr.getCode');
+  converted = converted.replace(/\bhandleConnectionFailed\(this\.error\)/g, 'handleConnectionFailed(clientErr)');
+  converted = converted.replace(/\bauthenticationFailed\(this\.error\)/g, 'authenticationFailed(clientErr)');
+  
+  // Перевод AS3 JSON API в нативный JS/TS
+  converted = converted.replace(/\bJSON\.encode\s*\(/g, 'JSON.stringify(');
+  converted = converted.replace(/\bJSON\.decode\s*\(/g, 'JSON.parse(');
 
   // --- ТЕРМИНАТОР СИНТАКСИСА ---
   // Лечим дикие подстановки 'this.' к зарезервированным словам, которые могли проскочить
