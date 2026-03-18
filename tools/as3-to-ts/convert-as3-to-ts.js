@@ -380,9 +380,9 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*_temp_\d+;\s*$/gm, '');
   converted = converted.replace(/^\s*(?:public\s+)?namespace\s+(\w+)\s*=\s*([^;]+);\s*$/gm, 'export const $1 = $2;');
 
+  converted = converted.replace(/\.\.([a-zA-Z_]\w*)\.\s*\(/g, '._descendants_filter_$1(');
   converted = converted.replace(/\.\.\*\.\s*\(/g, '._descendants_star_filter(');
   converted = converted.replace(/\.\.\*/g, '._descendants_star');
-  converted = converted.replace(/\.\.([a-zA-Z_]\w*)\.\s*\(/g, '._descendants_filter_$1(');
   converted = converted.replace(/\.@([a-zA-Z_]\w*)/g, '._attr_$1');
   converted = converted.replace(/\.\.([a-zA-Z_]\w*)/g, '._descendants_$1');
 
@@ -397,8 +397,10 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
   converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
   converted = converted.replace(/\b(this|_[a-zA-Z0-9_]+)\.\s*\(/g, '$1._missingMethod(');
-  converted = converted.replace(/\.\s*\(/g, '._filter(');
-  converted = converted.replace(/(\w+)\.\(([^)]*)\)/g, '$1["$2"]');
+  // Heal dynamic access artifacts from AS3 decompilation: obj.(expr) -> obj[expr]
+  converted = converted.replace(/\.\s*\(([^)]+)\)/g, '[$1]');
+  // Heal numeric property access: obj.0 -> obj[0]
+  converted = converted.replace(/\.([0-9]+)\b/g, '[$1]');
   converted = converted.replace(/\bcatch\s*\(\s*(?:this\.)?([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
   converted = converted.replace(/^\s*include\s+"[^"]+"\s*;/gm, '// include removed');
   converted = converted.replace(/new\s+<[\w\.]+>\s*\[/g, '[');
@@ -814,16 +816,8 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(/\bthis\.this\./g, 'this.');
 
-  converted = converted.replace(/\bthis\.if\b/g, 'if');
-  converted = converted.replace(/\bthis\.while\b/g, 'while');
-  converted = converted.replace(/\bthis\.switch\b/g, 'switch');
-  converted = converted.replace(/\bthis\.for\b/g, 'for');
-  converted = converted.replace(/\bthis\.catch\b/g, 'catch');
-  converted = converted.replace(/\bthis\.return\b/g, 'return');
-  converted = converted.replace(/\bthis\.super\b/g, 'super');
-  converted = converted.replace(/\bthis\.public\b/g, 'public');
-  converted = converted.replace(/\bthis\.private\b/g, 'private');
-  converted = converted.replace(/\bthis\.protected\b/g, 'protected');
+  // Heal TS1034: orphaned `super` tokens (not followed by `(` or `.`) are usually bad decompilation output.
+  converted = converted.replace(/\bsuper\b(?!\s*[\(.])/g, 'this');
 
   converted = converted.replace(/^\s*undefined\s*;\s*$/gm, '');
   converted = converted.replace(/^\s*null\s*;\s*$/gm, '');
