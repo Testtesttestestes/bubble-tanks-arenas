@@ -307,10 +307,11 @@ function convertAs3ToTs(source) {
   const flashMethods = [
     'addChild', 'addChildAt', 'removeChild', 'removeChildAt', 'gotoAndStop', 'gotoAndPlay',
     'play', 'stop', 'addEventListener', 'removeEventListener', 'dispatchEvent',
-    'setChildIndex', 'getChildIndex', 'contains', 'addFrameScript'
+    'setChildIndex', 'getChildIndex', 'contains', 'addFrameScript',
+    'localToGlobal', 'globalToLocal', 'hitTestPoint', 'hitTestObject', 'startDrag', 'stopDrag'
   ];
-  const methodsRegex = new RegExp(`(^|[^.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'gm');
-  converted = converted.replace(methodsRegex, '$1this.$2(');
+  const methodsRegex = new RegExp(`(?<![.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'g');
+  converted = converted.replace(methodsRegex, 'this.$1(');
 
   converted = converted.replace(/\b(function|get|set|public|private|protected|static|override)\s+this\./g, '$1 ');
 
