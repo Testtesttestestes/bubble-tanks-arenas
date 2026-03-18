@@ -75,26 +75,20 @@ package fl.managers
          setStyle(param1,null);
       }
       
-      public static function setComponentStyle(param1:Object, param2:String, param3:Object) : void
-      {
-         var _loc4_:Class = getClassDef(param1);
-         var _loc5_:Object = getInstance().classToStylesDict[_loc4_];
-         if(_loc5_ == null)
-         {
-            var _temp_4:* = getInstance().classToStylesDict;
-            var _temp_3:* = _loc4_;
-            var _temp_2:* = {};
-            _temp_2;
-            _temp_4[_temp_3] = _temp_2;
-            _loc5_ = _loc6_;
-         }
-         if(_loc5_ == param3)
-         {
-            return;
-         }
-         _loc5_[param2] = param3;
-         invalidateComponentStyle(_loc4_,param2);
-      }
+      public static setComponentStyle(param1: any, param2: string, param3: any): void {
+		var _loc4_: any = StyleManager.getClassDef(param1);
+		var _loc5_: any = (StyleManager.getInstance().classToStylesDict as any)[_loc4_ as any];
+		if (_loc5_ == null) {
+			// Возвращаем нормальную логику
+			_loc5_ = {};
+			(StyleManager.getInstance().classToStylesDict as any)[_loc4_ as any] = _loc5_;
+		}
+		if (_loc5_ == param3) {
+			return;
+		}
+		_loc5_[param2 as any] = param3;
+		StyleManager.invalidateComponentStyle(_loc4_, param2);
+	  }
       
       private static function setSharedStyles(param1:UIComponent) : void
       {
