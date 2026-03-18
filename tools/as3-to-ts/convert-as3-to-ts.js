@@ -447,14 +447,23 @@ function convertAs3ToTs(source) {
     }
   );
 
-  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
+  // Лечим приведение базовых классов (включая UIComponent и Dictionary)
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager)\s*\(([^)]*)\)/g, (match, prev, isNew, type, inner) => {
     if (isNew) return match;
+    // ЗАЩИТА: Если скобки пустые или внутри есть двоеточие (типизация параметра), это объявление метода/геттера, а не каст!
+    if (inner.trim() === '' || inner.includes(':')) return match;
+    
     if (type === 'Array') return `${prev}(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${prev}${type}(${inner})`;
     return `${prev}(${inner} as unknown as ${type})`;
   });
-  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
-    if (isNew) return match;
+
+  // Лечим AS3 приведение интерфейсов: IFocusManagerComponent(child) -> (child as unknown as IFocusManagerComponent)
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(([^)]*)\)/g, (match, prev, isNew, type, inner) => {
+    if (isNew) return match; 
+    // ЗАЩИТА: Аналогично бережём функции, начинающиеся на 'I' (например, сеттер IV)
+    if (inner.trim() === '' || inner.includes(':')) return match; 
+    
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
