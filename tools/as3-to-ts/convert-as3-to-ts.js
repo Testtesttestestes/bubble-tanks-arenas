@@ -47,7 +47,7 @@ function mapType(asType) {
   const simpleMap = new Map([
     ['Number', 'number'], ['int', 'number'], ['uint', 'number'],
     ['Boolean', 'boolean'], ['String', 'string'], ['Array', 'any'],
-    ['Object', 'Record<string, any>'], ['void', 'void'], ['*', 'any'],
+    ['Object', 'any'], ['void', 'void'], ['*', 'any'],
     ['Class', 'any'], ['Function', 'Function'], ['Event', 'any'],
     ['MouseEvent', 'any'], ['KeyboardEvent', 'any'], ['FocusEvent', 'any'],
     ['TimerEvent', 'any'], ['TextEvent', 'any'], ['IOErrorEvent', 'any'],
@@ -398,7 +398,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bcatch\s*\(\s*(?:this\.)?([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
   converted = converted.replace(/^\s*include\s+"[^"]+"\s*;/gm, '// include removed');
   converted = converted.replace(/new\s+<[\w\.]+>\s*\[/g, '[');
-  converted = converted.replace(/:\s*Object\b/g, ': Record<string, any>');
+  converted = converted.replace(/:\s*Object\b/g, ': any');
   converted = converted.replace(/(?<!function\s+|new\s+)\bArray\(([^)]+)\)/g, '($1 as unknown as any[])');
   
   converted = converted.replace(/:\s*\*/g, ': any');
@@ -469,6 +469,14 @@ function convertAs3ToTs(source) {
     if (isNew) return match; 
     if (!inner || inner.trim() === '' || inner.includes(':')) return match; 
     return `${prev}(${inner} as unknown as ${type})`;
+  });
+
+  // Хардкорный фоллбэк для глубоко вложенных кастов, которые пропустила основная регулярка (TS2348)
+  converted = converted.replace(/(?<!new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager)\s*\(([^;{]+)\)/g, (match, cls, inner) => {
+    if (inner.includes('function') || inner.trim() === '') return match;
+    // Очищаем скобки с конца, если регулярка захватила лишнее
+    if (inner.endsWith(')')) return match;
+    return `(${inner} as unknown as ${cls})`;
   });
 
   // Миграция AGI: убираем runtime SWF loadBytes(new AgiClass()) и инициализируем AGI напрямую
@@ -717,9 +725,9 @@ function convertAs3ToTs(source) {
     converted = converted.replace(/\breturn\s+([^;]+);/g, 'return $1 as any;');
   }
 
-  // Fix TS2678 in fl.motion.MotionBase: Cast problematic string literals to any
+  // Fix TS2678 in fl.motion.MotionBase: Cast switch expressions to any
   if (className === 'MotionBase') {
-    converted = converted.replace(/(?<!\w)(["'](?:x|y|skewX|skewY|scaleX|scaleY|rotation|alpha|color|filters|blendMode|matrix3D)["'])(?!\w)/g, '($1 as any)');
+    converted = converted.replace(/switch\s*\(\s*([a-zA-Z0-9_$.]+)\s*\)/g, 'switch ($1 as any)');
   }
 
   converted = converted.replace(/\bthis\.this\./g, 'this.');
@@ -764,6 +772,9 @@ function convertAs3ToTs(source) {
     if (key.trim().endsWith('as any')) return match;
     return `${dict}[${key} as any]`;
   });
+
+  // Лечим TS2339: маскируем вызовы статических методов у флешовых менеджеров
+  converted = converted.replace(/\b(StyleManager|FocusManager)\.([a-zA-Z0-9_$]+)/g, '($1 as any).$2');
 
   // Safely cast array insertions to bypass strict typing
   converted = castArrayInsertions(converted);
