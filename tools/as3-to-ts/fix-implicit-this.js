@@ -141,7 +141,10 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const rightTrimmed = right.trimStart();
     const isTypePipePrefix = prevTypeToken === '|' && !leftTrimmed.endsWith('||');
     const isTypeAmpPrefix = prevTypeToken === '&' && !leftTrimmed.endsWith('&&');
-    if (prevTypeToken === '<' || isTypePipePrefix || isTypeAmpPrefix) return token;
+    
+    // Narrow down the '<' check to only trigger on likely Generic Types (e.g. Vector<) and not operations (i < ROUNDS)
+    const isGenericLessThan = prevTypeToken === '<' && /(?:^|[^a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*<$/.test(leftTrimmed);
+    if (isGenericLessThan || isTypePipePrefix || isTypeAmpPrefix) return token;
 
     const startsWithTypeDelimiter =
       rightTrimmed.startsWith('[]') ||
@@ -206,11 +209,6 @@ function computeLineStarts(source) {
   return starts;
 }
 
-function lineColToIndex(lineStarts, line, col) {
-  if (line <= 0 || line > lineStarts.length) return -1;
-  return lineStarts[line - 1] + Math.max(0, col - 1);
-}
-
 function findMatchingBrace(source, openIndex) {
   let depth = 0;
   for (let i = openIndex; i < source.length; i += 1) {
@@ -242,7 +240,6 @@ function extractClassAndMethodRanges(source) {
     const close = findMatchingBrace(source, open);
     if (close === -1 || close > classRange.end) continue;
 
-    // Expand search scope slightly left to include parameter declarations
     const paramStart = match.index + match[0].indexOf('(');
 
     const params = new Set();
@@ -266,17 +263,6 @@ function extractClassAndMethodRanges(source) {
     methods.push({ start: paramStart, end: close, params, locals });
   }
   return { classRange, methods };
-}
-
-function collectLocalsInRange(source, range) {
-  const locals = new Set();
-  const snippet = source.slice(range.start, range.end);
-  const localRegex = /\b(?:let|const|var|function|catch)\s+([A-Za-z_$][\w$]*)/g;
-  let match;
-  while ((match = localRegex.exec(snippet)) !== null) {
-    locals.add(match[1]);
-  }
-  return locals;
 }
 
 function isTypeLikeContext(source, index) {
@@ -304,44 +290,10 @@ function isTypeLikeContext(source, index) {
   return false;
 }
 
-function isIdentifierChar(ch) {
-  return /[A-Za-z0-9_$]/.test(ch || '');
-}
-
-function findDiagnosticTokenIndex(source, diagnostic, lineStarts) {
-  const lineStartIndex = lineStarts[diagnostic.line - 1];
-  const lineEndIndex = lineStarts[diagnostic.line] || source.length;
-  const lineText = source.slice(lineStartIndex, lineEndIndex);
-
-  const columnIndex = Math.max(0, diagnostic.col - 1);
-  const fromColumn = lineText.slice(columnIndex);
-  const nameRegex = new RegExp(`\b${escapeRegExp(diagnostic.name)}\b`);
-  const direct = fromColumn.match(nameRegex);
-  if (direct && direct.index !== undefined) {
-    const index = lineStartIndex + columnIndex + direct.index;
-    const prev = source[index - 1] || '';
-    const next = source[index + diagnostic.name.length] || '';
-    if (!isIdentifierChar(prev) && !isIdentifierChar(next)) {
-      return index;
-    }
-  }
-
-  const fallbackRegex = new RegExp(`\b${escapeRegExp(diagnostic.name)}\b`, 'g');
-  let match;
-  while ((match = fallbackRegex.exec(lineText)) !== null) {
-    const index = lineStartIndex + match.index;
-    const prev = source[index - 1] || '';
-    if (prev === '.') continue;
-    return index;
-  }
-
-  return -1;
-}
-
 function applyDiagnosticThisFixes(source, diagnostics) {
   if (!diagnostics || diagnostics.length === 0) return source;
   const importedNames = parseImportNames(source);
-  const { className, instanceMembers } = extractClassScopeMembers(source);
+  const { instanceMembers } = extractClassScopeMembers(source);
 
   const ignoredRanges = getIgnoredRanges(source);
 
@@ -349,13 +301,13 @@ function applyDiagnosticThisFixes(source, diagnostics) {
   const lineStarts = computeLineStarts(source);
   for (const diagnostic of diagnostics) {
     if (importedNames.has(diagnostic.name)) continue;
-    if (/^[A-Z]/.test(diagnostic.name) && !instanceMembers.has(diagnostic.name)) continue;
+    
+    // Skip if it looks like a class name unless TSC explicitly gave us a forcePrefix
+    if (!diagnostic.forcePrefix && /^[A-Z]/.test(diagnostic.name) && !instanceMembers.has(diagnostic.name)) continue;
+    
     if (diagnostic.line <= 0 || diagnostic.line > lineStarts.length) continue;
     
-    let prefixTarget = 'this.';
-    if (diagnostic.forcePrefix === 'static' && className) {
-      prefixTarget = `${className}.`;
-    }
+    let prefixTarget = diagnostic.forcePrefix || 'this.';
 
     const lineStartIndex = lineStarts[diagnostic.line - 1];
     const lineEndIndex = lineStarts[diagnostic.line] || source.length;
@@ -366,7 +318,7 @@ function applyDiagnosticThisFixes(source, diagnostics) {
     while ((match = regex.exec(lineText)) !== null) {
       const matchIndex = lineStartIndex + match.index + match[1].length;
 
-      if (isIndexInRanges(matchIndex, ignoredRanges)) continue; // Skip if in string/comment
+      if (isIndexInRanges(matchIndex, ignoredRanges)) continue;
       
       const leftContext = source.slice(Math.max(0, matchIndex - prefixTarget.length), matchIndex);
       if (leftContext === prefixTarget || source[matchIndex - 1] === '.') continue;
@@ -388,32 +340,40 @@ function parseTscLog(logPath) {
   if (!logPath || !fs.existsSync(logPath)) return new Map();
   const result = new Map();
   const content = fs.readFileSync(logPath, 'utf8');
-  const lineRegex = /^(.*)\((\d+),(\d+)\):\s*error\s*TS(2304|2662|2663):\s*(.+)$/gm;
+  
+  // Handles BOTH standard TSC format AND custom wrapper format (e.g., [1/5] file.ts:line:col)
+  const lineRegex = /(?:\[\d+\/\d+\]\s+)?([^\s(:]+(?:\.ts|\.tsx|\.js|\.jsx))(?:\((\d+),(\d+)\):\s*error\s*|:(\d+):(\d+)\s+)TS(2304|2662|2663):?\s*(.+)$/gm;
+  
   let match;
   while ((match = lineRegex.exec(content)) !== null) {
-    const message = match[5];
+    const message = match[7];
     const unresolvedMatch = message.match(/Cannot find name\s*'([^']+)'/);
     if (!unresolvedMatch) continue;
+    
     let name = unresolvedMatch[1];
     let forcePrefix = null;
+    
+    // Extract precise class name directly from TSC suggestions
     const staticSuggestion = message.match(/Did you mean the static member\s*'([^']+)\.([^'.]+)'/);
     if (staticSuggestion) {
       name = staticSuggestion[2];
-      forcePrefix = 'static';
+      forcePrefix = `${staticSuggestion[1]}.`;
     }
     const instanceSuggestion = message.match(/Did you mean the instance member\s*'([^']+)\.([^'.]+)'/);
     if (instanceSuggestion) {
       name = instanceSuggestion[2];
-      forcePrefix = 'instance';
+      forcePrefix = 'this.';
     }
+    
     const filePath = path.resolve(match[1].trim());
     const diagnostic = {
-      code: Number(match[4]),
+      code: Number(match[6]),
       name,
       forcePrefix,
-      line: Number(match[2]),
-      col: Number(match[3])
+      line: Number(match[2] || match[4]),
+      col: Number(match[3] || match[5])
     };
+    
     if (!result.has(filePath)) result.set(filePath, []);
     result.get(filePath).push(diagnostic);
   }
@@ -517,7 +477,6 @@ module.exports = {
   extractClassScopePropertyNames,
   addThisToPropertyUsage,
   applyDiagnosticThisFixes,
-  findDiagnosticTokenIndex,
   parseTscLog,
   processFile,
   collectTsFiles,
