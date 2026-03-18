@@ -186,6 +186,39 @@ test('casts non-literal index keys to any for dictionary-like indexing', () => {
   assert.match(output, /dict\[7\] = true;/);
 });
 
+test('does not rewrite decimal literals while healing numeric property access', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f():Number {',
+    '      var value:Number = 0.9 + 0.1;',
+    '      return value;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /0\.9 \+ 0\.1/);
+  assert.doesNotMatch(output, /0\[9\]|0\[1\]/);
+});
+
+test('keeps chained member access valid when casting layout property assignments', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f(param1:Object):void {',
+    '      this.var_80[param1].mc.alpha = 0.5;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /\(this\.var_80\[param1 as any\]\.mc as any\)\.alpha = 0\.5;/);
+  assert.doesNotMatch(output, /\.?\(mc as any\)\.alpha/);
+});
+
 test('maps ProgressEvent constants to DOM-style event string literals', () => {
   const input = [
     'package {',
