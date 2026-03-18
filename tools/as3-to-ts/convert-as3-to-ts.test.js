@@ -79,6 +79,23 @@ test('adds ts-ignore for accessors overriding core Flash display properties', ()
   assert.match(output, /get x\(\): number/);
 });
 
+test('prefixes implicit DisplayObject coordinate and hit-test methods with this', () => {
+  const input = [
+    'package {',
+    '  public class Sample extends Sprite {',
+    '    public function f():void {',
+    '      globalToLocal(localToGlobal(hitTestPoint(10, 20) ? new Point() : new Point()));',
+    '      this.movTank.localToGlobal(new Point());',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /this\.globalToLocal\(this\.localToGlobal\(this\.hitTestPoint\(10, 20\)/);
+  assert.match(output, /this\.movTank\.localToGlobal\(new\s+\(Point as any\)\(\)\)/);
+});
+
 
 test('injects additional Flash globals used by AGI (Security, ExternalInterface, System)', () => {
   const input = [
