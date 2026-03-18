@@ -17,7 +17,8 @@ const FLASH_STUB_CLASSES = [
   'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
   'URLRequestMethod', 'URLVariables', 'URLLoader',
   'Mouse', 'MouseCursor', 'Timer',
-  'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter'
+  'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter',
+  'Keyboard', 'Class', 'IME', 'TextFormatAlign'
 ];
 
 function getFlashStubHeader(excludeClassName) {

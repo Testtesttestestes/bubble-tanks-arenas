@@ -24,7 +24,8 @@ const FLASH_TYPES = new Set([
   'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
   'URLRequestMethod', 'URLVariables', 'URLLoader', 'SecurityErrorEvent',
   'Mouse', 'MouseCursor', 'Timer',
-  'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter'
+  'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter',
+  'Keyboard', 'Class', 'IME', 'TextFormatAlign'
 ]);
 
 const PSEUDO_TYPES = new Set(['int', 'uint']);
