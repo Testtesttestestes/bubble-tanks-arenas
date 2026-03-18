@@ -564,6 +564,25 @@ function convertAs3ToTs(source) {
     }
   }
 
+  // Fix TS17009: Move super() to the top of the constructor block
+  if (classMatch && className && hasExtends) {
+    converted = converted.replace(
+      /(constructor\s*\([^)]*\)\s*\{)([\s\S]*?)(\n\s*(?:\/\/\s*@ts-ignore\s*\n\s*)?super\s*\([^)]*\)\s*;?)/g,
+      (match, ctorHead, ctorBody, superCall) => {
+        // If there's no body before the super call, leave it alone
+        if (ctorBody.trim() === '' || /^(?:\s*(?:var|let)\s+[a-zA-Z0-9_$:, ]+;)+$/.test(ctorBody)) {
+          return match;
+        }
+
+        // Extract the super call (and its ignore comment if present)
+        const cleanSuper = superCall.trimStart();
+
+        // Rebuild: Constructor Head -> Super Call -> The rest of the body
+        return `${ctorHead}\n    ${cleanSuper}${ctorBody}`;
+      }
+    );
+  }
+
   // Подавляем ошибку TS2337 (вызов super() не на первой строке или код до него)
   converted = converted.replace(/^(\s*)(super\s*\([^)]*\)\s*;?)/gm, '$1// @ts-ignore\n$1$2');
 
@@ -689,6 +708,11 @@ function convertAs3ToTs(source) {
 
     converted = converted.replace(/\bBigInteger\.BigInteger\./g, 'BigInteger.');
     converted = converted.replace(/\breturn\s+([^;]+);/g, 'return $1 as any;');
+  }
+
+  // Fix TS2678 in fl.motion.MotionBase: Cast problematic string literals to any
+  if (className === 'MotionBase') {
+    converted = converted.replace(/(?<!\w)(["'](?:skewX|skewY|scaleX|scaleY)["'])(?!\w)/g, '($1 as any)');
   }
 
   converted = converted.replace(/\bthis\.this\./g, 'this.');
