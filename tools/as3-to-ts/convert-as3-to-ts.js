@@ -452,8 +452,8 @@ function convertAs3ToTs(source) {
   // Лечим приведение базовых классов и UI-компонентов
   const flashCastClasses = 'String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager|InteractiveObject|DisplayObjectContainer|KeyframeBase|Button|Class|Color|MatrixTransformer3D|AnimatorBase|StyleManager|List|ComboBox|MotionBase';
   
-  // Улучшенные регулярки для поддержки вложенных скобок: MovieClip(getChildAt(0))
-  const castRegex = new RegExp(`(^|[^a-zA-Z0-9_$.])(new\\s+)?(${flashCastClasses})\\s*\\(([^()]*|\\([^()]*\\))*\\)`, 'g');
+  // ИСПРАВЛЕННАЯ РЕГУЛЯРКА: внешняя группа захвата сохраняет весь inner для вложенных скобок
+  const castRegex = new RegExp(`(^|[^a-zA-Z0-9_$.])(new\\s+)?(${flashCastClasses})\\s*\\(\\s*((?:[^()]*|\\([^()]*\\))*)\\s*\\)`, 'g');
 
   converted = converted.replace(castRegex, (match, prev, isNew, type, inner) => {
     if (isNew) return match;
@@ -464,12 +464,16 @@ function convertAs3ToTs(source) {
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
-  // То же самое для интерфейсов (I[A-Z]...)
-  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(([^()]*|\([^()]*\))*\)/g, (match, prev, isNew, type, inner) => {
+  // То же самое для интерфейсов
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(\s*((?:[^()]*|\([^()]*\))*)\s*\)/g, (match, prev, isNew, type, inner) => {
     if (isNew) return match; 
     if (!inner || inner.trim() === '' || inner.includes(':')) return match; 
     return `${prev}(${inner} as unknown as ${type})`;
   });
+
+  // Миграция AGI: убираем runtime SWF loadBytes(new AgiClass()) и инициализируем AGI напрямую
+  converted = converted.replace(/^\s*(?:this\.)?loader\.contentLoaderInfo\.addEventListener\(\s*(?:"complete"|Event\.COMPLETE)\s*,\s*(?:this\.)?loadComplete\s*\)\s*;\s*$/gm, '');
+  converted = converted.replace(/\b(?:this\.)?loader\.loadBytes\s*\(\s*new\s+AgiClass\s*\(\s*\)\s*\)\s*;/g, 'this.loadComplete({ currentTarget: { content: new AGI() } } as any);');
 
   converted = converted.replace(/\bint\.MAX_VALUE\b/g, '2147483647');
   converted = converted.replace(/\bint\.MIN_VALUE\b/g, '-2147483648');
@@ -611,6 +615,8 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bundefined\.([a-zA-Z0-9_]+)/g, '(undefined as any).$1');
   converted = converted.replace(/\bnull\s*\.\s*([a-zA-Z0-9_$]+)/g, '(null as any).$1');
   converted = converted.replace(/\bundefined\s*\.\s*([a-zA-Z0-9_$]+)/g, '(undefined as any).$1');
+  // Heal JPEXS empty parens bug (lost registers in math operations, e.g. Number(()))
+  converted = converted.replace(/\(\(\)\)/g, '((null as any))');
 
   converted = converted.replace(/:\s*Array\b(?!\s*<)/g, ': any[]');
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Array\b/g, 'as any[]');

@@ -109,6 +109,57 @@ test('convertAs3ToTs rewrites AS3 casts and int/uint casts', () => {
   assert.match(output, /var n: number = Number\(scaleX\);/);
 });
 
+test('convertAs3ToTs keeps full expression for nested cast args', () => {
+  const input = `package
+{
+   public class Casts
+   {
+      public function Casts()
+      {
+         var ok:Boolean = Boolean((hex.length & 1) == 1);
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /var ok: boolean = Boolean\(\(hex\.length & 1\) == 1\);/);
+  assert.doesNotMatch(output, /\(\s*==\s*1 as unknown as Boolean\)/);
+});
+
+test('convertAs3ToTs heals JPEXS empty parens artifacts', () => {
+  const input = `package
+{
+   public class ArenaCreator
+   {
+      public function ArenaCreator()
+      {
+         var value:Number = Number(());
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /Number\(\(null as any\)\)/);
+});
+
+test('convertAs3ToTs rewrites legacy AGI loadBytes bootstrap to direct AGI init', () => {
+  const input = `package
+{
+   public class class_79
+   {
+      public function class_79()
+      {
+         this.loader.contentLoaderInfo.addEventListener(Event.COMPLETE,this.loadComplete);
+         this.loader.loadBytes(new AgiClass());
+      }
+   }
+}`;
+
+  const output = convertAs3ToTs(input);
+  assert.doesNotMatch(output, /loadBytes\(new AgiClass\(\)\)/);
+  assert.match(output, /this\.loadComplete\(\{ currentTarget: \{ content: new \(AGI as any\)\(\) \} \} as any\);/);
+});
+
 
 
 test('convertAs3ToTs applies parser-stabilization rewrites for E4X and vector artifacts', () => {
