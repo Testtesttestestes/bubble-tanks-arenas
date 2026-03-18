@@ -20,7 +20,9 @@ const TS_KEYWORDS = new Set([
 const FLASH_TYPES = new Set([
   'MovieClip', 'DisplayObject', 'DisplayObjectContainer', 'Sprite', 'Shape', 'Bitmap', 'SimpleButton', 'TextField',
   'Event', 'MouseEvent', 'KeyboardEvent', 'TimerEvent', 'Point', 'Rectangle', 'Matrix', 'ColorTransform', 'Sound',
-  'URLRequest', 'Loader', 'ByteArray', 'Dictionary', 'XML', 'XMLList'
+  'URLRequest', 'Loader', 'ByteArray', 'Dictionary', 'XML', 'XMLList',
+  'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
+  'URLRequestMethod', 'URLVariables', 'URLLoader', 'SecurityErrorEvent'
 ]);
 
 const PSEUDO_TYPES = new Set(['int', 'uint']);
@@ -47,8 +49,8 @@ function buildSymbolMap(files) {
   const map = new Map();
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
-    // Only exported symbols should be considered providers for cross-file imports.
-    const matches = source.matchAll(/^\s*export\s+(?:default\s+)?(?:abstract\s+)?(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/gm);
+    // REMOVED ^ anchor. \b ensures we catch the export keyword anywhere safely
+    const matches = source.matchAll(/\bexport\s+(?:default\s+)?(?:abstract\s+)?(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/g);
     for (const match of matches) {
       const name = match[1];
       if (!map.has(name)) map.set(name, []);
