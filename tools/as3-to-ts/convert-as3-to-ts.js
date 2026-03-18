@@ -471,10 +471,11 @@ function convertAs3ToTs(source) {
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
-  // Хардкорный фоллбэк для глубоко вложенных кастов (FocusManager|MotionBase|UIComponent|StyleManager)
+  // Хардкорный фоллбэк для глубоко вложенных кастов
   let fallbackCursor = 0;
   let fallbackOutput = '';
-  const fallbackRegex = /(?<!new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager)\s*\(/g;
+  // ФИКС 1: Добавлен негативный lookbehind (?<!function\s+), чтобы не трогать `public function FocusManager(`
+  const fallbackRegex = /(?<!function\s+|new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager)\s*\(/g;
 
   while (true) {
     fallbackRegex.lastIndex = fallbackCursor;
@@ -524,8 +525,8 @@ function convertAs3ToTs(source) {
 
     const inner = converted.slice(openParen + 1, closeParen);
 
-    // Защита от трансформации функций
-    if (inner.includes('function') || inner.trim() === '') {
+    // ФИКС 2: Добавлено inner.includes(':') для спасения конструкторов (param: Type)
+    if (inner.includes('function') || inner.trim() === '' || inner.includes(':')) {
       fallbackOutput += converted.slice(fallbackCursor, closeParen + 1);
       fallbackCursor = closeParen + 1;
       continue;
