@@ -36,7 +36,10 @@ function getFlashStubHeader(excludeClassName) {
     'declare const flash: any;',
     'declare const console: any;',
     'declare const getDefinitionByName: any;',
-    'declare const describeType: any;'
+    'declare const getQualifiedClassName: any;',
+    'declare const getQualifiedSuperclassName: any;',
+    'declare const describeType: any;',
+    'declare const getTimer: any;'
   ].join('\n');
 }
 
@@ -738,12 +741,27 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bJSON\.decode\s*\(/g, 'JSON.parse(');
   converted = converted.replace(/\bgetTimer\s*\(\s*\)/g, 'Date.now()');
   converted = converted.replace(/\bExternalInterface\.call\s*\(/g, '(ExternalInterface.call as any)(');
+
+  // Heal TS2540: cast assignments to layout/display props to any.
+  // Example: foo.height = v -> (foo as any).height = v
+  const layoutProps = ['width', 'height', 'x', 'y', 'alpha', 'visible', 'scaleX', 'scaleY', 'rotation'];
+  const layoutRegex = new RegExp(`(\\b[\\w$.]+)\\.(${layoutProps.join('|')})\\s*=\\s*`, 'g');
+  converted = converted.replace(layoutRegex, '($1 as any).$2 = ');
   
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
   converted = converted.replace(/\bCaller\.calls\[([^\]]+)\]/g, '(Caller.calls as any)[$1 as any]');
 
-  converted = converted.replace(/declare const flash: any;/g, 'declare const flash: any;\ndeclare const console: any;');
+  converted = converted.replace(
+    /declare const flash: any;/g,
+    'declare const flash: any;\n'
+    + 'declare const console: any;\n'
+    + 'declare const getDefinitionByName: any;\n'
+    + 'declare const getQualifiedClassName: any;\n'
+    + 'declare const getQualifiedSuperclassName: any;\n'
+    + 'declare const describeType: any;\n'
+    + 'declare const getTimer: any;'
+  );
 
   converted = converted.replace(/\bnew\s+([A-Za-z0-9_.]+)\s*\(/g, 'new ($1 as any)(');
 

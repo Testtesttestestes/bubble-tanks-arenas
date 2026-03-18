@@ -9,6 +9,9 @@ function fixClassSignatures(source) {
   // Remove invalid `this.` prefixes in type positions.
   content = content.replace(/(:\s*)this\.([A-Za-z_$][\w$.]*)/g, '$1$2');
   content = content.replace(/(\bas\s+(?:unknown\s+as\s+)?)this\.([A-Za-z_$][\w$.]*)/g, '$1$2');
+  const flashGlobals = ['getQualifiedClassName', 'getQualifiedSuperclassName', 'getDefinitionByName', 'getTimer', 'describeType'];
+  const globalsRegex = new RegExp(`\\bthis\\.(${flashGlobals.join('|')})\\b`, 'g');
+  content = content.replace(globalsRegex, '$1');
 
   // Heal constructors missing parameter list.
   content = content.replace(
