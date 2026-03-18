@@ -317,6 +317,25 @@ function convertAs3ToTs(source) {
   ];
   const methodsRegex = new RegExp(`(?<![.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'g');
   converted = converted.replace(methodsRegex, 'this.$1(');
+  
+  // Bypass strict type checking on array insertions for AS3-style loose typing
+  converted = converted.replace(/\.(push|unshift)\s*\(([^,)]+)\)/g, (match, method, arg) => {
+    if (arg.trim().endsWith('as any')) return match;
+    return `.${method}(${arg} as any)`;
+  });
+  converted = converted.replace(/\.(splice)\s*\(([^)]*)\)/g, (match, method, args) => {
+    const parts = args.split(',');
+    if (parts.length < 3) return match;
+    const rewritten = parts.map((part, index) => {
+      if (index < 2) return part;
+      const trimmed = part.trim();
+      if (!trimmed || trimmed.endsWith('as any')) return part;
+      const leading = part.match(/^\s*/)?.[0] || '';
+      const trailing = part.match(/\s*$/)?.[0] || '';
+      return `${leading}${trimmed} as any${trailing}`;
+    });
+    return `.${method}(${rewritten.join(',')})`;
+  });
 
   converted = converted.replace(/\b(function|get|set|public|private|protected|static|override)\s+this\./g, '$1 ');
 

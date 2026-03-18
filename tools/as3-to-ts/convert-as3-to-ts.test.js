@@ -111,6 +111,26 @@ test('prefixes implicit EventDispatcher methods with this', () => {
   assert.match(output, /return this\.hasEventListener\("complete"\) && this\.willTrigger\("change"\);/);
 });
 
+test('casts push/unshift and splice insertions to any for AS3-style loose arrays', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public var arr:Array;',
+    '    public function f(param1:MovieClip, param2:Sprite, param3:DisplayObject):void {',
+    '      this.arr.push(param1);',
+    '      this.arr.unshift(param2 as any);',
+    '      this.arr.splice(0, 0, param3);',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /this\.arr\.push\(param1 as any\);/);
+  assert.match(output, /this\.arr\.unshift\(param2\s+as (?:unknown as )?any\);/);
+  assert.match(output, /this\.arr\.splice\(0, 0, param3 as any\);/);
+});
+
 test('maps ProgressEvent constants to DOM-style event string literals', () => {
   const input = [
     'package {',
