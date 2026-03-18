@@ -476,7 +476,7 @@ function convertAs3ToTs(source) {
   let fallbackCursor = 0;
   let fallbackOutput = '';
   // ФИКС 1: Добавлен негативный lookbehind (?<!function\s+), чтобы не трогать `public function FocusManager(`
-  const fallbackRegex = /(?<!function\s+|new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager)\s*\(/g;
+  const fallbackRegex = /(?<!function\s+|new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager|BitmapFilter|SimpleButton|DisplayObject|I[A-Z][a-zA-Z0-9_]*)\s*\(/g;
 
   while (true) {
     fallbackRegex.lastIndex = fallbackCursor;
@@ -839,6 +839,14 @@ function convertAs3ToTs(source) {
 
   // Лечим TS2339: маскируем вызовы статических методов у флешовых менеджеров
   converted = converted.replace(/\b(StyleManager|FocusManager)\.([a-zA-Z0-9_$]+)/g, '($1 as any).$2');
+
+  // Лечим TS2339: фантомные статические методы, которые JPEXS приписал классам
+  converted = converted.replace(/\b(StyleManager)\.(getQualifiedClassName|getQualifiedSuperclassName)\b/g, '($1 as any).$2');
+  converted = converted.replace(/\b(AnimatorBase)\.(AnimatorParent)\b/g, '($1 as any).$2');
+
+  // Лечим TS2538: жестко кастуем словари, где ключами выступают DisplayObject
+  converted = converted.replace(/\bUIComponent\.focusManagers\s*\[/g, '(UIComponent.focusManagers as any)[');
+  converted = converted.replace(/\bStyleManager\._loc1_\s*\[/g, '(StyleManager._loc1_ as any)[');
 
   // Safely cast array insertions to bypass strict typing
   converted = castArrayInsertions(converted);
