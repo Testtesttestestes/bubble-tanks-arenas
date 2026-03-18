@@ -21,7 +21,8 @@ const FLASH_STUB_CLASSES = [
   'Keyboard', 'Class', 'IME', 'TextFormatAlign',
   'TextFieldAutoSize', 'AntiAliasType', 'GridFitType', 'TextSnapshot', 'CSMSettings',
   'ContextMenuEvent', 'EventDispatcher', 'ContextMenuBuiltInItems', 'ContextMenuClipboardItems',
-  'IMEConversionMode', 'BitmapFilter', 'TextFieldType', 'TextLineMetrics', 'SharedObjectFlushStatus', 'Vector'
+  'IMEConversionMode', 'BitmapFilter', 'TextFieldType', 'TextLineMetrics', 'SharedObjectFlushStatus', 'Vector',
+  'BlendMode'
 ];
 
 function getFlashStubHeader(excludeClassName) {
@@ -525,8 +526,8 @@ function convertAs3ToTs(source) {
 
     const inner = converted.slice(openParen + 1, closeParen);
 
-    // ФИКС 2: Добавлено inner.includes(':') для спасения конструкторов (param: Type)
-    if (inner.includes('function') || inner.trim() === '' || inner.includes(':')) {
+    // ФИКС: Проверяем, что внутри именно сигнатура параметра (напр. "param: Type"), а не тернарник
+    if (inner.includes('function') || inner.trim() === '' || /^\s*[a-zA-Z0-9_$]+\s*:/.test(inner)) {
       fallbackOutput += converted.slice(fallbackCursor, closeParen + 1);
       fallbackCursor = closeParen + 1;
       continue;
@@ -681,6 +682,8 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bthis\.default\s*:/g, 'default:');
 
   converted = converted.replace(/\bnull\.([a-zA-Z0-9_]+)/g, '(null as any).$1');
+  converted = converted.replace(/\bnull\s*\[/g, '(null as any)[');
+  converted = converted.replace(/\bnull\s*\(/g, '(null as any)(');
   converted = converted.replace(/\bundefined\.([a-zA-Z0-9_]+)/g, '(undefined as any).$1');
   converted = converted.replace(/\bnull\s*\.\s*([a-zA-Z0-9_$]+)/g, '(null as any).$1');
   converted = converted.replace(/\bundefined\s*\.\s*([a-zA-Z0-9_$]+)/g, '(undefined as any).$1');
@@ -828,7 +831,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/(\b(?:this|[a-zA-Z0-9_$]+)\.method_\d+)(?=\s*(?:\+|-|\*|\/|==|!=|>=|<=|<|>))/g, '$1()');
 
   // Heal TS2538: cast complex object keys to any to emulate AS3 Dictionary indexing.
-  converted = converted.replace(/([a-zA-Z0-9_$.]+)\[([^\]]+)\]/g, (match, dict, key) => {
+  converted = converted.replace(/([a-zA-Z0-9_$.]+)\s*\[([^\]]+)\]/g, (match, dict, key) => {
     if (/^['"`0-9]/.test(key.trim())) return match;
     if (key.trim().endsWith('as any')) return match;
     return `${dict}[${key} as any]`;
