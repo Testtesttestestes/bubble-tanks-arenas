@@ -106,7 +106,10 @@ function getDeclaredNames(source) {
 }
 
 function getUsedIdentifiers(source) {
-  const stripped = source.replace(/\/\*[\s\S]*?\*\/|\/\/.*|(['"`])(?:\\.|(?!\1)[^\\])*\1/g, ' ');
+  const stripped = source.replace(
+    /\/\*[\s\S]*?\*\/|\/\/[^\n]*|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/g,
+    ' '
+  );
 
   const used = new Set();
 
