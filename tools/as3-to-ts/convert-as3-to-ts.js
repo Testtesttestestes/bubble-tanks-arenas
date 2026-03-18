@@ -18,7 +18,8 @@ const FLASH_STUB_CLASSES = [
   'URLRequestMethod', 'URLVariables', 'URLLoader',
   'Mouse', 'MouseCursor', 'Timer',
   'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter',
-  'Keyboard', 'Class', 'IME', 'TextFormatAlign'
+  'Keyboard', 'Class', 'IME', 'TextFormatAlign',
+  'TextFieldAutoSize', 'AntiAliasType', 'GridFitType', 'TextSnapshot', 'CSMSettings'
 ];
 
 function getFlashStubHeader(excludeClassName) {
@@ -695,6 +696,10 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\/\*\*[\s\S]*?\*\//g, (match) => {
     return match.replace(/@(?:type|param|return|private|public|see)\b/g, '');
   });
+
+  // Heal JPEXS dropped parentheses on obfuscated method calls used in math/comparisons
+  // This turns `_loc2_.method_41 + 5` into `_loc2_.method_41() + 5`
+  converted = converted.replace(/(\b(?:this|[a-zA-Z0-9_$]+)\.method_\d+)(?=\s*(?:\+|-|\*|\/|==|!=|>=|<=|<|>))/g, '$1()');
 
   // Safely cast array insertions to bypass strict typing
   converted = castArrayInsertions(converted);
