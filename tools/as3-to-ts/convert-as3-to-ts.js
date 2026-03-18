@@ -450,24 +450,24 @@ function convertAs3ToTs(source) {
   );
 
   // Лечим приведение базовых классов и UI-компонентов
-  const flashCastClasses = 'String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager|InteractiveObject|DisplayObjectContainer|KeyframeBase|Button|Class|Color|MatrixTransformer3D|AnimatorBase|StyleManager|List|ComboBox';
-  const castRegex = new RegExp(`(^|[^a-zA-Z0-9_$.])(new\\s+)?(${flashCastClasses})\\s*\\(([^)]*)\\)`, 'g');
+  const flashCastClasses = 'String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager|InteractiveObject|DisplayObjectContainer|KeyframeBase|Button|Class|Color|MatrixTransformer3D|AnimatorBase|StyleManager|List|ComboBox|MotionBase';
+  
+  // Улучшенные регулярки для поддержки вложенных скобок: MovieClip(getChildAt(0))
+  const castRegex = new RegExp(`(^|[^a-zA-Z0-9_$.])(new\\s+)?(${flashCastClasses})\\s*\\(([^()]*|\\([^()]*\\))*\\)`, 'g');
 
   converted = converted.replace(castRegex, (match, prev, isNew, type, inner) => {
     if (isNew) return match;
-    if (inner.trim() === '' || inner.includes(':')) return match;
+    if (!inner || inner.trim() === '' || inner.includes(':')) return match;
 
     if (type === 'Array') return `${prev}(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${prev}${type}(${inner})`;
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
-  // Лечим AS3 приведение интерфейсов: IFocusManagerComponent(child) -> (child as unknown as IFocusManagerComponent)
-  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(([^)]*)\)/g, (match, prev, isNew, type, inner) => {
+  // То же самое для интерфейсов (I[A-Z]...)
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(([^()]*|\([^()]*\))*\)/g, (match, prev, isNew, type, inner) => {
     if (isNew) return match; 
-    // ЗАЩИТА: Аналогично бережём функции, начинающиеся на 'I' (например, сеттер IV)
-    if (inner.trim() === '' || inner.includes(':')) return match; 
-    
+    if (!inner || inner.trim() === '' || inner.includes(':')) return match; 
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
@@ -625,9 +625,10 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Number\b/g, 'typeof $1 === "number"');
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Boolean\b/g, 'typeof $1 === "boolean"');
 
-  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?String\b/g, 'as string');
-  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Number\b/g, 'as number');
-  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Boolean\b/g, 'as boolean');
+  // Лечим TS2352 (ошибка прямого каста из any/Record в примитивы)
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?String\b/g, 'as unknown as string');
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Number\b/g, 'as unknown as number');
+  converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Boolean\b/g, 'as unknown as boolean');
 
   converted = converted.replace(/\b(var|let)\s+([a-zA-Z0-9_$]+)\s*=\s*\[\]/g, '$1 $2: any[] = []');
 
@@ -712,7 +713,7 @@ function convertAs3ToTs(source) {
 
   // Fix TS2678 in fl.motion.MotionBase: Cast problematic string literals to any
   if (className === 'MotionBase') {
-    converted = converted.replace(/(?<!\w)(["'](?:skewX|skewY|scaleX|scaleY)["'])(?!\w)/g, '($1 as any)');
+    converted = converted.replace(/(?<!\w)(["'](?:x|y|skewX|skewY|scaleX|scaleY|rotation|alpha|color|filters|blendMode|matrix3D)["'])(?!\w)/g, '($1 as any)');
   }
 
   converted = converted.replace(/\bthis\.this\./g, 'this.');
