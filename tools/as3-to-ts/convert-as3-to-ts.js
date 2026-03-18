@@ -16,7 +16,7 @@ const FLASH_STUB_CLASSES = [
   'NetConnection', 'NetStream', 'LocalConnection', 'Microphone', 'Camera',
   'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
   'URLRequestMethod', 'URLVariables', 'URLLoader',
-  'Mouse', 'MouseCursor',
+  'Mouse', 'MouseCursor', 'Timer',
   'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter'
 ];
 
