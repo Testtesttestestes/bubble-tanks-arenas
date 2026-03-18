@@ -79,6 +79,8 @@ const RESERVED_WORDS = new Set([
   'super', 'typeof', 'instanceof', 'in', 'delete', 'void', 'yield',
   'await', 'async', 'true', 'false', 'null', 'undefined', 'NaN', 'Infinity',
   'constructor',
+  'getQualifiedClassName', 'getQualifiedSuperclassName', 'getDefinitionByName',
+  'getTimer', 'describeType', 'trace', 'escapeMultiByte', 'unescapeMultiByte',
   'String', 'Number', 'Boolean', 'Object', 'Array', 'Function', 'Promise', 'RegExp',
   'Date', 'Math', 'JSON', 'Error', 'TypeError', 'Map', 'Set', 'WeakMap', 'WeakSet',
   'Symbol', 'BigInt', 'Uint8Array', 'Int8Array', 'Float32Array', 'Float64Array'
