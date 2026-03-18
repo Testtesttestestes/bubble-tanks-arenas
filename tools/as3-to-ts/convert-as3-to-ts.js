@@ -337,6 +337,8 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bint\.MIN_VALUE\b/g, '-2147483648');
   converted = converted.replace(/\buint\.MAX_VALUE\b/g, '4294967295');
   converted = converted.replace(/\buint\.MIN_VALUE\b/g, '0');
+  // Fix AS3 Array sorting constants
+  converted = converted.replace(/\bArray\.(CASEINSENSITIVE|DESCENDING|UNIQUESORT|RETURNINDEXEDARRAY|NUMERIC)\b/g, '(Array as any).$1');
 
   converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
   converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
