@@ -518,6 +518,16 @@ function convertAs3ToTs(source) {
     converted = converted.replace(/\bBase64\.Base64\./g, 'Base64.');
   }
 
+  if (className === 'TankCreatorScreen') {
+    // Heal JPEXS decompiler "register loss" bugs where it outputs 'null' instead of the variable
+    converted = converted.replace(/\bnew\s+null\[/g, 'new _loc3_[');
+    converted = converted.replace(/(?<!new\s)\bnull\[/g, '_loc3_[');
+
+    // Fix the twin mirror positioning (remembering that earlier regexes turned null.x into (null as any).x)
+    converted = converted.replace(/\(null as any\)\.x/g, 'this.movDragObj1.x');
+    converted = converted.replace(/\(null as any\)\.y/g, 'this.movDragObj1.y');
+  }
+
   if (className === 'BigInteger') {
     converted = converted
       .split('\n')
