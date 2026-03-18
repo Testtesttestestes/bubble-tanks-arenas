@@ -108,9 +108,7 @@ jobs:
 
             The workflow intentionally keeps running and opens this PR even when conversion or analysis fails.
           add-paths: |
-            migrated-ts/**/*.ts
-            migrated-ts/**/*.tsx
-            migrated-ts/**/*.d.ts
+            migrated-ts/**
             tools/as3-to-ts/**/*.js
             tools/as3-to-ts/**/*.ts
           labels: |
