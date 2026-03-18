@@ -197,6 +197,119 @@ function stripPackageWrapper(source) {
   return { source: prefixRemoved, packageName };
 }
 
+function castArrayInsertions(source) {
+  let output = '';
+  let cursor = 0;
+  const searchRegex = /\.(push|unshift|splice)\s*\(/g;
+
+  while (true) {
+    searchRegex.lastIndex = cursor;
+    const match = searchRegex.exec(source);
+    if (!match) {
+      output += source.slice(cursor);
+      break;
+    }
+
+    const method = match[1];
+    const openParen = match.index + match[0].length - 1;
+
+    // 1. Find the true matching closing paren for the method call
+    let depth = 0;
+    let quote = null;
+    let escaped = false;
+    let closeParen = -1;
+
+    for (let i = openParen; i < source.length; i += 1) {
+      const ch = source[i];
+      if (quote) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === quote) quote = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === '`') {
+        quote = ch;
+        continue;
+      }
+      if (ch === '(') depth += 1;
+      else if (ch === ')') {
+        depth -= 1;
+        if (depth === 0) {
+          closeParen = i;
+          break;
+        }
+      }
+    }
+
+    if (closeParen === -1) {
+      output += source.slice(cursor, openParen + 1);
+      cursor = openParen + 1;
+      continue;
+    }
+
+    output += source.slice(cursor, openParen + 1);
+    const inner = source.slice(openParen + 1, closeParen);
+
+    // 2. Split top-level commas safely (ignoring commas in objects/nested calls)
+    const args = [];
+    let current = '';
+    let paren = 0;
+    let brace = 0;
+    let bracket = 0;
+    quote = null;
+    escaped = false;
+
+    for (let i = 0; i < inner.length; i += 1) {
+      const ch = inner[i];
+      if (quote) {
+        current += ch;
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === quote) quote = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === '`') {
+        quote = ch;
+        current += ch;
+        continue;
+      }
+      if (ch === '(') paren += 1;
+      else if (ch === ')') paren -= 1;
+      else if (ch === '{') brace += 1;
+      else if (ch === '}') brace -= 1;
+      else if (ch === '[') bracket += 1;
+      else if (ch === ']') bracket -= 1;
+
+      if (ch === ',' && paren === 0 && brace === 0 && bracket === 0) {
+        args.push(current);
+        current = '';
+        continue;
+      }
+      current += ch;
+    }
+    if (current || args.length > 0) args.push(current);
+
+    // 3. Apply the `as any` cast to the correct arguments
+    for (let i = 0; i < args.length; i += 1) {
+      let arg = args[i];
+      const trimmed = arg.trim();
+      if (trimmed !== '') {
+        const needsCast = (method === 'push' || method === 'unshift') || (method === 'splice' && i >= 2);
+        if (needsCast && !trimmed.endsWith('as any')) {
+          arg = `${arg} as any`;
+        }
+      }
+      args[i] = arg;
+    }
+
+    output += args.join(',');
+    output += ')';
+    cursor = closeParen + 1;
+  }
+
+  return output;
+}
+
 function convertAs3ToTs(source) {
   const stripped = stripPackageWrapper(source);
   const packageName = stripped.packageName;
@@ -318,25 +431,6 @@ function convertAs3ToTs(source) {
   const methodsRegex = new RegExp(`(?<![.\\w$])(${flashMethods.join('|')})\\s*\\(`, 'g');
   converted = converted.replace(methodsRegex, 'this.$1(');
   
-  // Bypass strict type checking on array insertions for AS3-style loose typing
-  converted = converted.replace(/\.(push|unshift)\s*\(([^,)]+)\)/g, (match, method, arg) => {
-    if (arg.trim().endsWith('as any')) return match;
-    return `.${method}(${arg} as any)`;
-  });
-  converted = converted.replace(/\.(splice)\s*\(([^)]*)\)/g, (match, method, args) => {
-    const parts = args.split(',');
-    if (parts.length < 3) return match;
-    const rewritten = parts.map((part, index) => {
-      if (index < 2) return part;
-      const trimmed = part.trim();
-      if (!trimmed || trimmed.endsWith('as any')) return part;
-      const leading = part.match(/^\s*/)?.[0] || '';
-      const trailing = part.match(/\s*$/)?.[0] || '';
-      return `${leading}${trimmed} as any${trailing}`;
-    });
-    return `.${method}(${rewritten.join(',')})`;
-  });
-
   converted = converted.replace(/\b(function|get|set|public|private|protected|static|override)\s+this\./g, '$1 ');
 
   converted = converted.replace(
@@ -601,6 +695,9 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\/\*\*[\s\S]*?\*\//g, (match) => {
     return match.replace(/@(?:type|param|return|private|public|see)\b/g, '');
   });
+
+  // Safely cast array insertions to bypass strict typing
+  converted = castArrayInsertions(converted);
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
