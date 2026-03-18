@@ -3,6 +3,71 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+// NEW: Identify ranges of strings and comments
+function getIgnoredRanges(source) {
+  const ranges = [];
+  let inSingle = false, inDouble = false, inTemplate = false;
+  let inLineComment = false, inBlockComment = false, escaped = false;
+  let startIndex = -1;
+
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i];
+    const nextCh = source[i + 1];
+
+    if (inLineComment) {
+      if (ch === '\n') {
+        inLineComment = false;
+        ranges.push({ start: startIndex, end: i });
+      }
+      continue;
+    }
+    if (inBlockComment) {
+      if (ch === '*' && nextCh === '/') {
+        inBlockComment = false;
+        ranges.push({ start: startIndex, end: i + 1 });
+        i++;
+      }
+      continue;
+    }
+
+    if (escaped) { escaped = false; continue; }
+    if (ch === '\\') { escaped = true; continue; }
+
+    if (!inSingle && !inDouble && !inTemplate) {
+      if (ch === '/' && nextCh === '/') {
+        inLineComment = true; startIndex = i; i++; continue;
+      }
+      if (ch === '/' && nextCh === '*') {
+        inBlockComment = true; startIndex = i; i++; continue;
+      }
+    }
+
+    if (!inDouble && !inTemplate && ch === "'") {
+      if (inSingle) { inSingle = false; ranges.push({ start: startIndex, end: i }); }
+      else { inSingle = true; startIndex = i; }
+    } else if (!inSingle && !inTemplate && ch === '"') {
+      if (inDouble) { inDouble = false; ranges.push({ start: startIndex, end: i }); }
+      else { inDouble = true; startIndex = i; }
+    } else if (!inSingle && !inDouble && ch === '`') {
+      if (inTemplate) { inTemplate = false; ranges.push({ start: startIndex, end: i }); }
+      else { inTemplate = true; startIndex = i; }
+    }
+  }
+
+  if (inLineComment || inBlockComment || inSingle || inDouble || inTemplate) {
+    ranges.push({ start: startIndex, end: source.length });
+  }
+
+  return ranges;
+}
+
+function isIndexInRanges(index, ranges) {
+  for (const r of ranges) {
+    if (index >= r.start && index <= r.end) return true;
+  }
+  return false;
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -22,43 +87,21 @@ const RESERVED_WORDS = new Set([
 
 function extractClassScopeMembers(source) {
   const classMatch = source.match(/class\s+(\w+)/);
-  const className = classMatch ? classMatch[1] : 'Unknown';
-
-  // 1. Pre-fill known inherited members (crypto/base class hierarchy).
-  const instanceMembers = new Set([
-    'blockSize', 'padding', 'key', 'iv', 'lastIV', 'core', 'rng'
-  ]);
+  const instanceMembers = new Set();
   const staticMembers = new Set();
   if (!classMatch) {
-    return { className, instanceMembers, staticMembers };
+    return { className: null, instanceMembers, staticMembers };
   }
 
-  // 2. TS instance properties (e.g. public foo: Type, private S!: ByteArray, private size = 0)
-  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?(?:\s*[:=])/g)) {
-    const name = match[1];
+  const className = classMatch[1];
+  const memberRegex = /^[ \t]*(public|private|protected)\s+(static\s+)?(?:readonly\s+)?(?:(?:var|let|const|function|get|set)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=[(<:;=!?]|$)/gm;
+  let match;
+  while ((match = memberRegex.exec(source)) !== null) {
+    const isStatic = !!match[2];
+    const name = match[3];
     if (name === className || RESERVED_WORDS.has(name)) continue;
-    instanceMembers.add(name);
-  }
-
-  // 3. TS instance methods (e.g. public async foo())
-  for (const match of source.matchAll(/(?:public|private|protected)(?:\s+override)?(?:\s+(?:async|get|set))?\s+([a-zA-Z0-9_$]+)\s*\(/g)) {
-    const name = match[1];
-    if (name === className || RESERVED_WORDS.has(name)) continue;
-    instanceMembers.add(name);
-  }
-
-  // 4. TS static properties (e.g. public static readonly Nb: number, private static readonly Nb = 4)
-  for (const match of source.matchAll(/(?:(?:public|private|protected)\s+)?static(?:\s+readonly)?\s+([a-zA-Z0-9_$]+)\s*[!?]?(?:\s*[:=])/g)) {
-    const name = match[1];
-    if (name === className || RESERVED_WORDS.has(name)) continue;
-    staticMembers.add(name);
-  }
-
-  // 5. TS static methods (e.g. private static getSBox())
-  for (const match of source.matchAll(/(?:public|private|protected)\s+static(?:\s+(?:async|get|set))?\s+([a-zA-Z0-9_$]+)\s*\(/g)) {
-    const name = match[1];
-    if (name === className || RESERVED_WORDS.has(name)) continue;
-    staticMembers.add(name);
+    if (isStatic) staticMembers.add(name);
+    else instanceMembers.add(name);
   }
 
   return { className, instanceMembers, staticMembers };
@@ -72,12 +115,12 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
   const names = eligibleNames.map(escapeRegExp).join('|');
   const regex = new RegExp(`\\b(${names})\\b(?!\\s*:)`, 'g');
   const blockedPrefix = /(?:function|var|let|const|get|set|public|private|protected|static|readonly|catch|as|instanceof)\s+$/;
-  const { methods } = extractClassAndMethodRanges(source);
-  methods.forEach((method) => {
-    method.locals = collectLocalsInRange(source, method);
-  });
+
+  const ignoredRanges = getIgnoredRanges(source);
 
   return source.replace(regex, (token, name, offset, whole) => {
+    if (isIndexInRanges(offset, ignoredRanges)) return token; // Skip if in string/comment
+
     const prev = whole[offset - 1];
     if (prev === '.') return token;
     const left = whole.slice(Math.max(0, offset - 80), offset);
@@ -90,10 +133,7 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     const rightTrimmed = right.trimStart();
     const isTypePipePrefix = prevTypeToken === '|' && !leftTrimmed.endsWith('||');
     const isTypeAmpPrefix = prevTypeToken === '&' && !leftTrimmed.endsWith('&&');
-    const isGenericBracket =
-      prevTypeToken === '<' &&
-      /(?:[A-Z]\w*|any|unknown|string|number|boolean|void)\s*<$/.test(leftTrimmed);
-    if (isGenericBracket || isTypePipePrefix || isTypeAmpPrefix) return token;
+    if (prevTypeToken === '<' || isTypePipePrefix || isTypeAmpPrefix) return token;
 
     const startsWithTypeDelimiter =
       rightTrimmed.startsWith('>') ||
@@ -107,16 +147,7 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     if (blockedPrefix.test(left)) return token;
     const classFieldDeclarationPrefix = /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:readonly\s+)?$/;
     if (classFieldDeclarationPrefix.test(lineLeft) && /^\s*[!?]?\s*[:;]/.test(right)) return token;
-    const isProbablyType = isTypeLikeContext(whole, offset);
-    const isMathOrArrayAccess = /^[-+*/%^&|[\]();,><=]/.test(rightTrimmed);
-    if (isProbablyType && !isMathOrArrayAccess) return token;
-
-    for (const method of methods) {
-      if (offset < method.start || offset > method.end) continue;
-      if (method.params.has(name) || method.locals.has(name)) return token;
-      break;
-    }
-
+    if (isTypeLikeContext(whole, offset)) return token;
     return `${prefixTarget}.${name}`;
   });
 }
@@ -288,6 +319,8 @@ function applyDiagnosticThisFixes(source, diagnostics) {
   const importedNames = parseImportNames(source);
   const { className, instanceMembers } = extractClassScopeMembers(source);
 
+  const ignoredRanges = getIgnoredRanges(source);
+
   const edits = [];
   const lineStarts = computeLineStarts(source);
   for (const diagnostic of diagnostics) {
@@ -308,6 +341,8 @@ function applyDiagnosticThisFixes(source, diagnostics) {
     let match;
     while ((match = regex.exec(lineText)) !== null) {
       const matchIndex = lineStartIndex + match.index + match[1].length;
+
+      if (isIndexInRanges(matchIndex, ignoredRanges)) continue; // Skip if in string/comment
       
       const leftContext = source.slice(Math.max(0, matchIndex - prefixTarget.length), matchIndex);
       if (leftContext === prefixTarget || source[matchIndex - 1] === '.') continue;
@@ -459,7 +494,9 @@ module.exports = {
   findDiagnosticTokenIndex,
   parseTscLog,
   processFile,
-  collectTsFiles
+  collectTsFiles,
+  getIgnoredRanges,
+  isIndexInRanges
 };
 
 if (require.main === module) {

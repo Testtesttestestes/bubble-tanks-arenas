@@ -4,63 +4,31 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const FLASH_STUB_CLASSES = [
-  'ByteArray',
-  'Endian',
-  'Matrix',
-  'Point',
-  'Rectangle',
-  'DisplayObject',
-  'DisplayObjectContainer',
-  'InteractiveObject',
-  'MovieClip',
-  'Sprite',
-  'Shape',
-  'Bitmap',
-  'BitmapData',
-  'Loader',
-  'URLRequest',
-  'Event',
-  'MouseEvent',
-  'KeyboardEvent',
-  'FocusEvent',
-  'TimerEvent',
-  'TextField',
-  'TextFormat',
-  'Graphics',
-  'Sound',
-  'SoundChannel',
-  'SoundTransform',
-  'Stage',
-  'ApplicationDomain',
-  'ContextMenu',
-  'ContextMenuItem',
-  'Dictionary',
-  'Security',
-  'Capabilities',
-  'ExternalInterface',
-  'System',
-  'Font',
-  'NetConnection',
-  'NetStatusEvent',
-  'AsyncErrorEvent',
-  'SecurityErrorEvent',
-  'IOErrorEvent',
-  'SharedObject',
-  'Responder',
-  'Memory',
-  'LoaderContext',
-  'Transform',
-  'ColorTransform'
+  'ByteArray', 'Endian', 'Matrix', 'Point', 'Rectangle', 'DisplayObject',
+  'DisplayObjectContainer', 'InteractiveObject', 'MovieClip', 'Sprite',
+  'Shape', 'Bitmap', 'BitmapData', 'Loader', 'URLRequest', 'Event',
+  'MouseEvent', 'KeyboardEvent', 'FocusEvent', 'TimerEvent', 'TextField',
+  'TextFormat', 'Graphics', 'Sound', 'SoundChannel', 'SoundTransform',
+  'Stage', 'ApplicationDomain', 'ContextMenu', 'ContextMenuItem',
+  'Dictionary', 'Security', 'ExternalInterface', 'System', 'LoaderContext',
+  'Transform', 'ColorTransform'
 ];
 
-const FLASH_STUB_HEADER = [
-  '// Flash built-ins compatibility stubs (AUTO-INJECTED)',
-  ...FLASH_STUB_CLASSES.flatMap((className) => [
-    `declare interface ${className} { [key: string]: any; }`,
-    `declare const ${className}: { new(...args: any[]): ${className}; [key: string]: any; };`
-  ]),
-  // Runtime/global hacks removed: these should be linked via proper imports.
-].join('\n');
+// NEW: Function to generate headers dynamically, excluding the current class
+function getFlashStubHeader(excludeClassName) {
+  const stubsToInject = FLASH_STUB_CLASSES.filter(c => c !== excludeClassName);
+  return [
+    '// Flash built-ins compatibility stubs (AUTO-INJECTED)',
+    ...stubsToInject.flatMap((className) => [
+      `declare interface ${className} { [key: string]: any; }`,
+      `declare const ${className}: { new(...args: any[]): ${className}; [key: string]: any; };`
+    ]),
+    'declare const flash: any;',
+    'declare const console: any;',
+    'declare const getDefinitionByName: any;',
+    'declare const describeType: any;'
+  ].join('\n');
+}
 
 function mapType(asType) {
   const raw = (asType || '').trim();
@@ -68,26 +36,13 @@ function mapType(asType) {
   const vectorMatch = raw.match(/^Vector\.<\s*([^>]+)\s*>$/);
   if (vectorMatch) return `${mapType(vectorMatch[1])}[]`;
   const simpleMap = new Map([
-    ['Number', 'number'],
-    ['int', 'number'],
-    ['uint', 'number'],
-    ['Boolean', 'boolean'],
-    ['String', 'string'],
-    ['Array', 'any'],
-    ['Object', 'Record<string, any>'],
-    ['void', 'void'],
-    ['*', 'any'],
-    ['Class', 'any'],
-    ['Function', 'Function'],
-    ['Event', 'any'],
-    ['MouseEvent', 'any'],
-    ['KeyboardEvent', 'any'],
-    ['FocusEvent', 'any'],
-    ['TimerEvent', 'any'],
-    ['TextEvent', 'any'],
-    ['IOErrorEvent', 'any'],
-    ['SecurityErrorEvent', 'any'],
-    ['HTTPStatusEvent', 'any']
+    ['Number', 'number'], ['int', 'number'], ['uint', 'number'],
+    ['Boolean', 'boolean'], ['String', 'string'], ['Array', 'any'],
+    ['Object', 'Record<string, any>'], ['void', 'void'], ['*', 'any'],
+    ['Class', 'any'], ['Function', 'Function'], ['Event', 'any'],
+    ['MouseEvent', 'any'], ['KeyboardEvent', 'any'], ['FocusEvent', 'any'],
+    ['TimerEvent', 'any'], ['TextEvent', 'any'], ['IOErrorEvent', 'any'],
+    ['SecurityErrorEvent', 'any'], ['HTTPStatusEvent', 'any']
   ]);
 
   if (simpleMap.has(raw)) return simpleMap.get(raw);
@@ -102,7 +57,6 @@ function convertParams(paramString, isInterface = false) {
     .map((part) => part.trim())
     .filter(Boolean)
     .map((param) => {
-      // FIX: allow optional space after spread operator
       const match = param.match(/^(\.{3}\s*)?(?:this\.)?([a-zA-Z0-9_]+)\s*(?::\s*([^=]+))?(?:\s*=\s*(.+))?$/);
       if (!match) return param;
       const [, rest, name, type, defaultValue] = match;
@@ -318,10 +272,7 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/:\s*Object\b/g, ': Record<string, any>');
   converted = converted.replace(/(?<!function\s+|new\s+)\bArray\(([^)]+)\)/g, '($1 as unknown as any[])');
   
-  // Map ActionScript's `*` type in inline parameter definitions to `any`
   converted = converted.replace(/:\s*\*/g, ': any');
-  
-  // Map AS3 Error's getStackTrace to JS stack
   converted = converted.replace(/\.getStackTrace\s*\(\s*\)/g, '.stack');
 
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
@@ -361,9 +312,7 @@ function convertAs3ToTs(source) {
   );
 
   converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
-    // If it's a constructor call (e.g., 'new Array(...)'), leave it completely untouched
     if (isNew) return match;
-
     if (type === 'Array') return `${prev}(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${prev}${type}(${inner})`;
     return `${prev}(${inner} as unknown as ${type})`;
@@ -393,7 +342,6 @@ function convertAs3ToTs(source) {
 
     converted = convertClassMembers(converted, className, isDynamicClass);
 
-    // Convert anonymous functions to arrow functions to bind lexical `this` properly
     converted = converted.replace(
       /\bfunction\s*\(([^)]*)\)\s*(?::\s*([a-zA-Z0-9_<>\[\]]+))?\s*\{/g,
       (match, params, retType) => {
@@ -495,7 +443,6 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Number\b/g, 'as number');
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Boolean\b/g, 'as boolean');
 
-  // Лечим TS2322: неявный never[]
   converted = converted.replace(/\b(var|let)\s+([a-zA-Z0-9_$]+)\s*=\s*\[\]/g, '$1 $2: any[] = []');
 
   if (converted.includes('JSONToken') || converted.includes('JSONTokenType') || converted.includes('JSONParseError')) {
@@ -531,7 +478,8 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
   converted = converted.replace(/\bCaller\.calls\[([^\]]+)\]/g, '(Caller.calls as any)[$1 as any]');
 
-  // TS2351: смягчаем проверки конструкторов (new <symbol>) через any-каст (ГЛОБАЛЬНО)
+  converted = converted.replace(/declare const flash: any;/g, 'declare const flash: any;\ndeclare const console: any;');
+
   converted = converted.replace(/\bnew\s+([A-Za-z0-9_.]+)\s*\(/g, 'new ($1 as any)(');
 
   if (className === 'Base64') {
@@ -566,7 +514,6 @@ function convertAs3ToTs(source) {
     converted = converted.replace(/\breturn\s+([^;]+);/g, 'return $1 as any;');
   }
 
-  // Global cleanup for duplicate this-prefix from implicit-this rewrites.
   converted = converted.replace(/\bthis\.this\./g, 'this.');
 
   converted = converted.replace(/\bthis\.if\b/g, 'if');
@@ -595,7 +542,6 @@ function convertAs3ToTs(source) {
   }
   if (missingImports.length > 0) converted = `${missingImports.join('\n')}\n\n${converted}`;
 
-  // Strip JSDoc tags to prevent TS8020
   converted = converted.replace(/\/\*\*[\s\S]*?\*\//g, (match) => {
     return match.replace(/@(?:type|param|return|private|public|see)\b/g, '');
   });
@@ -605,7 +551,10 @@ function convertAs3ToTs(source) {
     packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
   ].join('\n');
 
-  return `${header}\n\n${FLASH_STUB_HEADER}\n\n${converted.trim()}\n`;
+  // NEW: Call the generated stub method to prevent redeclaring current classes
+  const flashStubHeader = getFlashStubHeader(className);
+
+  return `${header}\n\n${flashStubHeader}\n\n${converted.trim()}\n`;
 }
 
 function collectAsFiles(inputPath) {
