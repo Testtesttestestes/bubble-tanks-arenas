@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: 24 # Обновил до 24, так как в ваших логах было предупреждение о скором устаревании Node 20
           cache: npm
 
       - name: Reset branches and run conversion pipeline
@@ -29,48 +29,32 @@ jobs:
         run: |
           set -uo pipefail
 
-          clear || true
-
-          # 1. Сброс веток
           git fetch origin main
           git reset --hard origin/main
-
-          # 2. Очистка репозитория, ИСКЛЮЧАЯ папку с исходниками binaryData
           git clean -fdx -e "binaryData/"
-
-          # 3. Принудительное удаление результатов прошлой конвертации
           rm -rf migrated-ts tsconfig.tsbuildinfo tsc_output.log tsc_stats.log
 
-          # 4. Установка зависимостей
           npm install
 
+          # Инициализируем переменные для вывода
           convert_exit=0
           tsc_exit=0
           stats_exit=0
 
-          # 5. ГЕНЕРИРУЕМ файлы (scripts + AGI)
           npm run convert:full || convert_exit=$?
 
-          # 6. Локальные правки выполняем только если конвертация успешна
           if [ "${convert_exit}" -eq 0 ]; then
             node tools/as3-to-ts/heal-signature-params.js --input migrated-ts || true
             node tools/as3-to-ts/fix-class-signatures.js --input migrated-ts --scope agi || true
             node tools/as3-to-ts/fix-ts2695-sequences.js --input migrated-ts || true
             node tools/as3-to-ts/resolve-imports.js --input migrated-ts || true
 
-            # 7. КОМПИЛИРУЕМ (первый проход)
             npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
-            echo "TypeScript build exit code (first pass): ${tsc_exit}"
-
-            # 8. Исправляем implicit this
             node tools/as3-to-ts/fix-implicit-this.js --input migrated-ts --tsc-log tsc_output.log || true
-
-            # 9. КОМПИЛИРУЕМ (второй проход)
+            
             tsc_exit=0
             npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
-            echo "TypeScript build exit code (after auto-fixes): ${tsc_exit}"
-
-            # 10. Анализируем ошибки
+            
             ERROR_SLICE_RADIUS=10 MAX_ERROR_CONTEXTS=5 MAX_AGI_ERROR_CONTEXTS=5 MAX_ERROR_MESSAGES_PER_CODE=5 npm run tsc:stats | tee tsc_stats.log || stats_exit=$?
           else
             echo "Конвертация провалилась с кодом: ${convert_exit}" | tee tsc_stats.log
@@ -89,7 +73,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 3
 
-      - name: Create pull request with converted TS changes
+      - name: Create pull request with ALL changes
         if: always()
         uses: peter-evans/create-pull-request@v7
         with:
@@ -105,12 +89,6 @@ jobs:
             - convert: `${{ steps.convert.outputs.convert_exit }}`
             - tsc: `${{ steps.convert.outputs.tsc_exit }}`
             - tsc:stats: `${{ steps.convert.outputs.stats_exit }}`
-
-            The workflow intentionally keeps running and opens this PR even when conversion or analysis fails.
-          add-paths: |
-            migrated-ts/**
-            tools/as3-to-ts/**/*.js
-            tools/as3-to-ts/**/*.ts
           labels: |
             automation
             convert
