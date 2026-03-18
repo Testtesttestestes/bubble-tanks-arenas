@@ -302,6 +302,19 @@ function applyDiagnosticThisFixes(source, diagnostics) {
   const edits = [];
   const lineStarts = computeLineStarts(source);
   for (const diagnostic of diagnostics) {
+    if (diagnostic.code === 1003 || diagnostic.code === 1109) {
+      if (diagnostic.line <= 0 || diagnostic.line > lineStarts.length) continue;
+      const lineStartIndex = lineStarts[diagnostic.line - 1];
+      const lineEndIndex = lineStarts[diagnostic.line] || source.length;
+      const lineText = source.slice(lineStartIndex, lineEndIndex);
+      const keywordRegex = /\.(default|class|interface|var|let|const|enum|extends|implements)\b/g;
+      const updatedLine = lineText.replace(keywordRegex, '["$1"]');
+      if (updatedLine !== lineText) {
+        source = `${source.slice(0, lineStartIndex)}${updatedLine}${source.slice(lineEndIndex)}`;
+      }
+      continue;
+    }
+
     if (importedNames.has(diagnostic.name)) continue;
     
     // Skip if it looks like a class name unless TSC explicitly gave us a forcePrefix
@@ -376,6 +389,21 @@ function parseTscLog(logPath) {
       col: Number(match[3] || match[5])
     };
     
+    if (!result.has(filePath)) result.set(filePath, []);
+    result.get(filePath).push(diagnostic);
+  }
+
+  // Parse TS1003/TS1109 diagnostics to support keyword-property healing.
+  const syntaxRegex = /(?:\[\d+\/\d+\]\s+)?([^\s(:]+(?:\.ts|\.tsx|\.js|\.jsx))(?:\((\d+),(\d+)\):\s*error\s*|:(\d+):(\d+)\s+)TS(1003|1109):?\s*(.+)$/gm;
+  while ((match = syntaxRegex.exec(content)) !== null) {
+    const filePath = path.resolve(match[1].trim());
+    const diagnostic = {
+      code: Number(match[6]),
+      name: '',
+      forcePrefix: null,
+      line: Number(match[2] || match[4]),
+      col: Number(match[3] || match[5])
+    };
     if (!result.has(filePath)) result.set(filePath, []);
     result.get(filePath).push(diagnostic);
   }
