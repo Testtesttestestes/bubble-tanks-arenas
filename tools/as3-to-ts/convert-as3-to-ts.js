@@ -224,7 +224,8 @@ function convertAs3ToTs(source) {
     'Event.REMOVED_FROM_STAGE': '"removedfromstage"',
     'Event.CHANGE': '"change"',
     'KeyboardEvent.KEY_DOWN': '"keydown"',
-    'KeyboardEvent.KEY_UP': '"keyup"'
+    'KeyboardEvent.KEY_UP': '"keyup"',
+    'TextEvent.TEXT_INPUT': '"textInput"'
   };
 
   for (const [as3Event, tsEvent] of Object.entries(eventMap)) {

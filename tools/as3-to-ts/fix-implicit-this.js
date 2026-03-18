@@ -411,6 +411,11 @@ function processFile(filePath, options = {}) {
   // Cleanup any accidentally doubled prefixes
   converted = converted.replace(/\bthis\.this\./g, 'this.');
 
+  if (className) {
+    const doublePrefix = new RegExp(`\\b${escapeRegExp(className)}\\.${escapeRegExp(className)}\\.`, 'g');
+    converted = converted.replace(doublePrefix, `${className}.`);
+  }
+
   const replacementCount = (converted.match(/\bthis\./g) || []).length - (source.match(/\bthis\./g) || []).length;
   fs.writeFileSync(filePath, converted, 'utf8');
   return { changed: true, replacements: replacementCount };
