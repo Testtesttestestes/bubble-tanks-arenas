@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 24 # Обновил до 24, так как в ваших логах было предупреждение о скором устаревании Node 20
+          node-version: 24
           cache: npm
 
       - name: Reset branches and run conversion pipeline
@@ -36,7 +36,6 @@ jobs:
 
           npm install
 
-          # Инициализируем переменные для вывода
           convert_exit=0
           tsc_exit=0
           stats_exit=0
@@ -73,7 +72,15 @@ jobs:
           if-no-files-found: warn
           retention-days: 3
 
-      - name: Create pull request with ALL changes
+      - name: Cleanup before PR
+        if: always()
+        run: |
+          echo "Removing node_modules and temp logs..."
+          rm -rf node_modules
+          rm -f tsc_output.log
+          # tsc_stats.log оставляем, чтобы прочитать его в следующем шаге
+
+      - name: Create pull request
         if: always()
         uses: peter-evans/create-pull-request@v7
         with:
@@ -85,10 +92,15 @@ jobs:
           body: |
             This PR was created automatically by workflow `${{ github.workflow }}`.
 
-            Exit codes:
-            - convert: `${{ steps.convert.outputs.convert_exit }}`
-            - tsc: `${{ steps.convert.outputs.tsc_exit }}`
-            - tsc:stats: `${{ steps.convert.outputs.stats_exit }}`
+            ### Exit Codes:
+            - Convert: `${{ steps.convert.outputs.convert_exit }}`
+            - TSC: `${{ steps.convert.outputs.tsc_exit }}`
+            - Stats: `${{ steps.convert.outputs.stats_exit }}`
+
+            ### TSC Stats Summary:
+            ```text
+            $([ -f tsc_stats.log ] && cat tsc_stats.log | head -n 30 || echo "No stats available")
+            ```
           labels: |
             automation
             convert
