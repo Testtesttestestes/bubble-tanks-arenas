@@ -300,6 +300,10 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\(\s*as\s+unknown\s+as\b/g, '(null as unknown as');
   converted = converted.replace(/,\s*as\s+unknown\s+as\b/g, ', null as unknown as');
 
+  // Prefix implicit DisplayObject mouse coordinates with 'this.'
+  // Negative lookbehind prevents stage.mouseX -> stage.this.mouseX
+  converted = converted.replace(/(?<!\.)\b(mouseX|mouseY)\b/g, 'this.$1');
+
   const flashMethods = [
     'addChild', 'addChildAt', 'removeChild', 'removeChildAt', 'gotoAndStop', 'gotoAndPlay',
     'play', 'stop', 'addEventListener', 'removeEventListener', 'dispatchEvent',
@@ -337,7 +341,7 @@ function convertAs3ToTs(source) {
 
   if (classMatch && className) {
     converted = converted.replace(
-      /(public\s+|internal\s+)?(dynamic\s+)?(final\s+)?class\s+(\w+)\s*(extends\s+[\w\.]+)?\s*(implements\s+[\w\s,\.]+)?/,
+      /(public\s+|internal\s+)?(dynamic\s+)?(final\s+)?class\s+(\w+)\s*(extends\s+[\w\.]+)?\s*(implements\s+[\w\s,\.]+)?/g,
       (_, _vis, _dyn, _final, name, ext, impl) => {
         let extension = ext ? ` ${ext}` : '';
         if (extension.includes('.')) extension = ` extends ${extension.split('.').pop()}`;
@@ -384,7 +388,7 @@ function convertAs3ToTs(source) {
       (_, name, params, ret) => `    ${name}(${convertParams(params, true)}): ${mapType(ret || 'void')};`
     );
     converted = converted.replace(
-      /(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/,
+      /(public\s+|internal\s+)?interface\s+(\w+)\s*(extends\s+[\w\s,\.]+)?/g,
       (_, _vis, name, ext) => {
         let extension = ext ? ` ${ext}` : '';
         if (extension.includes('.')) extension = ` extends ${extension.split('.').pop()}`;
