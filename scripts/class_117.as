@@ -20,7 +20,7 @@ package
          super(param1,param2);
          this.timer = 0;
          this.var_450 = 15;
-         this.var_311 = false;
+         // Убрано ошибочное this.var_311 = false;, которое ломало логику
          this.var_367 = false;
          var_458 = false;
          var_409 = true;
@@ -28,8 +28,11 @@ package
          {
             filters = new Array(new GlowFilter(16777215,1,3,3,3,3));
          }
+         
+         // Убран бесполезный do { ... } while(false);
          alpha = 0.7;
          addEventListener(Event.ENTER_FRAME,this.method_299);
+         
          var _loc4_:uint = 0;
          while(_loc4_ < 5)
          {
@@ -107,12 +110,14 @@ package
                break;
             case 15:
                method_8(param1,param2,param3,param4,param5,0,0,0,0,587202559);
-               break;
+               break; // Убрали addr0027
             case 16:
                method_8(param1,param2,param3,param4,param5,0,0,0,0,301989887);
                break;
             case 17:
                method_8(param1,param2,param3,param4,param5,0,0,0,0,16777215);
+               break;
+               // Убрали §§goto(addr0027)
          }
       }
       
@@ -187,6 +192,7 @@ package
          {
             _loc2_ = this.var_450 - var_295;
             _loc3_ = 0;
+            // Восстановлен нормальный цикл while вместо дичи с loop0 и break loop0
             while(_loc3_ < _loc2_)
             {
                this.method_208();
@@ -250,12 +256,14 @@ package
                break;
             case 15:
                method_8(Math.random() * 550,Math.random() * 450,param1,param2,param3,0,0,0,0,587202559);
-               break;
+               break; // Убрали addr0035
             case 16:
                method_8(Math.random() * 550,Math.random() * 450,param1,param2,param3,0,0,0,0,301989887);
                break;
             case 17:
                method_8(Math.random() * 550,Math.random() * 450,param1,param2,param3,0,0,0,0,16777215);
+               break;
+               // Убрали §§goto(addr0035)
          }
       }
       
@@ -265,4 +273,3 @@ package
       }
    }
 }
-
