@@ -240,7 +240,11 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/^\s*\[[^\]]+\]\s*\n?/gm, '');
   converted = converted.replace(/^[ \t]*\[(?:Inspectable|Bindable|Event|Style|DefaultProperty|HostComponent|Embed|SWF|IconFile)[^\]]*\][ \t]*\n?/gm, '');
   converted = converted.replace(/^\s*default\s+xml\s+namespace\s*=\s*[^;]+;\s*\n?/gm, '');
-  converted = converted.replace(/\b(?:fl_internal|mx_internal|bi_internal)\b/g, 'public');
+  // Only replace internal namespaces when they are used as access modifiers,
+  // not when the namespace itself is being declared (e.g. namespace bi_internal = ...)
+  converted = converted.replace(/\b(?:fl_internal|mx_internal|bi_internal)\b(?!\s*=)/g, 'public');
+  // Fix TS bitwise/equality precedence (e.g., hex.length & 1 == 1 -> (hex.length & 1) == 1)
+  converted = converted.replace(/\b([a-zA-Z0-9_.$\[\]]+)\s*&\s*([0-9xXA-Fa-f]+)\s*(==|!=|===|!==)\s*([0-9]+)\b/g, '($1 & $2) $3 $4');
   converted = converted.replace(
     /^\s*(?:let|var)\s+_temp_\d+\s*:[^;]+;\s*\n\s*(?:true|false);\s*\n\s*_temp_\d+;\s*\n?/gm,
     ''

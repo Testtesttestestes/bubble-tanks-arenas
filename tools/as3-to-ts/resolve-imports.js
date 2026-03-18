@@ -47,7 +47,8 @@ function buildSymbolMap(files) {
   const map = new Map();
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
-    const matches = source.matchAll(/^\s*(?:export\s+)?(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/gm);
+    // Only exported symbols should be considered providers for cross-file imports.
+    const matches = source.matchAll(/^\s*export\s+(?:default\s+)?(?:abstract\s+)?(?:class|interface|type|enum|function|const|let|var)\s+([A-Za-z_$][\w$]*)\b/gm);
     for (const match of matches) {
       const name = match[1];
       if (!map.has(name)) map.set(name, []);
