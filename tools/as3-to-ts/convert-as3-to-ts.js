@@ -20,7 +20,8 @@ const FLASH_STUB_CLASSES = [
   'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter',
   'Keyboard', 'Class', 'IME', 'TextFormatAlign',
   'TextFieldAutoSize', 'AntiAliasType', 'GridFitType', 'TextSnapshot', 'CSMSettings',
-  'ContextMenuEvent', 'EventDispatcher', 'ContextMenuBuiltInItems', 'ContextMenuClipboardItems'
+  'ContextMenuEvent', 'EventDispatcher', 'ContextMenuBuiltInItems', 'ContextMenuClipboardItems',
+  'IMEConversionMode', 'BitmapFilter', 'TextFieldType', 'TextLineMetrics', 'SharedObjectFlushStatus', 'Vector'
 ];
 
 function getFlashStubHeader(excludeClassName) {
@@ -448,12 +449,14 @@ function convertAs3ToTs(source) {
     }
   );
 
-  // Лечим приведение базовых классов (включая UIComponent и Dictionary)
-  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager)\s*\(([^)]*)\)/g, (match, prev, isNew, type, inner) => {
+  // Лечим приведение базовых классов и UI-компонентов
+  const flashCastClasses = 'String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager|InteractiveObject|DisplayObjectContainer|KeyframeBase|Button|Class|Color|MatrixTransformer3D|AnimatorBase|StyleManager|List|ComboBox';
+  const castRegex = new RegExp(`(^|[^a-zA-Z0-9_$.])(new\\s+)?(${flashCastClasses})\\s*\\(([^)]*)\\)`, 'g');
+
+  converted = converted.replace(castRegex, (match, prev, isNew, type, inner) => {
     if (isNew) return match;
-    // ЗАЩИТА: Если скобки пустые или внутри есть двоеточие (типизация параметра), это объявление метода/геттера, а не каст!
     if (inner.trim() === '' || inner.includes(':')) return match;
-    
+
     if (type === 'Array') return `${prev}(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${prev}${type}(${inner})`;
     return `${prev}(${inner} as unknown as ${type})`;
@@ -554,9 +557,15 @@ function convertAs3ToTs(source) {
   }
 
   if (classMatch && className && hasExtends) {
-    const constructorRegex = /(constructor\s*\([^)]*\)\s*\{)(?!\s*super\s*\()/g;
-    converted = converted.replace(constructorRegex, '$1\n    super(); // AUTO-INJECTED');
+    // Инжектим super() только если его вообще нет в классе
+    if (!/\bsuper\s*\(/.test(converted)) {
+      const constructorRegex = /(constructor\s*\([^)]*\)\s*\{)/g;
+      converted = converted.replace(constructorRegex, '$1\n    super(); // AUTO-INJECTED');
+    }
   }
+
+  // Подавляем ошибку TS2337 (вызов super() не на первой строке или код до него)
+  converted = converted.replace(/^(\s*)(super\s*\([^)]*\)\s*;?)/gm, '$1// @ts-ignore\n$1$2');
 
   converted = converted.replace(
     /^(\s*)(?:(?:override|public|private|protected|static|internal|readonly|async)\s+)*(?:function\s+)?(?!if\b|for\b|while\b|switch\b|catch\b|do\b|else\b|try\b)\w+\s*\([^)]*\)\s*(?::\s*[^\{]+)?\s*\{([\s\S]*?)\n(\s*)\}/gm,
@@ -727,6 +736,9 @@ function convertAs3ToTs(source) {
 
   // Safely cast array insertions to bypass strict typing
   converted = castArrayInsertions(converted);
+
+  // Подавляем ошибки наследования (TS2417/TS2420) для сгенерированных AS3 классов
+  converted = converted.replace(/^(\s*)(export class [A-Za-z_$][\w$]*[^\{]*\{)/gm, '$1// @ts-ignore\n$1$2');
 
   const header = [
     '// AUTO-GENERATED AS3 TO TS CONVERSION',
