@@ -23,7 +23,7 @@ const FLASH_TYPES = new Set([
   'URLRequest', 'Loader', 'ByteArray', 'Dictionary', 'XML', 'XMLList',
   'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
   'URLRequestMethod', 'URLVariables', 'URLLoader', 'SecurityErrorEvent',
-  'Mouse', 'MouseCursor',
+  'Mouse', 'MouseCursor', 'Timer',
   'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter'
 ]);
 
