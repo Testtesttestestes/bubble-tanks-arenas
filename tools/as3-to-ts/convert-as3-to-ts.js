@@ -471,13 +471,73 @@ function convertAs3ToTs(source) {
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
-  // Хардкорный фоллбэк для глубоко вложенных кастов, которые пропустила основная регулярка (TS2348)
-  converted = converted.replace(/(?<!new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager)\s*\(([^;{]+)\)/g, (match, cls, inner) => {
-    if (inner.includes('function') || inner.trim() === '') return match;
-    // Очищаем скобки с конца, если регулярка захватила лишнее
-    if (inner.endsWith(')')) return match;
-    return `(${inner} as unknown as ${cls})`;
-  });
+  // Хардкорный фоллбэк для глубоко вложенных кастов (FocusManager|MotionBase|UIComponent|StyleManager)
+  let fallbackCursor = 0;
+  let fallbackOutput = '';
+  const fallbackRegex = /(?<!new\s+)\b(FocusManager|MotionBase|UIComponent|StyleManager)\s*\(/g;
+
+  while (true) {
+    fallbackRegex.lastIndex = fallbackCursor;
+    const match = fallbackRegex.exec(converted);
+    if (!match) {
+      fallbackOutput += converted.slice(fallbackCursor);
+      break;
+    }
+
+    const cls = match[1];
+    const openParen = match.index + match[0].length - 1;
+
+    let depth = 0;
+    let closeParen = -1;
+    let quote = null;
+    let escaped = false;
+
+    // Ищем честную закрывающую скобку
+    for (let i = openParen; i < converted.length; i += 1) {
+      const ch = converted[i];
+      if (quote) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === quote) quote = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === '`') {
+        quote = ch;
+        continue;
+      }
+      if (ch === '(') depth += 1;
+      else if (ch === ')') {
+        depth -= 1;
+        if (depth === 0) {
+          closeParen = i;
+          break;
+        }
+      }
+    }
+
+    if (closeParen === -1) {
+      // Если что-то пошло не так и скобка не найдена, пропускаем
+      fallbackOutput += converted.slice(fallbackCursor, openParen + 1);
+      fallbackCursor = openParen + 1;
+      continue;
+    }
+
+    const inner = converted.slice(openParen + 1, closeParen);
+
+    // Защита от трансформации функций
+    if (inner.includes('function') || inner.trim() === '') {
+      fallbackOutput += converted.slice(fallbackCursor, closeParen + 1);
+      fallbackCursor = closeParen + 1;
+      continue;
+    }
+
+    // Собираем правильный каст: (inner as unknown as Class)
+    fallbackOutput += converted.slice(fallbackCursor, match.index);
+    fallbackOutput += `(${inner} as unknown as ${cls})`;
+
+    fallbackCursor = closeParen + 1;
+  }
+  converted = fallbackOutput;
 
   // Миграция AGI: убираем runtime SWF loadBytes(new AgiClass()) и инициализируем AGI напрямую
   converted = converted.replace(/^\s*(?:this\.)?loader\.contentLoaderInfo\.addEventListener\(\s*(?:"complete"|Event\.COMPLETE)\s*,\s*(?:this\.)?loadComplete\s*\)\s*;\s*$/gm, '');
