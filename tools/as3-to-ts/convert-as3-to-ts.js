@@ -405,8 +405,9 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
   converted = converted.replace(/\b([\w\.\]\)]+)\s+is\s+([A-Za-z_][\w\.]*)/g, '$1 instanceof $2');
-  // Heal TS2693: strip interfaces from instanceof checks by replacing with a truthy guard.
-  converted = converted.replace(/\b([a-zA-Z0-9_.$()\[\]]+)\s+instanceof\s+(I[A-Z][a-zA-Z0-9_]*)\b/g, '(!!$1 /* instanceof $2 */)');
+  // Heal TS2693: safely strip interface instanceof checks without touching the left operand.
+  // if(child instanceof IFocusManager) -> if(child != null /* instanceof IFocusManager */)
+  converted = converted.replace(/\binstanceof\s+(I[A-Z][a-zA-Z0-9_]*)\b/g, '!= null /* instanceof $1 */');
   converted = converted.replace(/\bas\s+([A-Za-z_][\w\.]*)/g, ' as unknown as $1');
 
   converted = converted.replace(/\btrace\(/g, 'console.log(');
