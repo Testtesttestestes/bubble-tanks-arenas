@@ -30,6 +30,8 @@ test('injects Flash built-in stubs into each converted file', () => {
   const output = convertAs3ToTs(input);
   assert.match(output, /declare const ByteArray:/);
   assert.match(output, /declare const Sprite:/);
+  assert.match(output, /declare const ContextMenuEvent:/);
+  assert.match(output, /declare const EventDispatcher:/);
 });
 
 
@@ -129,6 +131,59 @@ test('casts push/unshift and splice insertions to any for AS3-style loose arrays
   assert.match(output, /this\.arr\.push\(param1 as any\);/);
   assert.match(output, /this\.arr\.unshift\(param2\s+as (?:unknown as )?any\);/);
   assert.match(output, /this\.arr\.splice\(0, 0, param3 as any\);/);
+});
+
+test('converts AS3 cast calls for fl classes and interface-like symbols', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f(item:Object, child:Object):void {',
+    '      var a:Object = UIComponent(item);',
+    '      var b:Object = Dictionary(item);',
+    '      var c:Object = IFocusManagerComponent(child);',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /var a: Record<string, any> = \(item as unknown as UIComponent\);/);
+  assert.match(output, /var b: Record<string, any> = \(item as unknown as Dictionary\);/);
+  assert.match(output, /var c: Record<string, any> = \(child as unknown as IFocusManagerComponent\);/);
+});
+
+test('replaces instanceof interface checks with truthy guards', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f(child:Object):Boolean {',
+    '      return child is IFocusManager;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /return \(!!child \/\* instanceof IFocusManager \*\/\);/);
+});
+
+test('casts non-literal index keys to any for dictionary-like indexing', () => {
+  const input = [
+    'package {',
+    '  public class Sample {',
+    '    public function f(dict:Object, spr:Object):void {',
+    '      dict[spr] = true;',
+    '      dict["ok"] = true;',
+    '      dict[7] = true;',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /dict\[spr as any\] = true;/);
+  assert.match(output, /dict\["ok"\] = true;/);
+  assert.match(output, /dict\[7\] = true;/);
 });
 
 test('maps ProgressEvent constants to DOM-style event string literals', () => {

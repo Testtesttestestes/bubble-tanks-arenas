@@ -19,7 +19,8 @@ const FLASH_STUB_CLASSES = [
   'Mouse', 'MouseCursor', 'Timer',
   'ColorMatrixFilter', 'GlowFilter', 'BlurFilter', 'DropShadowFilter',
   'Keyboard', 'Class', 'IME', 'TextFormatAlign',
-  'TextFieldAutoSize', 'AntiAliasType', 'GridFitType', 'TextSnapshot', 'CSMSettings'
+  'TextFieldAutoSize', 'AntiAliasType', 'GridFitType', 'TextSnapshot', 'CSMSettings',
+  'ContextMenuEvent', 'EventDispatcher', 'ContextMenuBuiltInItems', 'ContextMenuClipboardItems'
 ];
 
 function getFlashStubHeader(excludeClassName) {
@@ -404,6 +405,8 @@ function convertAs3ToTs(source) {
 
   converted = converted.replace(/Vector\.<\s*([^>]+)\s*>/g, 'Array<$1>');
   converted = converted.replace(/\b([\w\.\]\)]+)\s+is\s+([A-Za-z_][\w\.]*)/g, '$1 instanceof $2');
+  // Heal TS2693: strip interfaces from instanceof checks by replacing with a truthy guard.
+  converted = converted.replace(/\b([a-zA-Z0-9_.$()\[\]]+)\s+instanceof\s+(I[A-Z][a-zA-Z0-9_]*)\b/g, '(!!$1 /* instanceof $2 */)');
   converted = converted.replace(/\bas\s+([A-Za-z_][\w\.]*)/g, ' as unknown as $1');
 
   converted = converted.replace(/\btrace\(/g, 'console.log(');
@@ -444,10 +447,14 @@ function convertAs3ToTs(source) {
     }
   );
 
-  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(String|Number|Boolean|Array|TextField|MovieClip|Sprite|Event|URLLoader|UIComponent|Dictionary|DisplayObject|FocusManager)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
     if (isNew) return match;
     if (type === 'Array') return `${prev}(${inner} as unknown as any[])`;
     if (type === 'String' || type === 'Number' || type === 'Boolean') return `${prev}${type}(${inner})`;
+    return `${prev}(${inner} as unknown as ${type})`;
+  });
+  converted = converted.replace(/(^|[^a-zA-Z0-9_$.])(new\s+)?(I[A-Z][a-zA-Z0-9_]*)\s*\(([^)]+)\)/g, (match, prev, isNew, type, inner) => {
+    if (isNew) return match;
     return `${prev}(${inner} as unknown as ${type})`;
   });
 
@@ -700,6 +707,13 @@ function convertAs3ToTs(source) {
   // Heal JPEXS dropped parentheses on obfuscated method calls used in math/comparisons
   // This turns `_loc2_.method_41 + 5` into `_loc2_.method_41() + 5`
   converted = converted.replace(/(\b(?:this|[a-zA-Z0-9_$]+)\.method_\d+)(?=\s*(?:\+|-|\*|\/|==|!=|>=|<=|<|>))/g, '$1()');
+
+  // Heal TS2538: cast complex object keys to any to emulate AS3 Dictionary indexing.
+  converted = converted.replace(/([a-zA-Z0-9_$.]+)\[([^\]]+)\]/g, (match, dict, key) => {
+    if (/^['"`0-9]/.test(key.trim())) return match;
+    if (key.trim().endsWith('as any')) return match;
+    return `${dict}[${key} as any]`;
+  });
 
   // Safely cast array insertions to bypass strict typing
   converted = castArrayInsertions(converted);
