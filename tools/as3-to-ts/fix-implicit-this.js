@@ -3,7 +3,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-// NEW: Identify ranges of strings and comments
 function getIgnoredRanges(source) {
   const ranges = [];
   let inSingle = false, inDouble = false, inTemplate = false;
@@ -109,7 +108,7 @@ function extractClassScopeMembers(source) {
 
 function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options = {}) {
   if (memberNames.size === 0) return source;
-  const { excludedNames = new Set() } = options;
+  const { excludedNames = new Set(), methodScopes = [] } = options;
   const eligibleNames = Array.from(memberNames).filter((name) => !excludedNames.has(name));
   if (eligibleNames.length === 0) return source;
   const names = eligibleNames.map(escapeRegExp).join('|');
@@ -120,6 +119,15 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
 
   return source.replace(regex, (token, name, offset, whole) => {
     if (isIndexInRanges(offset, ignoredRanges)) return token; // Skip if in string/comment
+
+    // SKIP: if shadowed by local var or param in this method context
+    for (const m of methodScopes) {
+      if (offset >= m.start && offset <= m.end) {
+        if (m.params.has(name) || m.locals.has(name)) {
+          return token;
+        }
+      }
+    }
 
     const prev = whole[offset - 1];
     if (prev === '.') return token;
@@ -136,7 +144,6 @@ function addClassPrefixToMemberUsage(source, memberNames, prefixTarget, options 
     if (prevTypeToken === '<' || isTypePipePrefix || isTypeAmpPrefix) return token;
 
     const startsWithTypeDelimiter =
-      rightTrimmed.startsWith('>') ||
       rightTrimmed.startsWith('[]') ||
       rightTrimmed.startsWith(',') ||
       (rightTrimmed.startsWith('|') && !rightTrimmed.startsWith('||')) ||
@@ -234,12 +241,29 @@ function extractClassAndMethodRanges(source) {
     if (open < classRange.start || open > classRange.end) continue;
     const close = findMatchingBrace(source, open);
     if (close === -1 || close > classRange.end) continue;
+
+    // Expand search scope slightly left to include parameter declarations
+    const paramStart = match.index + match[0].indexOf('(');
+
     const params = new Set();
     match[2].split(',').forEach((param) => {
-      const m = param.trim().match(/^([A-Za-z_$][\w$]*)/);
+      const m = param.trim().match(/^(?:\.{3})?(?:this\.)?([A-Za-z_$][\w$]*)/);
       if (m) params.add(m[1]);
     });
-    methods.push({ start: open + 1, end: close, params });
+
+    const locals = new Set();
+    const snippet = source.slice(open + 1, close);
+    const localRegex = /\b(?:let|const|var|function|catch)\s+([A-Za-z_$][\w$]*)/g;
+    let lMatch;
+    while ((lMatch = localRegex.exec(snippet)) !== null) {
+      locals.add(lMatch[1]);
+    }
+    const forRegex = /\bfor\s*\(\s*(?:let|const|var)\s+([A-Za-z_$][\w$]*)/g;
+    while ((lMatch = forRegex.exec(snippet)) !== null) {
+      locals.add(lMatch[1]);
+    }
+
+    methods.push({ start: paramStart, end: close, params, locals });
   }
   return { classRange, methods };
 }
@@ -406,8 +430,10 @@ function processFile(filePath, options = {}) {
   let converted = source;
   
   if (className && (instanceMembers.size > 0 || staticMembers.size > 0)) {
-    converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this', { excludedNames: importedNames });
-    converted = addClassPrefixToMemberUsage(converted, staticMembers, className, { excludedNames: importedNames });
+    const { methods } = extractClassAndMethodRanges(converted);
+
+    converted = addClassPrefixToMemberUsage(converted, instanceMembers, 'this', { excludedNames: importedNames, methodScopes: methods });
+    converted = addClassPrefixToMemberUsage(converted, staticMembers, className, { excludedNames: importedNames, methodScopes: methods });
 
     staticMembers.forEach((name) => {
       const staticMistakeRegex = new RegExp(`\\bthis\\.${escapeRegExp(name)}\\b`, 'g');

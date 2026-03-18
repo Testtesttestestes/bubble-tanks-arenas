@@ -11,10 +11,11 @@ const FLASH_STUB_CLASSES = [
   'TextFormat', 'Graphics', 'Sound', 'SoundChannel', 'SoundTransform',
   'Stage', 'ApplicationDomain', 'ContextMenu', 'ContextMenuItem',
   'Dictionary', 'Security', 'ExternalInterface', 'System', 'LoaderContext',
-  'Transform', 'ColorTransform'
+  'Transform', 'ColorTransform', 'Font', 'Capabilities', 'SharedObject',
+  'Responder', 'AsyncErrorEvent', 'SecurityErrorEvent', 'IOErrorEvent',
+  'NetConnection', 'NetStream', 'LocalConnection', 'Microphone', 'Camera'
 ];
 
-// NEW: Function to generate headers dynamically, excluding the current class
 function getFlashStubHeader(excludeClassName) {
   const stubsToInject = FLASH_STUB_CLASSES.filter(c => c !== excludeClassName);
   return [
@@ -551,7 +552,6 @@ function convertAs3ToTs(source) {
     packageName ? `// Original Package: ${packageName}` : '// Original Package: <root>'
   ].join('\n');
 
-  // NEW: Call the generated stub method to prevent redeclaring current classes
   const flashStubHeader = getFlashStubHeader(className);
 
   return `${header}\n\n${flashStubHeader}\n\n${converted.trim()}\n`;
