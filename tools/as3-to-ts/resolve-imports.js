@@ -22,7 +22,8 @@ const FLASH_TYPES = new Set([
   'Event', 'MouseEvent', 'KeyboardEvent', 'TimerEvent', 'Point', 'Rectangle', 'Matrix', 'ColorTransform', 'Sound',
   'URLRequest', 'Loader', 'ByteArray', 'Dictionary', 'XML', 'XMLList',
   'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
-  'URLRequestMethod', 'URLVariables', 'URLLoader', 'SecurityErrorEvent'
+  'URLRequestMethod', 'URLVariables', 'URLLoader', 'SecurityErrorEvent',
+  'Mouse', 'MouseCursor'
 ]);
 
 const PSEUDO_TYPES = new Set(['int', 'uint']);

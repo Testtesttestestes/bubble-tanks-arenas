@@ -15,7 +15,8 @@ const FLASH_STUB_CLASSES = [
   'Responder', 'AsyncErrorEvent', 'SecurityErrorEvent', 'IOErrorEvent',
   'NetConnection', 'NetStream', 'LocalConnection', 'Microphone', 'Camera',
   'Matrix3D', 'Vector3D', 'AnimatorFactory3D', 'StageQuality', 
-  'URLRequestMethod', 'URLVariables', 'URLLoader'
+  'URLRequestMethod', 'URLVariables', 'URLLoader',
+  'Mouse', 'MouseCursor'
 ];
 
 function getFlashStubHeader(excludeClassName) {
@@ -444,9 +445,10 @@ function convertAs3ToTs(source) {
   converted = converted.replace(/\bas\s+(?:unknown\s+as\s+)?Array\b/g, 'as any[]');
   
   // NEW: Catch-all cleanup for capitalized primitive types that survived local var regexes
-  converted = converted.replace(/:\s*String\b/g, ': string');
-  converted = converted.replace(/:\s*Number\b/g, ': number');
-  converted = converted.replace(/:\s*Boolean\b/g, ': boolean');
+  // Adding (?!\s*\() ensures we don't accidentally match casting calls like Number(val) or String(val)
+  converted = converted.replace(/:\s*String\b(?!\s*\()/g, ': string');
+  converted = converted.replace(/:\s*Number\b(?!\s*\()/g, ': number');
+  converted = converted.replace(/:\s*Boolean\b(?!\s*\()/g, ': boolean');
 
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+String\b/g, 'typeof $1 === "string"');
   converted = converted.replace(/([a-zA-Z0-9_.$]+)\s+instanceof\s+Number\b/g, 'typeof $1 === "number"');
