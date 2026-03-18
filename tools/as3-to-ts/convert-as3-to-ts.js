@@ -400,7 +400,8 @@ function convertAs3ToTs(source) {
   // Heal dynamic access artifacts from AS3 decompilation: obj.(expr) -> obj[expr]
   converted = converted.replace(/\.\s*\(([^)]+)\)/g, '[$1]');
   // Heal numeric property access: obj.0 -> obj[0]
-  converted = converted.replace(/\.([0-9]+)\b/g, '[$1]');
+  // IMPORTANT: do not rewrite decimal literals like 0.9
+  converted = converted.replace(/(?<=[A-Za-z_$\]\)])\.([0-9]+)\b/g, '[$1]');
   converted = converted.replace(/\bcatch\s*\(\s*(?:this\.)?([a-zA-Z0-9_]+)\s*:\s*[a-zA-Z0-9_.]+\s*\)/g, 'catch ($1: any)');
   converted = converted.replace(/^\s*include\s+"[^"]+"\s*;/gm, '// include removed');
   converted = converted.replace(/new\s+<[\w\.]+>\s*\[/g, '[');
@@ -747,8 +748,11 @@ function convertAs3ToTs(source) {
   // Heal TS2540: cast assignments to layout/display props to any.
   // Example: foo.height = v -> (foo as any).height = v
   const layoutProps = ['width', 'height', 'x', 'y', 'alpha', 'visible', 'scaleX', 'scaleY', 'rotation'];
-  const layoutRegex = new RegExp(`(\\b[\\w$.]+)\\.(${layoutProps.join('|')})\\s*=\\s*`, 'g');
-  converted = converted.replace(layoutRegex, '($1 as any).$2 = ');
+  const layoutRegex = new RegExp(
+    `(^|[^.\\w$])([A-Za-z_$][\\w$]*(?:\\[[^\\]]+\\]|\\.[A-Za-z_$][\\w$]*)*)\\.(${layoutProps.join('|')})\\s*=\\s*`,
+    'gm'
+  );
+  converted = converted.replace(layoutRegex, '$1($2 as any).$3 = ');
   
   converted = converted.replace(/\bdelete\s+calls\[([^\]]+)\]\s*;/g, 'delete (calls as any)[$1 as any];');
   converted = converted.replace(/\bcalls\[([^\]]+)\]/g, '(calls as any)[$1 as any]');
