@@ -152,7 +152,7 @@ test('converts AS3 cast calls for fl classes and interface-like symbols', () => 
   assert.match(output, /var c: Record<string, any> = \(child as unknown as IFocusManagerComponent\);/);
 });
 
-test('replaces instanceof interface checks with truthy guards', () => {
+test('replaces instanceof interface checks with != null guards', () => {
   const input = [
     'package {',
     '  public class Sample {',
@@ -164,7 +164,7 @@ test('replaces instanceof interface checks with truthy guards', () => {
   ].join('\n');
 
   const output = convertAs3ToTs(input);
-  assert.match(output, /return \(!!child \/\* instanceof IFocusManager \*\/\);/);
+  assert.match(output, /return child != null \/\* instanceof IFocusManager \*\//);
 });
 
 test('casts non-literal index keys to any for dictionary-like indexing', () => {
