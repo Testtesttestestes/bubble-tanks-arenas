@@ -221,30 +221,6 @@ map_ts_line_to_as_line() {
     return
   fi
 
-  local ts_line_text normalized_ts_line exact_match_line
-  ts_line_text="$(get_ts_line "$ts_file" "$ts_line")"
-  normalized_ts_line="$(normalize_line_for_matching "$ts_line_text")"
-  if [[ -n "$normalized_ts_line" ]]; then
-    exact_match_line="$(awk -v needle="$normalized_ts_line" '
-      function normalize(line, normalized) {
-        normalized = line
-        gsub(/\<[A-Z][A-Za-z0-9_$]*\./, "", normalized)
-        gsub(/\<this\./, "", normalized)
-        gsub(/\(Date as any\)\(\)/, "Date()", normalized)
-        gsub(/===/, "==", normalized)
-        gsub(/!==/, "!=", normalized)
-        gsub(/^[[:space:]]+|[[:space:]]+$/, "", normalized)
-        return normalized
-      }
-
-      normalize($0) == needle { print NR; exit }
-    ' "$as_file")"
-    if [[ -n "$exact_match_line" ]]; then
-      printf '%s\n' "$exact_match_line"
-      return
-    fi
-  fi
-
   local ts_anchor as_anchor mapped as_total
   ts_anchor="$(find_first_line_matching "$ts_file" '^[[:space:]]*export[[:space:]]+(class|interface)([[:space:]]|$)')"
   as_anchor="$(find_first_line_matching "$as_file" '^[[:space:]]*(public[[:space:]]+)?(dynamic[[:space:]]+|final[[:space:]]+)?(class|interface)([[:space:]]|$)')"
@@ -261,6 +237,47 @@ map_ts_line_to_as_line() {
   fi
   if (( as_total > 0 && mapped > as_total )); then
     mapped="$as_total"
+  fi
+
+  local ts_line_text normalized_ts_line exact_match_line
+  ts_line_text="$(get_ts_line "$ts_file" "$ts_line")"
+  normalized_ts_line="$(normalize_line_for_matching "$ts_line_text")"
+  if [[ -n "$normalized_ts_line" ]]; then
+    exact_match_line="$(awk -v needle="$normalized_ts_line" -v target_line="$mapped" '
+      function normalize(line, normalized) {
+        normalized = line
+        gsub(/\<[A-Z][A-Za-z0-9_$]*\./, "", normalized)
+        gsub(/\<this\./, "", normalized)
+        gsub(/\(Date as any\)\(\)/, "Date()", normalized)
+        gsub(/===/, "==", normalized)
+        gsub(/!==/, "!=", normalized)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", normalized)
+        return normalized
+      }
+
+      normalize($0) == needle {
+        distance = NR - target_line
+        if (distance < 0) {
+          distance = -distance
+        }
+
+        if (!found || distance < best_distance || (distance == best_distance && NR < best_line)) {
+          found = 1
+          best_distance = distance
+          best_line = NR
+        }
+      }
+
+      END {
+        if (found) {
+          print best_line
+        }
+      }
+    ' "$as_file")"
+    if [[ -n "$exact_match_line" ]]; then
+      printf '%s\n' "$exact_match_line"
+      return
+    fi
   fi
 
   printf '%s\n' "$mapped"
