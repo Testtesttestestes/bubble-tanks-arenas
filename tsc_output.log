@@ -1,0 +1,181 @@
+migrated-ts/ArenaCreator.ts(315,43): error TS1003: Identifier expected.
+migrated-ts/ArenaCreator.ts(1989,37): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/ArenaCreator.ts(2036,102): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+migrated-ts/ArenaCreator.ts(2044,138): error TS1121: Octal literals are not allowed. Use the syntax '0o2'.
+migrated-ts/ArenaCreator.ts(2068,133): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/ArenaCreator.ts(2069,135): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/ArenaCreator.ts(2098,43): error TS1003: Identifier expected.
+migrated-ts/ArenaCreator.ts(2099,43): error TS1003: Identifier expected.
+migrated-ts/AvatarInterface.ts(262,37): error TS1489: Decimals with leading zeros are not allowed.
+migrated-ts/PartsUnlockedScreen.ts(426,48): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+migrated-ts/PauseMenu.ts(544,52): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/PauseMenu.ts(626,49): error TS1003: Identifier expected.
+migrated-ts/PauseMenu.ts(626,98): error TS1003: Identifier expected.
+migrated-ts/PauseMenu.ts(632,46): error TS1003: Identifier expected.
+migrated-ts/PauseMenu.ts(632,95): error TS1003: Identifier expected.
+migrated-ts/PauseMenu.ts(731,149): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(732,157): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(733,153): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(734,149): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(735,151): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(736,161): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(737,154): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(738,159): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(739,165): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(779,138): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(780,138): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(783,164): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(784,164): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(785,184): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(786,186): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(787,180): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(788,168): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(931,35): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/PauseMenu.ts(1228,146): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1229,150): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1230,140): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1231,144): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1232,144): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1233,146): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1234,148): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1380,144): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1381,156): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1382,153): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1383,163): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1384,167): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1385,149): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1580,38): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/PauseMenu.ts(1587,110): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1588,110): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1589,118): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1590,118): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1591,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1592,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1593,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1594,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1595,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1596,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1597,128): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1598,128): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1599,118): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/PauseMenu.ts(1600,118): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/TankCreatorScreen.ts(539,49): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(539,67): error TS1109: Expression expected.
+migrated-ts/TankCreatorScreen.ts(558,76): error TS1005: ')' expected.
+migrated-ts/TankCreatorScreen.ts(558,78): error TS1109: Expression expected.
+migrated-ts/TankCreatorScreen.ts(558,139): error TS1005: ';' expected.
+migrated-ts/TankCreatorScreen.ts(558,141): error TS1128: Declaration or statement expected.
+migrated-ts/TankCreatorScreen.ts(558,144): error TS1005: ';' expected.
+migrated-ts/TankCreatorScreen.ts(629,27): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(629,64): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(1338,35): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+migrated-ts/TankCreatorScreen.ts(1391,33): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(1396,94): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(1819,54): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(1956,42): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(1960,42): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(2124,33): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(2129,94): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(2726,48): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(3385,39): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(3540,37): error TS1109: Expression expected.
+migrated-ts/TankCreatorScreen.ts(3729,45): error TS1003: Identifier expected.
+migrated-ts/TankCreatorScreen.ts(3776,28): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(4864,33): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(4869,94): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankCreatorScreen.ts(4996,49): error TS1109: Expression expected.
+migrated-ts/TankViewerScreen.ts(755,69): error TS1109: Expression expected.
+migrated-ts/TankViewerScreen.ts(2278,69): error TS1109: Expression expected.
+migrated-ts/TankViewerScreen.ts(2770,78): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankViewerScreen.ts(2805,81): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankViewerScreen.ts(2839,78): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankViewerScreen.ts(2872,78): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/TankViewerScreen.ts(3172,69): error TS1109: Expression expected.
+migrated-ts/TankViewerScreen.ts(3932,57): error TS1109: Expression expected.
+migrated-ts/agi/com/armorgames/services/images/JPGEncoder.ts(721,82): error TS1489: Decimals with leading zeros are not allowed.
+migrated-ts/class_10.ts(314,55): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/class_5.ts(564,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(585,110): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(586,112): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(587,106): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(588,106): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(589,100): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(590,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(591,96): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(592,102): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(593,98): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(594,100): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(599,110): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(600,102): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(715,55): error TS1121: Octal literals are not allowed. Use the syntax '0o3'.
+migrated-ts/class_53.ts(838,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(839,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(840,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(973,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(974,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(975,40): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1191,94): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1192,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1197,128): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1198,128): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1201,112): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1202,110): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1203,92): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1204,102): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1205,110): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1210,94): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1215,112): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1216,104): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1217,106): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/class_53.ts(1320,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1321,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1322,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1323,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1324,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1325,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1326,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1327,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1328,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1329,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1330,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1331,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1332,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1333,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1334,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1335,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1336,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1337,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1338,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1339,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1340,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1341,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1342,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1343,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1344,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1345,25): error TS1003: Identifier expected.
+migrated-ts/class_53.ts(1346,25): error TS1003: Identifier expected.
+migrated-ts/class_54.ts(433,60): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/class_79.ts(1133,80): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/class_80.ts(244,27): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/class_80.ts(672,31): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/class_80.ts(673,32): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/fl/controls/LabelButton.ts(280,47): error TS1109: Expression expected.
+migrated-ts/fl/core/UIComponent.ts(815,37): error TS1109: Expression expected.
+migrated-ts/fl/motion/AdjustColor.ts(186,54): error TS1121: Octal literals are not allowed. Use the syntax '0o1'.
+migrated-ts/fl/motion/AdjustColor.ts(186,60): error TS1121: Octal literals are not allowed. Use the syntax '0o2'.
+migrated-ts/fl/motion/AdjustColor.ts(186,66): error TS1121: Octal literals are not allowed. Use the syntax '0o4'.
+migrated-ts/fl/motion/AdjustColor.ts(186,72): error TS1121: Octal literals are not allowed. Use the syntax '0o5'.
+migrated-ts/fl/motion/AdjustColor.ts(186,78): error TS1121: Octal literals are not allowed. Use the syntax '0o6'.
+migrated-ts/fl/motion/AdjustColor.ts(186,84): error TS1121: Octal literals are not allowed. Use the syntax '0o7'.
+migrated-ts/fl/motion/AdjustColor.ts(186,90): error TS1489: Decimals with leading zeros are not allowed.
+migrated-ts/fl/motion/AdjustColor.ts(186,344): error TS1121: Octal literals are not allowed. Use the syntax '0o6'.
+migrated-ts/fl/motion/ColorMatrix.ts(188,56): error TS1489: Decimals with leading zeros are not allowed.
+migrated-ts/fl/motion/ColorMatrix.ts(261,12): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(268,32): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(269,32): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(270,32): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(277,33): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(278,33): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(279,36): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(287,36): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
+migrated-ts/fl/motion/ColorMatrix.ts(289,32): error TS1121: Octal literals are not allowed. Use the syntax '0o72'.
