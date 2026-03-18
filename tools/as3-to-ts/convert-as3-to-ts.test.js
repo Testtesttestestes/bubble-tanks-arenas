@@ -96,6 +96,40 @@ test('prefixes implicit DisplayObject coordinate and hit-test methods with this'
   assert.match(output, /this\.movTank\.localToGlobal\(new\s+\(Point as any\)\(\)\)/);
 });
 
+test('prefixes implicit EventDispatcher methods with this', () => {
+  const input = [
+    'package {',
+    '  public class Sample extends Sprite {',
+    '    public function f():Boolean {',
+    '      return hasEventListener(Event.COMPLETE) && willTrigger(Event.CHANGE);',
+    '    }',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /return this\.hasEventListener\("complete"\) && this\.willTrigger\("change"\);/);
+});
+
+test('maps ProgressEvent constants to DOM-style event string literals', () => {
+  const input = [
+    'package {',
+    '  public class Sample extends Sprite {',
+    '    public function f():void {',
+    '      addEventListener(ProgressEvent.PROGRESS, onProgress);',
+    '      addEventListener(ProgressEvent.SOCKET_DATA, onSocketData);',
+    '    }',
+    '    public function onProgress(e:Event):void {}',
+    '    public function onSocketData(e:Event):void {}',
+    '  }',
+    '}'
+  ].join('\n');
+
+  const output = convertAs3ToTs(input);
+  assert.match(output, /this\.addEventListener\("progress", onProgress\.bind\(this\)\);/);
+  assert.match(output, /this\.addEventListener\("socketData", onSocketData\.bind\(this\)\);/);
+});
+
 
 test('injects additional Flash globals used by AGI (Security, ExternalInterface, System)', () => {
   const input = [

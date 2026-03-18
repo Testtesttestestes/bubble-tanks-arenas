@@ -230,7 +230,9 @@ function convertAs3ToTs(source) {
     'Event.CHANGE': '"change"',
     'KeyboardEvent.KEY_DOWN': '"keydown"',
     'KeyboardEvent.KEY_UP': '"keyup"',
-    'TextEvent.TEXT_INPUT': '"textInput"'
+    'TextEvent.TEXT_INPUT': '"textInput"',
+    'ProgressEvent.PROGRESS': '"progress"',
+    'ProgressEvent.SOCKET_DATA': '"socketData"'
   };
 
   for (const [as3Event, tsEvent] of Object.entries(eventMap)) {
@@ -309,6 +311,7 @@ function convertAs3ToTs(source) {
   const flashMethods = [
     'addChild', 'addChildAt', 'removeChild', 'removeChildAt', 'gotoAndStop', 'gotoAndPlay',
     'play', 'stop', 'addEventListener', 'removeEventListener', 'dispatchEvent',
+    'hasEventListener', 'willTrigger',
     'setChildIndex', 'getChildIndex', 'contains', 'addFrameScript',
     'localToGlobal', 'globalToLocal', 'hitTestPoint', 'hitTestObject', 'startDrag', 'stopDrag'
   ];
