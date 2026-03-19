@@ -1,0 +1,97 @@
+name: Manual TS analysis with PR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  analyze-and-create-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Prepare environment
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          git fetch origin main
+          git reset --hard origin/main
+          git clean -fdx -e "binaryData/" -e "migrated-ts/"
+
+          npm install
+
+      - name: Run TypeScript analysis
+        id: analyze
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          tsc_exit=0
+          stats_exit=0
+
+          # Первая прогонка tsc
+          npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
+
+          # Вторая (если нужны стабилизированные ошибки)
+          tsc_exit=0
+          npx tsc --build --force > tsc_output.log 2>&1 || tsc_exit=$?
+
+          # Статистика
+          ERROR_SLICE_RADIUS=10 MAX_ERROR_CONTEXTS=5 MAX_AGI_ERROR_CONTEXTS=5 MAX_ERROR_MESSAGES_PER_CODE=5 \
+            npm run tsc:stats | tee tsc_stats.log || stats_exit=$?
+
+          echo "tsc_exit=${tsc_exit}" >> "$GITHUB_OUTPUT"
+          echo "stats_exit=${stats_exit}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload tsc stats log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tsc-stats-log
+          path: tsc_stats.log
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Cleanup before PR
+        if: always()
+        run: |
+          rm -rf node_modules
+          rm -f tsc_output.log
+
+      - name: Create pull request
+        if: always()
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update TS analysis artifacts"
+          branch: "automation/manual-ts-analysis-${{ github.run_id }}"
+          delete-branch: true
+          title: "chore: manual TS analysis"
+          body: |
+            This PR was created automatically by workflow `${{ github.workflow }}`.
+
+            ### Exit Codes:
+            - TSC: `${{ steps.analyze.outputs.tsc_exit }}`
+            - Stats: `${{ steps.analyze.outputs.stats_exit }}`
+
+            ### TSC Stats Summary:
+            ```text
+            $([ -f tsc_stats.log ] && head -n 30 tsc_stats.log || echo "No stats available")
+            ```
+          labels: |
+            automation
+            analysis
