@@ -7,9 +7,6 @@ resolved imports in 0/611
 > bubble-tanks-arenas-migration-tools@0.1.0 tsc:stats
 > bash tools/as3-to-ts/collect-tsc-stats.sh
 
-Warning: local TypeScript compiler was not found at /home/runner/work/bubble-tanks-arenas/bubble-tanks-arenas/node_modules/.bin/tsc.
-Run `npm install` before `npm run tsc:stats`, otherwise npx may execute a non-TypeScript stub and report 0 parsed errors.
-
 Using existing log: /home/runner/work/bubble-tanks-arenas/bubble-tanks-arenas/tsc_output.log
 TSC project: /home/runner/work/bubble-tanks-arenas/bubble-tanks-arenas/tsconfig.json
 Total errors: 181
